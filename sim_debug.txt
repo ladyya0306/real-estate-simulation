@@ -1,0 +1,81 @@
+2026-01-22 21:01:33,778 - INFO - Initializing New Simulation...
+2026-01-22 21:01:33,910 - INFO - Market initialized with 300 properties.
+2026-01-22 21:01:33,913 - INFO - Assigning initial ownership...
+2026-01-22 21:01:33,926 - INFO - Agents initialized: 50
+2026-01-22 21:01:33,927 - INFO - Starting Simulation: 3 Months
+2026-01-22 21:01:33,927 - INFO - --- Month 1 ---
+2026-01-22 21:01:33,941 - INFO - Roles: Sellers=5, Buyers=14
+2026-01-22 21:01:33,942 - INFO - Month 1 Complete. Transactions: 0
+2026-01-22 21:01:33,942 - INFO - --- Month 2 ---
+2026-01-22 21:01:33,954 - INFO - Roles: Sellers=5, Buyers=14
+2026-01-22 21:01:33,955 - INFO - Month 2 Complete. Transactions: 0
+2026-01-22 21:01:33,955 - INFO - --- Month 3 ---
+2026-01-22 21:01:33,968 - INFO - Roles: Sellers=1, Buyers=14
+2026-01-22 21:01:33,968 - INFO - Month 3 Complete. Transactions: 0
+2026-01-22 21:01:33,969 - INFO - Simulation Finished.
+
+Debug: Active listings: 5
+Debug: First listing: {'property_id': 189, 'seller_id': 1, 'listed_price': 4674105.116313688, 'min_price': 4036727.1459072754, 'urgency': 0.5, 'status': 'active', 'reasoning': 'Default mock response'}
+Debug: First listing property_id type: <class 'int'>
+Debug: Props_map has 300 entries
+Debug: First few props_map keys: [189, 34, 262, 43, 265]
+Debug: Props_map key type: <class 'int'>
+Debug: Is listing[0] property_id 189 in props_map? True
+Debug: Found 0 candidates for Buyer 28
+Debug: Found 0 candidates for Buyer 29
+Debug: Found 0 candidates for Buyer 31
+Debug: Found 0 candidates for Buyer 35
+Debug: Found 0 candidates for Buyer 36
+Debug: Found 0 candidates for Buyer 38
+Debug: Found 0 candidates for Buyer 39
+Debug: Found 0 candidates for Buyer 41
+Debug: Found 0 candidates for Buyer 42
+Debug: Found 0 candidates for Buyer 43
+Debug: Found 0 candidates for Buyer 45
+Debug: Found 0 candidates for Buyer 47
+Debug: Found 0 candidates for Buyer 48
+Debug: Found 0 candidates for Buyer 49
+
+Debug: Active listings: 5
+Debug: First listing: {'property_id': 189, 'seller_id': 1, 'listed_price': 4674105.116313688, 'min_price': 4036727.1459072754, 'urgency': 0.5, 'status': 'active', 'reasoning': 'Default mock response'}
+Debug: First listing property_id type: <class 'int'>
+Debug: Props_map has 300 entries
+Debug: First few props_map keys: [189, 34, 262, 43, 265]
+Debug: Props_map key type: <class 'int'>
+Debug: Is listing[0] property_id 189 in props_map? True
+Debug: Found 0 candidates for Buyer 28
+Debug: Found 0 candidates for Buyer 29
+Debug: Found 0 candidates for Buyer 31
+Debug: Found 0 candidates for Buyer 35
+Debug: Found 0 candidates for Buyer 36
+Debug: Found 0 candidates for Buyer 38
+Debug: Found 0 candidates for Buyer 39
+Debug: Found 0 candidates for Buyer 41
+Debug: Found 0 candidates for Buyer 42
+Debug: Found 0 candidates for Buyer 43
+Debug: Found 0 candidates for Buyer 45
+Debug: Found 0 candidates for Buyer 47
+Debug: Found 0 candidates for Buyer 48
+Debug: Found 0 candidates for Buyer 49
+
+Debug: Active listings: 1
+Debug: First listing: {'property_id': 54, 'seller_id': 20, 'listed_price': 11657740.899808345, 'min_price': 10068048.958925387, 'urgency': 0.5, 'status': 'active', 'reasoning': 'Default mock response'}
+Debug: First listing property_id type: <class 'int'>
+Debug: Props_map has 300 entries
+Debug: First few props_map keys: [189, 34, 262, 43, 265]
+Debug: Props_map key type: <class 'int'>
+Debug: Is listing[0] property_id 54 in props_map? True
+Debug: Found 0 candidates for Buyer 28
+Debug: Found 0 candidates for Buyer 29
+Debug: Found 0 candidates for Buyer 31
+Debug: Found 0 candidates for Buyer 35
+Debug: Found 0 candidates for Buyer 36
+Debug: Found 0 candidates for Buyer 38
+Debug: Found 0 candidates for Buyer 39
+Debug: Found 0 candidates for Buyer 41
+Debug: Found 0 candidates for Buyer 42
+Debug: Found 0 candidates for Buyer 43
+Debug: Found 0 candidates for Buyer 45
+Debug: Found 0 candidates for Buyer 47
+Debug: Found 0 candidates for Buyer 48
+Debug: Found 0 candidates for Buyer 49

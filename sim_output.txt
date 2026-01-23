@@ -1,0 +1,45 @@
+2026-01-22 21:06:26,934 - INFO - Initializing New Simulation...
+2026-01-22 21:06:27,061 - INFO - Market initialized with 300 properties.
+2026-01-22 21:06:27,066 - INFO - Assigning initial ownership...
+2026-01-22 21:06:27,074 - INFO - Agents initialized: 50
+2026-01-22 21:06:27,074 - INFO - Starting Simulation: 3 Months
+2026-01-22 21:06:27,075 - INFO - --- Month 1 ---
+2026-01-22 21:06:27,085 - INFO - Roles: Sellers=3, Buyers=14
+2026-01-22 21:06:27,086 - INFO - match found: Buyer 30 -> Prop 153 (Listed: 2598842.7617100934)
+2026-01-22 21:06:27,091 - ERROR - Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\simulation_runner.py", line 265, in run
+    cursor.execute("""
+    ~~~~~~~~~~~~~~^^^^
+        INSERT INTO negotiations (buyer_id, seller_id, property_id, round_count, final_price, success, log)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        neg_result['outcome'] == 'success', json.dumps(neg_result['history'])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ))
+    ^^
+sqlite3.OperationalError: table negotiations has no column named seller_id
+
+
+Debug: Active listings: 3
+Debug: First listing: {'property_id': 153, 'seller_id': 7, 'listed_price': 2598842.7617100934, 'min_price': 2244455.1123859896, 'urgency': 0.5, 'status': 'active', 'reasoning': 'Default mock response'}
+Debug: First listing property_id type: <class 'int'>
+Debug: Props_map has 300 entries
+Debug: First few props_map keys: [152, 61, 159, 147, 265]
+Debug: Props_map key type: <class 'int'>
+Debug: Is listing[0] property_id 153 in props_map? True
+Debug: Found 3 candidates for Buyer 30
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\simulation_runner.py", line 305, in <module>
+    runner.run()
+    ~~~~~~~~~~^^
+  File "D:\GitProj\oasis-main\simulation_runner.py", line 265, in run
+    cursor.execute("""
+    ~~~~~~~~~~~~~~^^^^
+        INSERT INTO negotiations (buyer_id, seller_id, property_id, round_count, final_price, success, log)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        neg_result['outcome'] == 'success', json.dumps(neg_result['history'])
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ))
+    ^^
+sqlite3.OperationalError: table negotiations has no column named seller_id
