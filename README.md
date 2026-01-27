@@ -128,4 +128,4 @@ git checkout models.py
     *   A: 检查是否激活了环境 (`conda activate oasis`)，或者是否安装了对应的包 (`pip install <包名>`)。
 
 ---
-*Created by the Oasis Team.*
+*Created by the Li Di Team.*

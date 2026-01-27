@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 import json
 
 class AgentStory:
-    def __init__(self, occupation="", career_outlook="", family_plan="", education_need="", housing_need="", selling_motivation="", background_story=""):
+    def __init__(self, occupation="", career_outlook="", family_plan="", education_need="", housing_need="", selling_motivation="", background_story="", negotiation_style="balanced"):
         self.occupation = occupation
         self.career_outlook = career_outlook
         self.family_plan = family_plan
@@ -10,6 +10,7 @@ class AgentStory:
         self.housing_need = housing_need
         self.selling_motivation = selling_motivation
         self.background_story = background_story
+        self.negotiation_style = negotiation_style
 
 class AgentPreference:
     def __init__(self, target_zone="", max_price=0.0, min_bedrooms=1, need_school_district=False):
@@ -19,8 +20,9 @@ class AgentPreference:
         self.need_school_district = need_school_district
 
 class Agent:
-    def __init__(self, id: int, age: int = 30, marital_status: str = "single", cash: float = 0.0, monthly_income: float = 0.0):
+    def __init__(self, id: int, name: str = "", age: int = 30, marital_status: str = "single", cash: float = 0.0, monthly_income: float = 0.0):
         self.id = id
+        self.name = name
         self.age = age
         self.marital_status = marital_status
         self.cash = cash

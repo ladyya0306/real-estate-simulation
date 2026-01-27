@@ -13,5 +13,7 @@ CREATE TABLE IF NOT EXISTS agents (
     selling_motivation TEXT,
     background_story TEXT,
     profile_summary TEXT, -- LLM persona
+    role TEXT DEFAULT 'OBSERVER',
+    role_duration INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

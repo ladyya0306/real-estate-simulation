@@ -1,30 +1,76 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Oasis Real Estate Simulation Runner (v2.1 Scholar Edition)
-Supports: Interactive Menu, Persistence (Resume), Configurable Parameters, seed control.
+Oasis Real Estate Simulation Runner (v2.2 Scholar Edition)
+增强版：完整的交互式参数配置，包含收入档次、房产分配、市场健康检查
 """
 import sys
 import logging
 import random
 import numpy as np
-import time
+import os
+from pathlib import Path
+from config.config_loader import SimulationConfig
 from simulation_runner import SimulationRunner
 
-# Configure Logging to Console
+# Configure Logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    encoding='utf-8' # Force UTF-8
+    encoding='utf-8'
 )
 
 def input_default(prompt, default_value):
     """Helper for input with default value"""
     val = input(f"{prompt} [default: {default_value}]: ").strip()
-    return val if val else default_value
+    return val if val else str(default_value)
+
+def validate_config(agent_config, property_count):
+    """
+    市场健康检查：验证配置是否可能导致0交易
+    
+    Returns:
+        (is_valid, warnings, errors)
+    """
+    warnings = []
+    errors = []
+    
+    # 1. 检查房产总数是否足够
+    total_properties_needed = sum(tier['property_count'][1] for tier in agent_config.values())
+    if property_count < total_properties_needed:
+        errors.append(f"🔴 严重: 房产总数({property_count}) < 各档次房产数之和({total_properties_needed})")
+        errors.append(f"   最少需要 {total_properties_needed} 套房产")
+    
+    # 2. 检查收入分布（低收入人群不应过多）
+    total_agents = sum(tier['count'] for tier in agent_config.values())
+    low_income_count = agent_config['low']['count'] + agent_config['low_mid']['count']
+    low_income_ratio = low_income_count / total_agents
+    
+    if low_income_ratio > 0.7:
+        warnings.append(f"🟡 提示: 低收入人群占比 {low_income_ratio:.1%} 过高")
+        warnings.append(f"   可能导致大部分Agent买不起房产，建议控制在60%以下")
+    
+    # 3. 检查房产分配的合理性
+    avg_properties_per_person = property_count / total_agents
+    if avg_properties_per_person < 0.5:
+        warnings.append(f"🟡 提示: 人均房产数 {avg_properties_per_person:.2f} 偏低")
+        warnings.append(f"   可能导致市场房源不足，建议至少0.8套/人")
+    
+    # 4. 估算可负担性（粗略）
+    # 假设中高收入人群能买得起房
+    potential_buyers = (agent_config['middle']['count'] + 
+                       agent_config['high']['count'] + 
+                       agent_config['ultra_high']['count'])
+    buyer_ratio = potential_buyers / total_agents
+    
+    if buyer_ratio < 0.3:
+        warnings.append(f"🟡 提示: 潜在买家占比 {buyer_ratio:.1%} 偏低")
+        warnings.append(f"   建议中高收入群体至少占30%")
+    
+    return (len(errors) == 0, warnings, errors)
 
 def main():
-    # Force UTF-8 for Windows Console
+    # UTF-8
     try:
         if sys.stdout.encoding != 'utf-8':
             sys.stdout.reconfigure(encoding='utf-8')
@@ -32,19 +78,24 @@ def main():
         pass
 
     print("\n" + "=" * 60)
-    print("🏠 Oasis Real Estate Sandbox (Scholar Edition v2.2)".center(60))
+    print("     🏠 Oasis Real Estate Sandbox (Scholar Edition v2.2)     ".center(60))
     print("=" * 60)
     
     # --- 1. Seed Control ---
     seed_val = input_default("Enter Random Seed (for reproducibility)", "random")
+    seed_to_use = None
     if seed_val != "random":
         try:
             seed_int = int(seed_val)
+            seed_to_use = seed_int
             random.seed(seed_int)
             np.random.seed(seed_int)
             print(f"✅ Random Seed set to: {seed_int}")
         except ValueError:
             print("⚠️ Invalid seed, using random.")
+            logging.info("使用随机种子 (结果不可复现)")
+    else:
+        logging.info("使用随机种子 (结果不可复现)")
     
     # --- 2. Mode Selection ---
     print("\nSelect Mode:")
@@ -57,47 +108,188 @@ def main():
     if mode == "2":
         resume = True
         print("📂 Will attempt to resume from 'real_estate_stage2.db'...")
-        # Optional: Ask for how many MORE months to run
-        months = int(input_default("How many months to simulate?", "12"))
+        months = int(input_default("How many MORE months to simulate?", "12"))
         
-        # We need default config for resume, or maybe store config in DB?
-        # For now use default
-        config = {
-            'volatility': 0.03,
-            'shock_prob': 0.10,
-            'shock_mag': 0.12
-        }
+        # Load config from file
+        config = SimulationConfig("config/baseline.yaml")
     else:
-        print("\n--- Configuration ---")
+        # NEW Simulation
+        try:
+            if os.path.exists("real_estate_stage2.db"):
+                os.remove("real_estate_stage2.db")
+                print("🗑️ Removed old database file.")
+        except Exception as e:
+            print(f"⚠️ Warning: Could not remove old DB: {e}")
+
+        print("\n" + "=" * 60)
+        print("--- Configuration ---")
+        print("=" * 60)
         use_custom = input_default("Use Custom Parameters? (y/N)", "n")
         
-        if use_custom.lower() == 'y':
-            agent_count = int(input_default("Agent Count", "100"))
-            months = int(input_default("Months to Simulate", "12"))
-            shock_prob = float(input_default("Market Shock Probability (0.0-1.0)", "0.10"))
-            shock_mag = float(input_default("Shock Magnitude (0.0-0.5)", "0.12"))
-            volatility = float(input_default("Normal Volatility (e.g. 0.03)", "0.03"))
-        else:
+        if use_custom.lower() != 'y':
+            # 使用默认配置
+            print("✅ Using Default Parameters.")
+            config = SimulationConfig("config/baseline.yaml")
             agent_count = 100
             months = 12
-            shock_prob = 0.10
-            shock_mag = 0.12
-            volatility = 0.03
-            print("✅ Using Default Parameters.")
+        else:
+            print("\n⚠️  注意: 以下参数将直接影响市场流动性和交易活跃度")
+            print("   不当配置可能导致0交易，请参考默认值谨慎设置\n")
             
-        config = {
-            'volatility': volatility,
-            'shock_prob': shock_prob,
-            'shock_mag': shock_mag
-        }
+            # === Agent 配置 ===
+            print("=" * 60)
+            print("【步骤 1/4】Agent 数量与收入档次配置")
+            print("=" * 60)
+            
+            # Agent总数
+            agent_count = int(input_default("\n总Agent数量", "100"))
+            
+            # 收入档次配置
+            print("\n📊 收入档次配置 (共5档):")
+            print("   提示: 收入分界线单位为 元/月")
+            print("   参考: 低收入<20k, 中低收入20-40k, 中等收入40-80k, 高收入80-150k, 超高收入>150k\n")
+            
+            # 默认收入分界线
+            default_income_bounds = {
+                'ultra_high': (150000, 300000),
+                'high': (80000, 150000),
+                'middle': (40000, 80000),
+                'low_mid': (20000, 40000),
+                'low': (8000, 20000)
+            }
+            
+            agent_config = {}
+            total_assigned = 0
+            
+            for tier_key in ['ultra_high', 'high', 'middle', 'low_mid', 'low']:
+                tier_names = {
+                    'ultra_high': '超高收入',
+                    'high': '高收入',
+                    'middle': '中等收入',
+                    'low_mid': '中低收入',
+                    'low': '低收入'
+                }
+                
+                default_bounds = default_income_bounds[tier_key]
+                print(f"\n【{tier_names[tier_key]}档】")
+                print(f"  默认收入范围: {default_bounds[0]:,} - {default_bounds[1]:,} 元/月")
+                
+                # 该档次人数
+                remaining = agent_count - total_assigned
+                if tier_key == 'low':
+                    # 最后一档自动分配剩余
+                    count = remaining
+                    print(f"  该档Agent数量: {count} (剩余自动分配)")
+                else:
+                    default_count = {
+                        'ultra_high': max(1, agent_count // 20),  # 5%
+               'high': max(2, agent_count // 10),   # 10%
+                        'middle': max(5, agent_count // 2),    # 50%
+                        'low_mid': max(2, agent_count // 5)    # 20%
+                    }.get(tier_key, 1)
+                    count = int(input_default(f"  该档Agent数量", str(min(default_count, remaining))))
+                
+                total_assigned += count
+                
+                # 该档次房产数范围
+                default_props = {
+                    'ultra_high': (2, 5),
+                    'high': (1, 3),
+                    'middle': (0, 1),
+                    'low_mid': (0, 1),
+                    'low': (0, 0)
+                }[tier_key]
+                
+                props_min = int(input_default(f"  该档人均房产数(最小)", str(default_props[0])))
+                props_max = int(input_default(f"  该档人均房产数(最大)", str(default_props[1])))
+                
+                agent_config[tier_key] = {
+                    'count': count,
+                    'income_range': default_bounds,
+                    'property_count': (props_min, props_max)
+                }
+            
+            # === 房产配置 ===
+            print("\n" + "=" * 60)
+            print("【步骤 2/4】房产总量配置")
+            print("=" * 60)
+            
+            min_properties = sum(tier['property_count'][0] * tier['count'] 
+                               for tier in agent_config.values())
+            max_properties = sum(tier['property_count'][1] * tier['count'] 
+                               for tier in agent_config.values())
+            
+            print(f"\n根据配置，至少需要 {min_properties} 套房产")
+            print(f"最多需要 {max_properties} 套房产")
+            print(f"建议: {int(max_properties * 1.2)} 套 (留20%市场库存)\n")
+            
+            property_count = int(input_default("房产总数量", str(int(max_properties * 1.2))))
+            
+            # === 市场健康检查 ===
+            print("\n" + "=" * 60)
+            print("【步骤 3/4】市场健康检查")
+            print("=" * 60)
+            
+            is_valid, warnings, errors = validate_config(agent_config, property_count)
+            
+            if errors:
+                print("\n❌ 配置错误:")
+                for err in errors:
+                    print(f"  {err}")
+                print("\n请修正后重新运行。")
+                return
+            
+            if warnings:
+                print("\n⚠️  配置警告:")
+                for warn in warnings:
+                    print(f"  {warn}")
+                print("\n这些配置可能导致交易不活跃，但可以继续运行。")
+                confirm = input("\n是否继续? [Y/n]: ").strip().lower()
+                if confirm == 'n':
+                    print("已取消模拟。")
+                    return
+            else:
+                print("\n✅ 配置检查通过！")
+            
+            # === 最终确认 ===
+            print("\n" + "=" * 60)
+            print("【步骤 4/4】配置总览与确认")
+            print("=" * 60)
+            
+            months = int(input_default("\n模拟月数", "12"))
+            
+            print(f"\n配置总览:")
+            print(f"  - Agent总数: {agent_count}")
+            for tier_key, tier_data in agent_config.items():
+                tier_names = {'ultra_high': '超高', 'high': '高', 'middle': '中', 'low_mid': '中低', 'low': '低'}
+                print(f"      {tier_names[tier_key]}收入: {tier_data['count']}人, "
+                      f"收入{tier_data['income_range'][0]//1000}-{tier_data['income_range'][1]//1000}k, "
+                      f"拥房{tier_data['property_count'][0]}-{tier_data['property_count'][1]}套")
+            print(f"  - 房产总数: {property_count}")
+            print(f"  - 模拟月数: {months}")
+            print(f"  - 随机种子: {seed_to_use or '随机'}")
+            
+            confirm = input("\n确认启动模拟? [Y/n]: ").strip().lower()
+            if confirm == 'n':
+                print("已取消模拟。")
+                return
+            
+            # === 创建配置对象 ===
+            # 动态修改 baseline.yaml 的内容
+            config = SimulationConfig("config/baseline.yaml")
+            
+            # 注入用户自定义配置（这里简化处理，实际应该修改yaml或传递参数）
+            # 暂时通过 SimulationRunner 的参数传递
+            config.user_agent_config = agent_config
+            config.user_property_count = property_count
     
     # --- 3. Execution ---
     print("\n🚀 Initializing Runner...")
     
-    # Note: If resuming, agent_count is ignored (loaded from DB)
     runner = SimulationRunner(
         agent_count=agent_count if not resume else 0,
         months=months,
+        seed=seed_to_use,
         resume=resume,
         config=config
     )
@@ -112,7 +304,6 @@ def main():
             import scripts.export_results as exporter
             exporter.export_data()
         except ImportError:
-            # Fallback if module logic isn't perfect importable, run via command
             import subprocess
             subprocess.run([sys.executable, "scripts/export_results.py"])
             

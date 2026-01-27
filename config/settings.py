@@ -45,3 +45,56 @@ LIFE_EVENT_POOL = [
     {"event": "生病",     "cash_change": -0.2, "buy_tendency": -0.3,"sell_tendency": 0.3},
     {"event": "离婚",     "cash_change": 0.0,  "buy_tendency": 0.0, "sell_tendency": 0.5},
 ]
+
+# ---------------------------------------------------------
+# 4. Macro Environment Configuration
+# ---------------------------------------------------------
+
+# Defines parameters for different macro sentiments
+MACRO_ENVIRONMENT = {
+    "optimistic": {
+        "income_growth_rate": 0.05,      # 5% annual growth rate
+        "buy_tendency_modifier": 0.2,    # Boost buying prob
+        "sell_tendency_modifier": -0.1,  # Reduce selling
+        "price_expectation": 0.03,       # Expect 3% price rise
+        "description": "经济繁荣，股市上涨，大家对未来充满信心。"
+    },
+    "stable": {
+        "income_growth_rate": 0.02,      # 2% annual (inflation)
+        "buy_tendency_modifier": 0.0,
+        "sell_tendency_modifier": 0.0,
+        "price_expectation": 0.0,
+        "description": "经济平稳，政策稳定，市场供需平衡。"
+    },
+    "pessimistic": {
+        "income_growth_rate": -0.02,     # 2% contraction
+        "buy_tendency_modifier": -0.2,   # Reduce buying
+        "sell_tendency_modifier": 0.2,   # panic selling
+        "price_expectation": -0.05,      # Expect 5% drop
+        "description": "经济衰退，失业率上升，市场弥漫着恐慌情绪。"
+    }
+}
+
+# Schedule: Month -> Sentiment Key
+# Example: 1-12 months scenario
+MACRO_SENTIMENT_SCHEDULE = {
+    1: "stable",
+    2: "stable",
+    3: "optimistic",
+    4: "optimistic", 
+    5: "optimistic",
+    6: "stable",    # Cooling down
+    7: "pessimistic", # Shock
+    8: "pessimistic",
+    9: "stable",    # Recovery
+    10: "stable",
+    11: "optimistic",
+    12: "optimistic"
+}
+
+def get_current_macro_sentiment(month: int) -> str:
+    """Get sentiment key for the given month, defaulting to stable."""
+    # Loop scenario if month > 12 to allow longer sims
+    norm_month = (month - 1) % 12 + 1
+    return MACRO_SENTIMENT_SCHEDULE.get(norm_month, "stable")
+

@@ -2,7 +2,10 @@ import sqlite3
 import json
 import os
 import csv
+import csv
 from datetime import datetime
+import matplotlib.pyplot as plt
+import numpy as np
 
 # Default Constants
 DB_PATH = 'real_estate_stage2.db'
@@ -30,16 +33,37 @@ def export_legacy_csvs(results_dir):
             for row in rows:
                 writer.writerow(dict(row))
                 
-    # 2. thoughts.csv (Mapped from decision_logs)
+    # 2. thoughts.csv (Mapped from decision_logs, 解析JSON为易读格式)
     print("Exporting thoughts.csv...")
-    cursor.execute("SELECT month, agent_id, decision as step_type, reason as content, thought_process FROM decision_logs")
+    cursor.execute("SELECT month, agent_id, decision as role, reason as trigger, thought_process FROM decision_logs")
     rows = cursor.fetchall()
     if rows:
-        with open(f"{results_dir}/thoughts.csv", "w", newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        # 定义新的易读字段
+        fieldnames = ['月份', '代理人ID', '角色', '触发原因', '紧迫程度', '价格预期', '原始数据']
+        with open(f"{results_dir}/thoughts.csv", "w", newline='', encoding='utf-8-sig') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             for row in rows:
-                writer.writerow(dict(row))
+                row_dict = dict(row)
+                # 解析 thought_process JSON
+                urgency = ""
+                price_exp = ""
+                try:
+                    tp = json.loads(row_dict.get('thought_process', '{}') or '{}')
+                    urgency = tp.get('urgency', '')
+                    price_exp = tp.get('price_expectation', '')
+                except:
+                    pass
+                
+                writer.writerow({
+                    '月份': row_dict.get('month', ''),
+                    '代理人ID': row_dict.get('agent_id', ''),
+                    '角色': row_dict.get('role', ''),
+                    '触发原因': row_dict.get('trigger', ''),
+                    '紧迫程度': urgency,
+                    '价格预期': price_exp,
+                    '原始数据': row_dict.get('thought_process', '')
+                })
 
     # 3. properties.csv
     print("Exporting properties.csv...")
@@ -194,6 +218,41 @@ def generate_market_report(report_dir=REPORT_DIR):
     print(f"Generated {report_dir}/market_report.md")
     conn.close()
 
+def generate_wealth_distribution(results_dir):
+    """Generate wealth distribution chart (Histogram)"""
+    conn = sqlite3.connect(DB_PATH)
+    # Calculate net worth: Cash + Property Value
+    # Note: Property Value approximation using base_value or listed_price
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT a.agent_id, a.cash, 
+               COALESCE(SUM(p.base_value), 0) as prop_wealth
+        FROM agents a
+        LEFT JOIN properties p ON a.agent_id = p.owner_id
+        GROUP BY a.agent_id
+    """)
+    rows = cursor.fetchall()
+    conn.close()
+    
+    if not rows:
+        print("No agents found for wealth chart.")
+        return
+        
+    net_worths = [(row[1] + row[2]) / 10000 for row in rows] # Convert to Wan (10k)
+    
+    plt.figure(figsize=(10, 6))
+    plt.hist(net_worths, bins=50, color='skyblue', edgecolor='black', alpha=0.7)
+    plt.title('Agent Wealth Distribution')
+    plt.xlabel('Net Worth (10k CNY)')
+    plt.ylabel('Number of Agents')
+    plt.grid(axis='y', alpha=0.5)
+    
+    # Save
+    chart_path = f"{results_dir}/wealth_distribution.png"
+    plt.savefig(chart_path)
+    plt.close()
+    print(f"Generated Wealth Chart: {chart_path}")
+
 def generate_all_reports():
     """Main entry point for report generation."""
     print("Generating Reports & Exports...")
@@ -209,6 +268,7 @@ def generate_all_reports():
     generate_negotiations(REPORT_DIR)
     generate_decisions(REPORT_DIR)
     generate_market_report(REPORT_DIR)
+    generate_wealth_distribution(results_dir)
     
     # 3. Export CSVs
     export_legacy_csvs(results_dir)

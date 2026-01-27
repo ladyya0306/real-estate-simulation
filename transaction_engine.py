@@ -5,7 +5,7 @@ import json
 import random
 from typing import List, Dict, Optional, Tuple, Any
 from models import Agent, Market
-from agent_behavior import safe_call_llm
+from agent_behavior import safe_call_llm, build_macro_context
 from mortgage_system import check_affordability, calculate_monthly_payment
 from config.settings import MORTGAGE_CONFIG
 
@@ -15,8 +15,9 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market) 
     """
     LLM drives seller to set listed price and min acceptable price.
     """
+    ""
     # Get Market Info
-    zone = property_data['zone']
+    zone = property_data.get('zone', 'A') # Default to A if missing
     avg_price = market.get_avg_price(zone)
     if avg_price == 0:
         avg_price = property_data['base_value']
@@ -25,7 +26,7 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market) 
     你准备卖房：
     【背景】{seller.story.background_story}
     【卖房动机】{seller.story.selling_motivation}
-    【房产】{zone}区，{property_data.get('building_area', 100)}㎡，{property_data.get('bedrooms', 2)}房
+    【房产】{zone}区，{property_data.get('building_area', 100)}㎡
     【市场均价】{avg_price:,.0f}元
     【估值】{property_data['base_value']:,.0f}元
 
@@ -54,6 +55,7 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market) 
     return {
         "property_id": property_data['property_id'],
         "seller_id": seller.id,
+        "zone": zone,  # 添加zone字段，negotiate需要用它判断市场供需
         "listed_price": listed_price,
         "min_price": max(min_price, 1.0), # Ensure positive
         "urgency": result.get("urgency", 0.5),
@@ -88,10 +90,7 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
             # print(f"Debug: Price mismatch {listing['listed_price']} > {pref.max_price}")
             continue
             
-        # 3. Bedroom Check
-        if prop.get('bedrooms', 0) < pref.min_bedrooms:
-            # print(f"Debug: Bedroom mismatch {prop.get('bedrooms')} < {pref.min_bedrooms}")
-            continue
+
             
         # 4. School District Check
         if pref.need_school_district and not prop.get('is_school_district', False):
@@ -99,7 +98,7 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
             
         candidates.append(listing)
         
-    print(f"Debug: Found {len(candidates)} candidates for Buyer {buyer.id}")
+    # print(f"Debug: Found {len(candidates)} candidates for Buyer {buyer.id}")
         
     if not candidates:
         return None
@@ -112,34 +111,102 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
 
 # --- 3. Negotiation Logic (Phase 2.2) ---
 
-def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market) -> Dict:
+# --- 3. Negotiation Logic (Phase 2.2 & P3) ---
+
+def get_market_condition(market: Market, zone: str, potential_buyers_count: int) -> str:
     """
-    LLM-driven 3-5 round negotiation.
-    Returns: {"outcome": "success"|"failed", "final_price": float, "history": List}
+    Determine market condition based on Supply/Demand Ratio.
+    Ratio = Active Listings / Potential Buyers
     """
-    history = []
-    rounds = random.randint(3, 5) # 3-5 rounds
+    listings = [p for p in market.properties if p['status'] == 'for_sale' and p['zone'] == zone]
+    listing_count = len(listings)
+    
+    # Avoid division by zero
+    buyer_count = max(potential_buyers_count, 1)
+    
+    ratio = listing_count / buyer_count
+    
+    # Thresholds
+    if ratio > 1.5:
+        return "oversupply"      # 供过于求 (买方市场)
+    elif ratio < 0.7:
+        return "undersupply"     # 供不应求 (卖方市场)
+    else:
+        return "balanced"        # 供需平衡
+
+def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potential_buyers_count: int = 10, config=None) -> Dict:
+    """
+    LLM-driven negotiation with Market Context, Configurable Rounds, and Personality.
+    """
+    # 1. Configuration & Context Setup
+    neg_cfg = config.negotiation if config else {}
+    rounds_range = neg_cfg.get('rounds_range', [2, 3])
+    gap_threshold = neg_cfg.get('heuristic_gap_threshold', 0.20)
+    market_conds = neg_cfg.get('market_conditions', {})
+    
     current_price = listing['listed_price']
     min_price = listing['min_price']
     
-    buyer_offer_price = current_price * 0.9 # Start lower
+    # 2. Heuristic Pre-check (Fail early if gap is too large)
+    buyer_max = buyer.preference.max_price
+    # Check gap between listed price and buyer max
+    # If listed_price is significantly higher than buyer_max, skip
+    price_gap = (current_price - buyer_max) / current_price
     
+    # Also check min_price vs buyer_max
+    if min_price > buyer_max * (1 + gap_threshold):
+         return {"outcome": "failed", "reason": f"Pre-check: Price gap {price_gap:.1%} too large", "history": [], "final_price": 0}
+
+    # 3. Market Condition & Strategy
+    market_condition = get_market_condition(market, listing['zone'], potential_buyers_count)
+    
+    cond_cfg = market_conds.get(market_condition, {})
+    lowball_ratio = cond_cfg.get('buyer_lowball', 0.90)
+    market_hint = cond_cfg.get('llm_hint', "【市场供需平衡】供需相当，价格理性。")
+    
+    # Macro Environment Context
+    macro_context = build_macro_context(1, config) # Month is not passed effectively here, defaulting to 1 or need to pass in
+    
+    history = []
+    rounds = random.randint(*rounds_range)
+    
+    # Starting offer based on configuration
+    buyer_offer_price = current_price * lowball_ratio
+
     negotiation_log = []
     
+    # Agent Styling
+    buyer_style = getattr(buyer.story, 'negotiation_style', 'balanced')
+    seller_style = getattr(seller.story, 'negotiation_style', 'balanced')
+    
+    style_prompts = {
+        "aggressive": "你是个激进派。大幅杀价/坐地起价，一言不合就退出，绝不吃亏。",
+        "conservative": "你是个保守派。谨慎出价，坚守底线，不轻易冒进。",
+        "balanced": "你是个理性派。寻求双赢，愿意适度妥协以达成交易。",
+        "desperate": "你是个急迫派。为了快速成交，愿意大幅让步。"
+    }
+
     for r in range(1, rounds + 1):
         # --- Buyer Turn ---
         buyer_prompt = f"""
+        {macro_context}
         你是买方Agent {buyer.id}，第{r}/{rounds}轮谈判。
-        【你的背景】{buyer.story.background_story}
-        【你的预算】{buyer.preference.max_price:,.0f}
-        【当前卖方报价】{current_price:,.0f}
-        【你的上一轮出价】{buyer_offer_price:,.0f}
-        【谈判历史】{json.dumps(negotiation_log, ensure_ascii=False)}
+        【你的风格】{buyer_style} - {style_prompts.get(buyer_style, "")}
         
-        决定行动：
-        - OFFER: 出价 (必须低于当前报价，但要合理)
-        - ACCEPT: 接受当前报价
-        - WITHDRAW: 觉得太贵放弃
+        【交易背景】
+        - 你的预算上限: {buyer.preference.max_price:,.0f}
+        - 卖方当前报价: {current_price:,.0f}
+        - 你的上轮出价: {buyer_offer_price:,.0f}
+        
+        【市场提示】{market_hint}
+        
+        【谈判历史】
+        {json.dumps(negotiation_log, ensure_ascii=False)}
+        
+        决定行动 (请遵循你的风格):
+        - OFFER: 出价 (必须低于报价，可参考建议: {current_price*lowball_ratio:,.0f} ~ {current_price:,.0f})
+        - ACCEPT: 接受报价
+        - WITHDRAW: 放弃 (如果价格太高或对方太顽固)
         
         输出JSON: {{"action": "OFFER"|"ACCEPT"|"WITHDRAW", "offer_price": 0, "reason": "..."}}
         """
@@ -171,16 +238,24 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market) -> Dic
              
         # --- Seller Turn ---
         seller_prompt = f"""
+        {macro_context}
         你是卖方Agent {seller.id}，第{r}/{rounds}轮谈判。
-        【你的底价】{min_price:,.0f}
-        【买方最新出价】{buyer_offer_price:,.0f}
-        【当前你的报价】{current_price:,.0f}
-        【谈判历史】{json.dumps(negotiation_log, ensure_ascii=False)}
+        【你的风格】{seller_style} - {style_prompts.get(seller_style, "")}
         
-        决定行动：
-        - ACCEPT: 接受买方出价
-        - COUNTER: 还价 (必须高于买方出价，低于当前报价)
-        - REJECT: 价格太低拒绝
+        【交易背景】
+        - 你的心理底价: {min_price:,.0f}
+        - 买方最新出价: {buyer_offer_price:,.0f}
+        - 当前你的报价: {current_price:,.0f}
+        
+        【市场提示】{market_hint}
+        
+        【谈判历史】
+        {json.dumps(negotiation_log, ensure_ascii=False)}
+        
+        决定行动 (请遵循你的风格):
+        - ACCEPT: 接受买方出价 (如果高于底价或你是急迫型)
+        - COUNTER: 还价 (必须降低报价以示诚意，除非你是激进型)
+        - REJECT: 拒绝 (价格太低且无意让步)
         
         输出JSON: {{"action": "ACCEPT"|"COUNTER"|"REJECT", "counter_price": 0, "reason": "..."}}
         """
@@ -209,18 +284,40 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market) -> Dic
 
     return {"outcome": "failed", "reason": "Max rounds reached", "history": negotiation_log, "final_price": 0}
 
+def handle_failed_negotiation(seller: Agent, listing: Dict, market: Market, potential_buyers_count: int) -> bool:
+    """
+    Handle negotiation failure. In oversupply market, seller might drop price immediately.
+    Returns: True if price adjusted, False otherwise.
+    """
+    market_condition = get_market_condition(market, listing.get('zone', 'A'), potential_buyers_count)
+    
+    
+    if market_condition == "oversupply":
+        # 30% chance to drop price immediately in panic market
+        import random
+        if random.random() < 0.3:
+            price_reduction = random.uniform(0.02, 0.05) # 2-5% drop
+            old_price = listing['listed_price']
+            new_price = old_price * (1 - price_reduction)
+            listing['listed_price'] = new_price
+            listing['min_price'] = listing['min_price'] * (1 - price_reduction * 0.5)
+            # print(f"📉 Market Pressure: Seller {seller.id} cuts price {old_price:,.0f} -> {new_price:,.0f}")
+            return True
+            
+    return False
+
 # --- 4. Transaction Execution (Phase 2.3 & 3) ---
 
-def execute_transaction(buyer: Agent, seller: Optional[Agent], property_data: Dict, price: float, market: Market) -> Optional[Dict]:
+def execute_transaction(buyer: Agent, seller: Optional[Agent], property_data: Dict, price: float, market: Market, config=None) -> Optional[Dict]:
     """
     Execute transaction: Transfer funds, update ownership, apply mortgage, update market.
     Returns transaction record or None if failed.
     """
     # 1. Final Affordability Check (incorporating Mortgage logic)
-    is_affordable, down_payment, loan_amount = check_affordability(buyer, price)
+    is_affordable, down_payment, loan_amount = check_affordability(buyer, price, config)
     
     if not is_affordable:
-        print(f"Transaction failed: Buyer {buyer.id} cannot afford {price}")
+        # print(f"Transaction failed: Buyer {buyer.id} cannot afford {price}")
         return None
         
     # 2. Financial Transfer
@@ -269,3 +366,227 @@ def execute_transaction(buyer: Agent, seller: Optional[Agent], property_data: Di
         "loan_amount": loan_amount,
         "type": "secondary" if seller else "new_sale"
     }
+
+
+# --- 5. Open Negotiation (LLM-Driven Free Strategy) ---
+
+def open_negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market,
+                   buyer_context: str = "", seller_context: str = "", config=None) -> Dict:
+    """
+    开放式谈判 - LLM自由表达策略，代码解析执行
+    
+    Args:
+        buyer: 买家Agent
+        seller: 卖家Agent
+        listing: 挂牌信息
+        market: 市场对象
+        buyer_context: 买家历史上下文
+        seller_context: 卖家历史上下文
+    
+    Returns:
+        dict: {"outcome": "success"|"failed"|"max_rounds", "final_price": float, "history": list}
+    """
+    from agent_behavior import safe_call_llm
+    
+    history = []
+    max_rounds = 5
+    current_ask = listing.get('listed_price', 0)
+    min_price = listing.get('min_price', current_ask * 0.9)
+    
+    # 获取买家预算
+    buyer_max = getattr(buyer, 'preference', None)
+    if buyer_max:
+        buyer_max = buyer_max.max_price
+    else:
+        from mortgage_system import calculate_max_affordable
+        buyer_max = calculate_max_affordable(buyer.cash, buyer.monthly_income, config=config)
+    
+    # 市场状态
+    supply = len([p for p in market.properties if p.get('status') == 'for_sale'])
+    zone = listing.get('zone', 'B')
+    zone_supply = len([p for p in market.properties if p.get('status') == 'for_sale' and p.get('zone') == zone])
+    
+    if zone_supply > 15:
+        market_desc = "买方市场(供过于求，房源充足)"
+    elif zone_supply < 5:
+        market_desc = "卖方市场(供不应求，房源紧缺)"
+    else:
+        market_desc = "均衡市场(供需相当)"
+    
+    # 宏观与性格上下文
+    macro_context = build_macro_context(1, config)
+    buyer_style = getattr(buyer.story, 'negotiation_style', 'balanced')
+    seller_style = getattr(seller.story, 'negotiation_style', 'balanced')
+
+    # 房产信息
+    prop_info = f"{zone}区 {listing.get('building_area', 80):.0f}㎡ {listing.get('property_type', '普通住宅')}"
+    
+    for round_num in range(1, max_rounds + 1):
+        # === 买方回合 ===
+        buyer_prompt = f"""
+{macro_context}
+你是买家 {buyer.name}，正在第{round_num}轮谈判。
+【你的性格】{buyer_style}
+
+【你的背景】{buyer.story.background_story}
+【你的预算上限】¥{buyer_max:,.0f}
+【你的历史行为】
+{buyer_context if buyer_context else "无历史记录"}
+
+【目标房产】{prop_info}
+【卖方当前报价】¥{current_ask:,.0f}
+
+【市场环境】{market_desc}
+【谈判历史】{json.dumps(history[-4:], ensure_ascii=False) if history else "首轮谈判"}
+
+---
+请自由思考并决定你的行动。你可以：
+- 出价（给出具体金额和理由）
+- 接受当前价格
+- 放弃（觉得不值或超预算）
+- 其他策略（如要求附加条件、表示可以再谈等）
+
+输出JSON:
+{{
+  "action": "OFFER" / "ACCEPT" / "WITHDRAW" / 其他,
+  "offer_price": 你的出价(数字，不出价则为null),
+  "message": "你想对卖家说的话",
+  "inner_thought": "你内心的真实想法（不会告诉对方）"
+}}
+"""
+        buyer_resp = safe_call_llm(buyer_prompt, {
+            "action": "WITHDRAW", 
+            "offer_price": None, 
+            "message": "价格超出预算", 
+            "inner_thought": "默认放弃"
+        }, system_prompt="你是一个精明但理性的购房者。")
+        
+        # 解析买方行动
+        buyer_action = str(buyer_resp.get("action", "WITHDRAW")).upper()
+        buyer_offer = buyer_resp.get("offer_price")
+        
+        # 验证出价
+        if buyer_offer is not None:
+            try:
+                buyer_offer = float(buyer_offer)
+                if buyer_offer > buyer_max:
+                    buyer_action = "WITHDRAW"
+                    buyer_resp["inner_thought"] = "出价超过预算上限，放弃"
+            except:
+                buyer_offer = None
+        
+        history.append({
+            "round": round_num, 
+            "party": "buyer", 
+            "agent_id": buyer.id,
+            "action": buyer_action,
+            "price": buyer_offer, 
+            "message": buyer_resp.get("message", ""),
+            "thought": buyer_resp.get("inner_thought", "")
+        })
+        
+        # 检查终止条件
+        if buyer_action == "WITHDRAW":
+            return {
+                "outcome": "failed", 
+                "reason": "买方放弃", 
+                "history": history, 
+                "final_price": 0
+            }
+        if buyer_action == "ACCEPT":
+            return {
+                "outcome": "success", 
+                "final_price": current_ask, 
+                "history": history
+            }
+        
+        # 如果没有出价，设置默认出价
+        if buyer_offer is None:
+            buyer_offer = current_ask * 0.9
+            
+        # === 卖方回合 ===
+        seller_prompt = f"""
+你是卖家 {seller.name}，正在第{round_num}轮谈判。
+
+【你的背景】{seller.story.background_story}
+【你的历史行为】
+{seller_context if seller_context else "无历史记录"}
+
+【你的房产】{prop_info}
+【你的挂牌价】¥{listing['listed_price']:,.0f}
+【你的心理底价】约 ¥{min_price:,.0f}
+
+【买方最新出价】¥{buyer_offer:,.0f}
+【买方说】"{buyer_resp.get('message', '')}"
+
+【市场环境】{market_desc}
+【谈判历史】{json.dumps(history[-4:], ensure_ascii=False)}
+
+---
+请自由思考并决定你的行动。你可以：
+- 接受买方出价
+- 还价（给出新价格）
+- 拒绝（结束谈判）
+- 其他策略（如提出附加条件、表示可以再谈等）
+
+输出JSON:
+{{
+  "action": "ACCEPT" / "COUNTER" / "REJECT" / 其他,
+  "counter_price": 你的还价(数字，不还价则为null),
+  "message": "你想对买家说的话",
+  "inner_thought": "你内心的真实想法"
+}}
+"""
+        seller_resp = safe_call_llm(seller_prompt, {
+            "action": "REJECT", 
+            "counter_price": None, 
+            "message": "价格太低", 
+            "inner_thought": "默认拒绝"
+        }, system_prompt="你是一个理性的房产卖家。")
+        
+        seller_action = str(seller_resp.get("action", "REJECT")).upper()
+        counter_price = seller_resp.get("counter_price")
+        
+        # 验证还价
+        if counter_price is not None:
+            try:
+                counter_price = float(counter_price)
+            except:
+                counter_price = None
+        
+        history.append({
+            "round": round_num, 
+            "party": "seller", 
+            "agent_id": seller.id,
+            "action": seller_action,
+            "price": counter_price if counter_price else current_ask,
+            "message": seller_resp.get("message", ""),
+            "thought": seller_resp.get("inner_thought", "")
+        })
+        
+        # 检查终止条件
+        if seller_action == "ACCEPT":
+            final_price = buyer_offer if buyer_offer else current_ask
+            return {
+                "outcome": "success", 
+                "final_price": final_price, 
+                "history": history
+            }
+        if seller_action == "REJECT":
+            return {
+                "outcome": "failed", 
+                "reason": "卖方拒绝", 
+                "history": history, 
+                "final_price": 0
+            }
+        if seller_action == "COUNTER" and counter_price:
+            current_ask = counter_price
+    
+    # 达到最大轮数
+    return {
+        "outcome": "max_rounds", 
+        "reason": "超过最大谈判轮数", 
+        "history": history, 
+        "final_price": 0
+    }
+

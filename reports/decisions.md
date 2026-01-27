@@ -2,52 +2,226 @@
 
 
 ## Month 1
-### Agent 1 -> BUYER
-**Reasoning**: 陈默渴望一个能进行园艺和木工的实体空间，这表明他有潜在的房产购买或租赁需求，以创建满足其新爱好的工作坊或花园。他拥有可观的财富，具备购买能力，且背景中未提及他有任何房产出售的意图。
+### Agent 1 -> SELLER
+**Reasoning**: 市场平稳，高位资产止盈变现，优化税务配置
 
 ### Agent 2 -> BUYER
-**Reasoning**: 林澈当前拥有公寓但感到局促，渴望置换一个更大的房产以满足家庭需求，其目标是购买新房，因此角色是买方（BUYER）。
+**Reasoning**: 家族成员众多，需为子女购置房产
 
 ### Agent 3 -> BUYER
-**Reasoning**: 林默希望置换房产以建立温暖家庭，这符合购房者（BUYER）的核心目标。他目前拥有房产（可观的储蓄和置换需求），但背景未提及他有出售房产的意图或行为，因此不是卖家（SELLER）。他也不是单纯观察市场，而是有明确的购买和置换计划，因此也不是观察者（OBSERVER）。
-
-### Agent 4 -> BUYER
-**Reasoning**: Sufficient savings, looking to buy
+**Reasoning**: 现金流充裕，关注资产保值增值
 
 ### Agent 5 -> BUYER
-**Reasoning**: 林晓宇和妻子计划置换现有住房，目的是为了未来孩子的教育资源，这表明他们正在寻求购买新的房产，因此角色是买家（BUYER）。
+**Reasoning**: 家族成员众多，需为子女购置房产
+
+### Agent 12 -> BUYER
+**Reasoning**: 刚结婚，急需置换大平层
+
+### Agent 13 -> BUYER
+**Reasoning**: 刚结婚，急需置换大平层
+
+### Agent 19 -> BUYER
+**Reasoning**: 想买养老房
+
+### Agent 23 -> BUYER
+**Reasoning**: 为了孩子上学换学区房
+
+### Agent 31 -> BUYER
+**Reasoning**: 想买养老房
+
+### Agent 35 -> BUYER
+**Reasoning**: 父母资助首付，看刚需上车盘
+
+### Agent 37 -> BUYER
+**Reasoning**: 为了孩子上学换学区房
+
+### Agent 43 -> BUYER
+**Reasoning**: 为了孩子上学换学区房
+
+### Agent 46 -> BUYER
+**Reasoning**: 父母资助首付，看刚需上车盘
+
+### Agent 52 -> BUYER
+**Reasoning**: 想买养老房
+
+### Agent 61 -> BUYER
+**Reasoning**: 父母资助首付，看刚需上车盘
 
 
 ## Month 2
-### Agent 1 -> BUYER
-**Reasoning**: 陈默渴望一个能进行园艺和木工、从数字世界抽离的实体空间，这暗示他有购买房产（如带花园或工作室的房屋）以满足新生活方式的潜在需求，因此他是买家（BUYER）。
+### Agent 6 -> BUYER
+**Reasoning**: 刚结婚，急需置换大平层
 
-### Agent 2 -> BUYER
-**Reasoning**: 林澈当前目标是置换房产，从局促公寓升级为适合家人团聚、孩子奔跑的更大住宅，因此他处于购房者的位置。
+### Agent 11 -> BUYER
+**Reasoning**: 子女教育，计划置换顶级学区房
 
-### Agent 3 -> BUYER
-**Reasoning**: 林默希望置换房产以建立温暖家庭，这表明他有明确的购房意图和需求，属于买方角色。
+### Agent 27 -> BUYER
+**Reasoning**: 购买养老房
 
-### Agent 4 -> BUYER
-**Reasoning**: Sufficient savings, looking to buy
+### Agent 46 -> BUYER
+**Reasoning**: 刚需上车盘
 
-### Agent 5 -> BUYER
-**Reasoning**: 林晓宇计划置换现有住房，为未来孩子规划教育资源，属于购房需求方，因此角色是买家。
+### Agent 51 -> SELLER
+**Reasoning**: 为换学区房变现
 
 
 ## Month 3
-### Agent 1 -> BUYER
-**Reasoning**: 陈默拥有高收入和财富积累，且目前有明确的个人需求（渴望一个用于园艺和木工、能从数字世界抽离的实体空间），这符合寻找并可能购买房产的买家特征。背景中未提及他有房产需要出售，也没有表明他仅作为观察者参与市场。
+### Agent 14 -> BUYER
+**Reasoning**: 子女教育，置换顶级学区房
 
+### Agent 15 -> BUYER
+**Reasoning**: 子女教育，置换顶级学区房
+
+### Agent 30 -> BUYER
+**Reasoning**: 刚需上车，父母资助首付
+
+### Agent 32 -> BUYER
+**Reasoning**: 刚需上车，父母资助首付
+
+### Agent 33 -> SELLER
+**Reasoning**: 置换刚需盘，资金紧张
+
+### Agent 46 -> SELLER
+**Reasoning**: 资金紧张，可能变现
+
+### Agent 51 -> BUYER
+**Reasoning**: 孩子上学，换学区房
+
+### Agent 59 -> BUYER
+**Reasoning**: 购买养老房
+
+### Agent 65 -> SELLER
+**Reasoning**: 为孩子上学置换学区房
+
+
+## Month 4
+### Agent 2 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 3 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 5 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 7 -> BUYER
+**Reasoning**: 子女教育（置换顶级学区房）
+
+### Agent 8 -> BUYER
+**Reasoning**: 投资机会（现金转换为核心地段房产）
+
+### Agent 12 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 13 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 19 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 23 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 24 -> BUYER
+**Reasoning**: 孩子上学（换学区房）
+
+### Agent 27 -> BUYER
+**Reasoning**: 改善需求（买养老房）
+
+### Agent 30 -> BUYER
+**Reasoning**: 刚需上车
+
+### Agent 37 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 40 -> BUYER
+**Reasoning**: 改善需求（买养老房）
+
+### Agent 43 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 43 -> BUYER
+**Reasoning**: 孩子上学（换学区房）
+
+### Agent 49 -> BUYER
+**Reasoning**: 刚需上车
+
+### Agent 50 -> BUYER
+**Reasoning**: 改善需求（买养老房）
+
+### Agent 52 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 59 -> BUYER
+**Reasoning**: 改善需求（买养老房）
+
+### Agent 62 -> BUYER
+**Reasoning**: 改善需求（买养老房）
+
+### Agent 64 -> SELLER
+**Reasoning**: 置换变现（为刚需上车盘提供资金）
+
+
+## Month 5
 ### Agent 2 -> BUYER
-**Reasoning**: 林澈当前目标是置换房产，从局促的公寓换到更宽敞的家园，以满足家庭成长需求，因此他是房产的潜在购买者。
+**Reasoning**: 为子女购置多套房产
 
+### Agent 6 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 6 -> BUYER
+**Reasoning**: 刚结婚，急需置换大平层
+
+### Agent 11 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 11 -> BUYER
+**Reasoning**: 为子女置换顶级学区房
+
+### Agent 38 -> BUYER
+**Reasoning**: 刚需上车盘
+
+### Agent 48 -> BUYER
+**Reasoning**: 刚需上车盘
+
+### Agent 62 -> BUYER
+**Reasoning**: 购置养老房
+
+
+## Month 6
 ### Agent 3 -> BUYER
-**Reasoning**: 林默希望置换房产以建立温暖家庭，这是典型的购房需求。他积累储蓄、重新规划人生，目标明确，符合买方特征。
+**Reasoning**: 投资机会且资金充足
 
-### Agent 4 -> BUYER
-**Reasoning**: Sufficient savings, looking to buy
+### Agent 4 -> SELLER
+**Reasoning**: 止盈变现或优化配置
 
 ### Agent 5 -> BUYER
-**Reasoning**: 林晓宇计划置换现有住房，为未来孩子规划教育资源，属于购房需求方，因此角色是买家(BUYER)。
+**Reasoning**: 家族成员多，有刚需
+
+### Agent 13 -> BUYER
+**Reasoning**: 刚结婚，置换大平层
+
+### Agent 14 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 15 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
+
+### Agent 19 -> BUYER
+**Reasoning**: 想买养老房，有刚需
+
+### Agent 22 -> BUYER
+**Reasoning**: 看刚需上车盘
+
+### Agent 26 -> BUYER
+**Reasoning**: 孩子上学，有刚需
+
+### Agent 37 -> BUYER
+**Reasoning**: 孩子上学，有刚需
+
+### Agent 42 -> BUYER
+**Reasoning**: 看刚需上车盘
+
+### Agent 51 -> OBSERVER
+**Reasoning**: Timeout: 3 months no purchase
 

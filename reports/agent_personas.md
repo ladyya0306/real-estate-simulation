@@ -1,32 +1,602 @@
 # Agent Personas Report
 
-## Agent 1: None (41岁)
-- **Occupation**: 资深人工智能算法架构师
-- **Background**: 陈默，41岁，毕业于顶尖院校计算机科学专业。他在硅谷积累了十年前沿AI研发经验后回国，如今是国内某科技巨头的算法团队负责人。高强度的职业生涯让他积累了可观的财富，却也让他开始反思生活与工作的平衡。最近，他迷上了园艺和木工，渴望一个能让自己从数字世界中抽离、亲手创造实体事物的空间。
-- **Housing Need**: None
-- **Selling Motivation**: None
+## Agent 1: 黄红雪 (34岁)
+- **Occupation**: 天使投资人
+- **Background**: 眼光独到的投资人，对市场风向极度敏感，倾向于抛售高位资产或通过房产优化税务配置。
+- **Housing Need**: 投资
+- **Selling Motivation**: none
 ---
-## Agent 2: None (33岁)
-- **Occupation**: 科技公司高级产品经理
-- **Background**: 林澈在互联网行业打拼十年，从程序员成长为独当一面的产品负责人。他与妻子是大学同学，婚后共同奋斗积累了可观财富。如今，两人深感当前公寓的局促，渴望一个能让家人团聚、孩子奔跑的温馨家园，置换房产成为实现下一阶段人生蓝图的关键一步。
-- **Housing Need**: None
-- **Selling Motivation**: None
+## Agent 2: 苏浩 (54岁)
+- **Occupation**: 民营企业家
+- **Background**: 白手起家创办了实业公司，家族成员众多，需要购置多套房产供子女居住。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
 ---
-## Agent 3: None (37岁)
-- **Occupation**: 科技公司高级产品经理
-- **Background**: 林默毕业于国内顶尖高校计算机专业，在互联网行业深耕十五年，从程序员逐步成长为产品负责人。三年前结束了一段长达七年的恋情后，他将全部精力投入事业，积累了可观的储蓄。如今他感到生活缺乏温度，开始重新规划人生，希望建立一个属于自己的温暖家庭，置换房产是他实现这一愿景的关键一步。
-- **Housing Need**: None
-- **Selling Motivation**: None
+## Agent 3: 熊雨欢 (52岁)
+- **Occupation**: 上市公司高管
+- **Background**: 拥有多年的企业管理经验，持有大量公司股票，现金流充裕，关注资产保值增值。
+- **Housing Need**: 投资
+- **Selling Motivation**: none
 ---
-## Agent 4: None (44岁)
-- **Occupation**: 科技公司高级技术总监
-- **Background**: 陈默，44岁，在互联网行业深耕近二十年，从一线工程师成长为技术负责人。经历了几段无果而终的感情后，他更专注于事业与个人兴趣。如今，他渴望一个能容纳其藏书、音乐设备与小型家庭影院的宁静空间，作为下半生的精神居所。
-- **Housing Need**: None
-- **Selling Motivation**: None
+## Agent 4: 陈霞 (27岁)
+- **Occupation**: 天使投资人
+- **Background**: 眼光独到的投资人，对市场风向极度敏感，倾向于抛售高位资产或通过房产优化税务配置。
+- **Housing Need**: 投资
+- **Selling Motivation**: none
 ---
-## Agent 5: None (26岁)
-- **Occupation**: 互联网公司产品经理
-- **Background**: 林晓宇26岁，三年前与大学恋人结婚，目前在一家知名互联网公司担任产品经理。他和妻子都来自普通家庭，通过努力工作攒下了首付，在郊区购买了一套小公寓。随着职业发展和家庭规划提上日程，他们开始意识到现有住房的局限性，决定趁着房价相对稳定时期进行置换，为未来的孩子提前规划教育资源。
-- **Housing Need**: None
-- **Selling Motivation**: None
+## Agent 5: 钟俊 (38岁)
+- **Occupation**: 民营企业家
+- **Background**: 白手起家创办了实业公司，家族成员众多，需要购置多套房产供子女居住。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 6: 朱悦斌 (32岁)
+- **Occupation**: 互联网大厂P8
+- **Background**: 名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 7: 朱敏桂 (27岁)
+- **Occupation**: 三甲医院专家医生
+- **Background**: 职业稳定社会地位高，收入逐年上升，考虑到子女教育，计划置换一套顶级学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 8: 杨智英 (55岁)
+- **Occupation**: 金融分析师
+- **Background**: 在CBD工作，收入不菲但波动较大，希望将部分现金转换为核心地段房产以求稳健。
+- **Housing Need**: 投资
+- **Selling Motivation**: none
+---
+## Agent 9: 韩秀 (38岁)
+- **Occupation**: 互联网大厂P8
+- **Background**: 名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 10: 彭雷琳 (28岁)
+- **Occupation**: 互联网大厂P8
+- **Background**: 名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 11: 乔春 (54岁)
+- **Occupation**: 三甲医院专家医生
+- **Background**: 职业稳定社会地位高，收入逐年上升，考虑到子女教育，计划置换一套顶级学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 12: 石军 (50岁)
+- **Occupation**: 互联网大厂P8
+- **Background**: 名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 13: 孔雪 (38岁)
+- **Occupation**: 互联网大厂P8
+- **Background**: 名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 14: 谢欢功 (51岁)
+- **Occupation**: 三甲医院专家医生
+- **Background**: 职业稳定社会地位高，收入逐年上升，考虑到子女教育，计划置换一套顶级学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 15: 姜旺 (46岁)
+- **Occupation**: 三甲医院专家医生
+- **Background**: 职业稳定社会地位高，收入逐年上升，考虑到子女教育，计划置换一套顶级学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 16: 邱悦芳 (39岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 17: 史宁 (29岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 18: 戴辉杰 (39岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 19: 漕乐文 (35岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 20: 孟艳旺 (51岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 21: 龙欢安 (51岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 22: hu红 (38岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 23: 姚雪 (31岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 24: 文峰芳 (51岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 25: 秦杰雨 (59岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 26: 崔晨 (32岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 27: 林达英 (49岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 28: 姜梅芳 (53岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 29: 武娟波 (56岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 30: 朱北辉 (25岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 31: 龚秋 (56岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 32: 黄飞功 (33岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 33: 蒋晨亮 (33岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 34: 邱然超 (54岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 35: 王军 (57岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 36: 何旺 (56岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 37: 刘刚宁 (30岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 38: 杨波亚 (53岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 39: 王娜勇 (47岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 40: 梁明勇 (37岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 41: 崔功 (41岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 42: 魏磊远 (33岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 43: 汪文强 (56岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 44: 薛宁成 (36岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 45: 武云兰 (55岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 46: 阎巍志 (43岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 47: 罗兰 (27岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 48: 彭远文 (37岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 49: 孔河鹏 (25岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 50: 钱刚涛 (38岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 51: 陆西志 (47岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 52: 卢晨敏 (30岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 53: 马静 (25岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 54: hu伟海 (48岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 55: 薛欣 (52岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 56: 潘慧悦 (39岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 57: 阎欢宇 (57岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 58: 吕南磊 (28岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 59: 林亚 (47岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 60: 赵辰 (36岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 61: 阎斌定 (56岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 62: 田巍 (31岁)
+- **Occupation**: 公务员
+- **Background**: 工作极其稳定，公积金充足，生活节奏慢，想买一套离单位近、环境好的养老房。
+- **Housing Need**: 改善
+- **Selling Motivation**: none
+---
+## Agent 63: 黄河 (29岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 64: 贾博玉 (56岁)
+- **Occupation**: 普通白领
+- **Background**: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
+- **Housing Need**: 刚需
+- **Selling Motivation**: none
+---
+## Agent 65: 于婷涛 (47岁)
+- **Occupation**: 中小学教师
+- **Background**: 重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。
+- **Housing Need**: 学区
+- **Selling Motivation**: none
+---
+## Agent 66: 吴梅 (54岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 67: 梁远欢 (32岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 68: 龚宁乐 (43岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 69: 孟风 (32岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 70: 白军博 (57岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 71: 冯波涛 (34岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 72: 汪桂智 (42岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 73: 钱亮艳 (34岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 74: 彭南 (60岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 75: 吴鹏波 (54岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 76: 江勇明 (43岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 77: 冯洲智 (54岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 78: 田安勇 (42岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 79: 董定 (28岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 80: 汪亚星 (60岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 81: 白宇 (39岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 82: 郑秋 (46岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 83: 龚乐 (40岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 84: 田桂梅 (38岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 85: 何红建 (42岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 86: 赖辰鹏 (38岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 87: 赵鹏艳 (52岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 88: 钟阳亮 (48岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 89: 孟勇琳 (43岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 90: 董东兰 (55岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 91: 谭安 (54岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 92: 赵秋红 (33岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 93: 石梅 (26岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 94: 赵伟秋 (46岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 95: 郑娟玉 (31岁)
+- **Occupation**: 刚毕业大学生
+- **Background**: 初入职场，还在实习期，目前租房居住，关注租房市场多于买卖市场。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 96: 廖辰伟 (45岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 97: 叶博 (43岁)
+- **Occupation**: 工厂技工
+- **Background**: 勤劳肯干，收入勉强维持生活，暂无购房计划，但如果老家拆迁可能会有变动。
+- **Housing Need**: 无
+- **Selling Motivation**: none
+---
+## Agent 98: 万华巍 (39岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 99: 黎欢 (52岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
+---
+## Agent 100: 萧亮洲 (45岁)
+- **Occupation**: 外卖配送员
+- **Background**: 日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。
+- **Housing Need**: 回乡置业
+- **Selling Motivation**: none
 ---

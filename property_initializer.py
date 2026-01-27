@@ -17,12 +17,17 @@ def classify_property_type(area: float, unit_price: float, zone: str) -> str:
         elif area < 180: return "改善型大户型"
         else: return "豪宅"
 
-def assign_school_district(zone: str) -> Tuple[bool, int]:
+def assign_school_district(zone: str, config=None) -> Tuple[bool, int]:
     """
     Assign school district status and tier based on zone ratio.
     Returns: (is_school_district, school_tier)
     """
-    ratio = INITIAL_MARKET_CONFIG[zone]["school_district_ratio"]
+    ratio = 0.0
+    if config:
+        ratio = config.market.get('zones', {}).get(zone, {}).get('school_district_ratio', 0.0)
+    else:
+        ratio = INITIAL_MARKET_CONFIG[zone]["school_district_ratio"]
+
     is_district = random.random() < ratio
     
     if is_district:
@@ -32,7 +37,7 @@ def assign_school_district(zone: str) -> Tuple[bool, int]:
     else:
         return False, 3  # Tier 3 means no school district
 
-def create_property(prop_id: int, zone: str, quality: int) -> Dict:
+def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     """Create a single property record with extended fields"""
     
     # 1. Randomize Area and Bedrooms
@@ -47,10 +52,15 @@ def create_property(prop_id: int, zone: str, quality: int) -> Dict:
         bedrooms = random.choice([3, 4, 5])
         
     # 2. Calculate Unit Price
-    config = INITIAL_MARKET_CONFIG[zone]
+    base_price = 0
+    if config:
+        base_price = config.market.get('zones', {}).get(zone, {}).get('base_price_per_sqm', 50000)
+    else:
+        base_price = INITIAL_MARKET_CONFIG[zone]["base_price_per_sqm"]
+
     # Fluctuate based on quality factor (0.9, 1.0, 1.2)
     quality_factor = {1: 0.9, 2: 1.0, 3: 1.2}[quality]
-    base_unit_price = config["base_price_per_sqm"] * quality_factor
+    base_unit_price = base_price * quality_factor
     # Add random variation (+- 10%)
     unit_price = base_unit_price * random.uniform(0.9, 1.1)
     
@@ -76,8 +86,8 @@ def create_property(prop_id: int, zone: str, quality: int) -> Dict:
         "zone": zone,
         "quality": quality,
         "base_value": base_value,
+        "base_value": base_value,
         "building_area": round(area, 2),
-        "bedrooms": bedrooms,
         "unit_price": round(unit_price, 0),
         "property_type": prop_type,
         "is_school_district": is_district,
@@ -88,19 +98,64 @@ def create_property(prop_id: int, zone: str, quality: int) -> Dict:
         "last_transaction_month": None
     }
 
-def initialize_market_properties() -> List[Dict]:
+def initialize_market_properties(target_total_count: int = None, config=None) -> List[Dict]:
     """
     Initialize market properties list
+    Args:
+        target_total_count: If provided, scales the default distribution to match this total
+        config: SimulationConfig object
     """
     properties = []
     property_id = 1
     
-    for zone, distribution in PROPERTY_DISTRIBUTION.items():
+    # Use config distribution or fallback
+    distribution_map = {}
+    if config:
+        for zone, z_cfg in config.market.get('zones', {}).items():
+            distribution_map[zone] = z_cfg.get('property_count', {})
+    else:
+        distribution_map = PROPERTY_DISTRIBUTION
+
+    # Calculate scaling factor if target count provided
+    scale_factor = 1.0
+    if target_total_count:
+        # Calculate current total in distribution config
+        current_total = 0
+        for zone_dist in distribution_map.values():
+            current_total += sum(zone_dist.values())
+        
+        if current_total > 0:
+            scale_factor = target_total_count / current_total
+    
+    for zone, distribution in distribution_map.items():
         for quality_level in [1, 2, 3]:
-            count = distribution[f"quality_{quality_level}"]
+            # Scale count
+            base_count = distribution.get(f"quality_{quality_level}", 0)
+            count = int(base_count * scale_factor)
+            
+            # Ensure at least 1 if base was > 0 and scaling made it 0 (optional safeguard)
+            if base_count > 0 and count == 0:
+                count = 1
+                
             for _ in range(count):
-                prop = create_property(property_id, zone, quality_level)
+                prop = create_property(property_id, zone, quality_level, config)
                 properties.append(prop)
                 property_id += 1
+                
+    # If we are slightly off due to rounding, add/remove random properties to match exactly
+    if target_total_count and len(properties) != target_total_count:
+        diff = target_total_count - len(properties)
+        if diff > 0:
+            # Add more properties (clone random logic)
+            for _ in range(diff):
+                # Pick random zone/quality based on weights? Simplified: Random choice
+                zone = random.choice(list(distribution_map.keys()))
+                quality = random.choice([1, 2, 3])
+                prop = create_property(property_id, zone, quality, config)
+                properties.append(prop)
+                property_id += 1
+        elif diff < 0:
+            # Trim properties (from the end or random? End is fine as order is mixed by zone loop)
+            properties = properties[:target_total_count]
                 
     return properties

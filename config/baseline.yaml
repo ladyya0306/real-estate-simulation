@@ -1,0 +1,229 @@
+# ============================================
+# 🏠 Oasis 房产模拟系统 - 基准配置文件 (baseline.yaml)
+# ============================================
+# 说明：本文件定义了模拟系统的所有参数。
+# 原则：
+# 1. [系统控制]: 代码强制执行的硬规则
+# 2. [LLM上下文]: 注入Prompt作为背景，LLM自主决策
+# 3. [LLM建议]: 作为建议告知LLM，但不强制执行
+# ============================================
+
+# ====== 1. 基础模拟参数 ======
+simulation:
+  # [系统控制] Agent数量
+  # 后果: 数量越多模拟越真实，但计算越慢。推荐100用于调试，1000+用于仿真。
+  agent_count: 100
+  
+  # [系统控制] 模拟持续月数
+  # 后果: 决定模拟的时间跨度。推荐 12-60 个月。
+  months: 12
+  
+  # [系统控制] 随机种子
+  # 说明: null表示每次结果随机；固定整数结果可复现。
+  random_seed: null
+
+# ====== 2. 市场配置 (Market) ======
+market:
+  # [系统控制] 区域定义与房价基准
+  zones:
+    A:  # 核心区
+      # [系统控制] 基础单价 (元/平米)
+      base_price_per_sqm: 80000
+      # [系统控制] 价格随机波动范围
+      price_range: [60000, 120000]
+      # [系统控制] 学区房比例
+      school_district_ratio: 0.3
+      # [系统控制] 初始房产数量分布 (品质1=老破小, 2=普通, 3=豪宅)
+      property_count:
+        quality_1: 30
+        quality_2: 50
+        quality_3: 20
+    
+    B:  # 非核心区
+      base_price_per_sqm: 35000
+      price_range: [25000, 50000]
+      school_district_ratio: 0.1
+      property_count:
+        quality_1: 80
+        quality_2: 100
+        quality_3: 20
+
+  # [系统控制] 初始挂牌率
+  # 后果: 影响系统启动时的市场供给量。0.05表示5%的房产初始在售。
+  initial_listing_rate: 0.05
+
+# ====== 3. Agent人群分层 (Agent Tiers) ======
+agent_tiers:
+  # [系统控制] 收入阶层定义 (年收入边界)
+  boundaries:
+    ultra_high: 1000000    # >100万
+    high: 500000           # >50万
+    middle: 200000         # >20万
+    lower_middle: 100000   # >10万
+    low: 0                 # <10万
+  
+  # [系统控制] 人群分布比例
+  # 说明: 定义社会的贫富结构
+  distribution:
+    ultra_high: 1          # 1% 顶豪
+    high: 9                # 9% 富裕
+    middle: 30             # 30% 中产
+    lower_middle: 40       # 40% 工薪
+    low: 20                # 20% 困难
+  
+  # [系统控制] 初始财富配置
+  initial_wealth:
+    ultra_high:
+      cash_ratio: [5, 20]        # 现金 = 年收入 * 倍数
+      property_count: [3, 6]     # 持房数量
+    high:
+      cash_ratio: [3, 10]
+      property_count: [1, 3]
+    middle:
+      cash_ratio: [1, 5]
+      property_count: [0, 2]
+    lower_middle:
+      cash_ratio: [0.5, 3]
+      property_count: [0, 1]
+    low:
+      cash_ratio: [0, 1]
+      property_count: [0, 0]
+
+# ====== 4. 房产分配策略 ======
+property_allocation:
+  # [系统控制] 分配策略
+  strategy: "value_descending"
+  # [系统控制] 学区房溢价
+  school_premium: [1.15, 1.30]
+
+# ====== 5. 决策因子 (Decision Factors) ======
+decision_factors:
+  # [系统控制] Agent激活逻辑
+  activation:
+    # 基础月度激活率 (0.3%的人每个月会想买卖房)
+    base_probability: 0.003
+    
+    # 权重因子 (逻辑硬编码，数值在此调整)
+    weights:
+      has_school_age_child: 0.15
+      recently_married: 0.12
+      high_income_growth: 0.08
+      multi_property_holder: 0.10
+      high_wealth_no_property: 0.20
+      low_cash_poor: -0.5
+      
+    # [LLM上下文] 激活因子的自然语言描述 (用于Prompt)
+    context_hints:
+      has_school_age_child: "孩子到了上学年龄，急需学区房，买房意愿极强。"
+      recently_married: "刚结婚组建家庭，需要稳定的婚房，属于刚性需求。"
+      high_income_growth: "近期收入大幅增长，如果你还没有房，现在是置业的好时机。"
+      multi_property_holder: "你持有这套非自住房产，如果价格合适，可以考虑套现离场。"
+      high_wealth_no_property: "你手头现金充足但名下无房，为了资产保值，你应该考虑买入。"
+      low_cash_poor: "你手头现金非常紧张，不仅买不起房，甚至可能需要卖房求生。"
+
+  # [系统控制] 交易超时与降价规则
+  buyer_timeout_months: 3
+  listing_stale_months: 2
+  auto_price_cut_rate: 0.05
+
+# ====== 6. 贷款与金融 (Mortgage) ======
+mortgage:
+  # [系统控制] 首付比例 (30%)
+  down_payment_ratio: 0.3
+  # [系统控制] 年利率 (5%)
+  annual_interest_rate: 0.05
+  # [系统控制] 贷款年限
+  loan_term_years: 30
+  # [系统控制] 最大还款收入比 (50%收入用于还贷)
+  max_dti_ratio: 0.5
+
+# ====== 7. 宏观经济环境 (Macro Environment) ======
+macro_environment:
+  # [LLM上下文] 全局覆盖模式 (可选: optimistic, stable, pessimistic, null)
+  override_mode: null 
+
+  # [LLM上下文] 月度环境计划
+  schedule:
+    1: stable
+    2: stable
+    3: optimistic  # 该月环境将注入LLM Prompt
+    4: optimistic
+    5: optimistic
+    6: stable
+    7: pessimistic
+    8: pessimistic
+    9: stable
+    10: stable
+    11: optimistic
+    12: optimistic
+
+  # 环境参数详细定义
+  parameters:
+    optimistic:
+      income_growth_rate: 0.05
+      buy_tendency_modifier: 0.2
+      # [LLM上下文] 宏观描述：直接决定LLM对大势的判断
+      llm_description: "【经济繁荣期】GDP高速增长，股市大涨，人人对未来充满信心。大家普涨看涨楼市，买家唯恐踏空。"
+      price_expectation: 0.03 # 预期涨幅
+    
+    stable:
+      income_growth_rate: 0.02
+      buy_tendency_modifier: 0.0
+      llm_description: "【经济平稳期】经济运行正常，就业稳定。楼市供需平衡，价格波动不大，适合按需购买。"
+      price_expectation: 0.0
+    
+    pessimistic:
+      income_growth_rate: -0.02
+      buy_tendency_modifier: -0.2
+      llm_description: "【经济衰退期】失业率上升，企业裁员。市场弥漫恐慌情绪，大家捂紧钱包不敢消费，楼市面临下行压力。"
+      price_expectation: -0.05
+
+# ====== 8. 谈判参数 (Negotiation) ======
+negotiation:
+  # [系统控制] 谈判轮数区间
+  # 说明: 减少轮数可加快模拟速度；2-3轮符合真实场景。
+  rounds_range: [2, 3]
+  
+  # [系统控制] 规则前置过滤阈值
+  # 说明: 只要 (最低价 - 买方上限) > 买方上限 * 20%，直接跳过谈判，节省时间。
+  heuristic_gap_threshold: 0.20
+
+  # [LLM上下文] 性格分布权重
+  # 说明: 决定新生成Agent的谈判风格。
+  personality_weights:
+    aggressive: 0.25    # 激进型: 利益至上，寸步不让
+    conservative: 0.25  # 保守型: 谨慎行事，安全第一
+    balanced: 0.40      # 平衡型: 理性决策，寻求共赢
+    desperate: 0.10     # 急迫型: 急于成交，大幅让步
+
+  # 市场状况参数 (根据供需比动态匹配)
+  market_conditions:
+    oversupply:  # 买方市场 (供 > 求)
+      threshold_ratio: 1.5
+      # [LLM建议] 建议买家砍价比例 (建议砍到 85%)
+      buyer_lowball: 0.85
+      # [LLM上下文] 市场提示语
+      llm_hint: "【买方市场】供过于求，满大街都是卖房的。你是大爷，尽管用力砍价，卖家如果不肯降价就直接走人，还有大把房子等你挑。"
+    
+    undersupply: # 卖方市场 (供 < 求)
+      threshold_ratio: 0.7
+      # [LLM建议] 建议买家出价比例 (95% - 100%)
+      buyer_lowball: 0.95
+      llm_hint: "【卖方市场】一房难求，几十个人抢一套房。房东非常强势，你要么接受高价，要么加价抢，犹豫一秒房子就没了。"
+    
+    balanced:    # 均衡市场
+      # [LLM建议] 建议买家出价比例 (90%)
+      buyer_lowball: 0.90
+      llm_hint: "【均衡市场】供需基本平衡。价格比较透明，双方都能理性沟通，你可以试着还价，但不要太离谱。"
+
+# ====== 9. 系统设置 (System) ======
+system:
+  # [预留] LLM成本控制
+  llm:
+    max_calls_per_month: 200
+    enable_caching: true
+  
+  # [系统控制] 输出配置
+  output:
+    results_dir: "results"
+    log_level: "INFO"
