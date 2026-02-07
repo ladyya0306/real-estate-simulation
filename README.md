@@ -1,4 +1,4 @@
-# Oasis 东莞房产市场仿真系统 (Oasis Real Estate Simulation)
+# Real Estate Simulation (原 Oasis 东莞房产市场仿真系统)
 
 这是一个基于人工智能代理（AI Agent）的东莞房地产市场仿真系统。系统中的每一个买家和卖家都有自己独特的背景故事、职业和财务状况，他们会像真人一样思考、谈判并进行房产交易。
 
