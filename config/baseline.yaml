@@ -12,7 +12,14 @@
 simulation:
   # [系统控制] Agent数量
   # 后果: 数量越多模拟越真实，但计算越慢。推荐100用于调试，1000+用于仿真。
-  agent_count: 100
+  agent_count: 50
+  
+  # [V2新增] 全局Agent配置
+  agent:
+    # 储蓄率 (月收入的40%存入现金)
+    savings_rate: 0.4
+    # 收入调整系数 (1.0=正常, 0.9=全员降薪10%)
+    income_adjustment_rate: 1.0
   
   # [系统控制] 模拟持续月数
   # 后果: 决定模拟的时间跨度。推荐 12-60 个月。
@@ -28,9 +35,9 @@ market:
   zones:
     A:  # 核心区
       # [系统控制] 基础单价 (元/平米)
-      base_price_per_sqm: 80000
+      base_price_per_sqm: 35000
       # [系统控制] 价格随机波动范围
-      price_range: [60000, 120000]
+      price_range: [30000, 45000]
       # [系统控制] 学区房比例
       school_district_ratio: 0.3
       # [系统控制] 初始房产数量分布 (品质1=老破小, 2=普通, 3=豪宅)
@@ -40,8 +47,8 @@ market:
         quality_3: 20
     
     B:  # 非核心区
-      base_price_per_sqm: 35000
-      price_range: [25000, 50000]
+      base_price_per_sqm: 15000
+      price_range: [12000, 20000]
       school_district_ratio: 0.1
       property_count:
         quality_1: 80
@@ -51,6 +58,10 @@ market:
   # [系统控制] 初始挂牌率
   # 后果: 影响系统启动时的市场供给量。0.05表示5%的房产初始在售。
   initial_listing_rate: 0.05
+
+  # [V2新增] 恐慌抛售阈值
+  # 说明: 连续3个月价格跌幅超过此值触发恐慌
+  panic_sell_threshold: -0.05
 
 # ====== 3. Agent人群分层 (Agent Tiers) ======
 agent_tiers:
@@ -126,7 +137,45 @@ decision_factors:
   listing_stale_months: 2
   auto_price_cut_rate: 0.05
 
-# ====== 6. 贷款与金融 (Mortgage) ======
+# ====== 6. 生活事件 (Life Events) ======
+life_events:
+  # [系统控制] 事件池
+  # 说明: 定义随机生活事件及其财务影响
+  pool:
+    - event: "升职加薪"
+      cash_change: 0.2
+      buy_tendency: 0.3
+      sell_tendency: 0.0
+    - event: "年终奖"
+      cash_change: 0.15
+      buy_tendency: 0.2
+      sell_tendency: 0.0
+    - event: "结婚"
+      cash_change: 0.0
+      buy_tendency: 0.5
+      sell_tendency: 0.0
+    - event: "生子"
+      cash_change: -0.1
+      buy_tendency: 0.4
+      sell_tendency: 0.0
+    - event: "降薪"
+      cash_change: -0.15
+      buy_tendency: -0.3
+      sell_tendency: 0.2
+    - event: "失业"
+      cash_change: -0.3
+      buy_tendency: -0.5
+      sell_tendency: 0.4
+    - event: "生病"
+      cash_change: -0.2
+      buy_tendency: -0.3
+      sell_tendency: 0.3
+    - event: "离婚"
+      cash_change: 0.0
+      buy_tendency: 0.0
+      sell_tendency: 0.5
+
+# ====== 7. 贷款与金融 (Mortgage) ======
 mortgage:
   # [系统控制] 首付比例 (30%)
   down_payment_ratio: 0.3
@@ -188,13 +237,28 @@ negotiation:
   # 说明: 只要 (最低价 - 买方上限) > 买方上限 * 20%，直接跳过谈判，节省时间。
   heuristic_gap_threshold: 0.20
 
-  # [LLM上下文] 性格分布权重
-  # 说明: 决定新生成Agent的谈判风格。
+  # [V2 新增] 谈判模式规则 (由Agent自主选择模式)
+  modes:
+    batch_bidding:
+      enabled: true
+      # 盲拍等待轮数 (目前简化为1轮)
+      rounds: 1 
+      description: "盲拍模式：召集所有买家同台竞技，价高者得"
+    
+    flash_deal:
+      enabled: true
+      rounds: 1
+      description: "闪电成交：一口价甩卖，迅速回笼资金"
+    
+    classic:
+      enabled: true
+      description: "传统谈判：一对一讨价还价"
+
   personality_weights:
-    aggressive: 0.25    # 激进型: 利益至上，寸步不让
-    conservative: 0.25  # 保守型: 谨慎行事，安全第一
-    balanced: 0.40      # 平衡型: 理性决策，寻求共赢
-    desperate: 0.10     # 急迫型: 急于成交，大幅让步
+    aggressive: 0.30    # 激进型
+    conservative: 0.30  # 保守型
+    balanced: 0.40      # 平衡型
+    # [V2移除] desperate 已改为由 LLM 根据处境动态生成的 is_urgent 状态
 
   # 市场状况参数 (根据供需比动态匹配)
   market_conditions:

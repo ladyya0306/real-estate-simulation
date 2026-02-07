@@ -1,12 +1,12 @@
 # Market Report
 
 ## Overview
-- Total Properties: 70
-- Avg Value: $5,154,021
+- Total Properties: 300
+- Avg Value: $5,592,057
 
 ## Active Listings
-- Count: 2
-- Avg List Price: $12,697,164
+- Count: 0
+- Avg List Price: $0
 
 ## Transactions (12)
 - (1, 1, 31, 73, 25, 2080000.0, 'secondary', '2026-01-27 06:28:45')

@@ -1,0 +1,48 @@
+test_agent_service_initialization (tests.test_services.TestServices.test_agent_service_initialization) ... ERROR
+test_market_bulletin (tests.test_services.TestServices.test_market_bulletin) ... FAIL
+test_market_service_initialization (tests.test_services.TestServices.test_market_service_initialization) ... ERROR
+test_transaction_match (tests.test_services.TestServices.test_transaction_match) ... ok
+
+======================================================================
+ERROR: test_agent_service_initialization (tests.test_services.TestServices.test_agent_service_initialization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\tests\test_services.py", line 55, in test_agent_service_initialization
+    properties = market_service.initialize_market()
+  File "D:\GitProj\oasis-main\services\market_service.py", line 22, in initialize_market
+    properties = initialize_market_properties(target_total_count=user_prop_count, config=self.config)
+  File "D:\GitProj\oasis-main\property_initializer.py", line 144, in initialize_market_properties
+    for zone, z_cfg in config.market.get('zones', {}).items():
+                       ^^^^^^^^^^^^^
+AttributeError: 'MockConfig' object has no attribute 'market'
+
+======================================================================
+ERROR: test_market_service_initialization (tests.test_services.TestServices.test_market_service_initialization)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\tests\test_services.py", line 42, in test_market_service_initialization
+    properties = service.initialize_market()
+  File "D:\GitProj\oasis-main\services\market_service.py", line 22, in initialize_market
+    properties = initialize_market_properties(target_total_count=user_prop_count, config=self.config)
+  File "D:\GitProj\oasis-main\property_initializer.py", line 144, in initialize_market_properties
+    for zone, z_cfg in config.market.get('zones', {}).items():
+                       ^^^^^^^^^^^^^
+AttributeError: 'MockConfig' object has no attribute 'market'
+
+======================================================================
+FAIL: test_market_bulletin (tests.test_services.TestServices.test_market_bulletin)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\tests\test_services.py", line 85, in test_market_bulletin
+    self.assertIn("100,000", bulletin.replace(',','')) # Avg of 1M? No 1.1M
+    ~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '100,000' not found in '\n【\U0001f4ca 市场公报 - 第1月】\n━━━━━━━━━━━━━━━━━━━━━━━\n\U0001f4c8 上月成交: 2 套\n\U0001f4b0 成交均价: \xa51100000 (+0.0%)\n\U0001f3e2 A区热度: BALANCED | B区热度: BALANCED\n\U0001f4ca 趋势信号: \u27a1\ufe0f STABLE (连续0月)\n━━━━━━━━━━━━━━━━━━━━━━━\n'
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.457s
+
+FAILED (failures=1, errors=2)
+Database initialized at test_services.db with V2 schema.
+Database initialized at test_services.db with V2 schema.
+Database initialized at test_services.db with V2 schema.
+Database initialized at test_services.db with V2 schema.

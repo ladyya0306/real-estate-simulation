@@ -65,9 +65,9 @@ def export_legacy_csvs(results_dir):
                     '原始数据': row_dict.get('thought_process', '')
                 })
 
-    # 3. properties.csv
-    print("Exporting properties.csv...")
-    cursor.execute("SELECT * FROM properties")
+    # 3. properties.csv (Mapped to properties_market for V2)
+    print("Exporting properties.csv (V2 Market)...")
+    cursor.execute("SELECT * FROM properties_market")
     rows = cursor.fetchall()
     if rows:
         with open(f"{results_dir}/properties.csv", "w", newline='', encoding='utf-8') as f:
@@ -188,7 +188,7 @@ def generate_market_report(report_dir=REPORT_DIR):
     content = "# Market Report\n\n"
     
     # Overview
-    cursor.execute("SELECT COUNT(*), AVG(base_value) FROM properties")
+    cursor.execute("SELECT COUNT(*), AVG(initial_value) FROM properties_static")
     row = cursor.fetchone()
     content += f"## Overview\n"
     val = row[1] if row[1] else 0
@@ -196,7 +196,7 @@ def generate_market_report(report_dir=REPORT_DIR):
     content += f"- Avg Value: ${val:,.0f}\n\n"
     
     # Listings
-    cursor.execute("SELECT COUNT(*), AVG(listed_price) FROM property_listings WHERE status='active'")
+    cursor.execute("SELECT COUNT(*), AVG(listed_price) FROM properties_market WHERE status='for_sale'")
     row = cursor.fetchone()
     price = row[1] if row[1] else 0
     content += f"## Active Listings\n"
@@ -226,9 +226,9 @@ def generate_wealth_distribution(results_dir):
     cursor = conn.cursor()
     cursor.execute("""
         SELECT a.agent_id, a.cash, 
-               COALESCE(SUM(p.base_value), 0) as prop_wealth
+               COALESCE(SUM(pm.current_valuation), 0) as prop_wealth
         FROM agents a
-        LEFT JOIN properties p ON a.agent_id = p.owner_id
+        LEFT JOIN properties_market pm ON a.agent_id = pm.owner_id
         GROUP BY a.agent_id
     """)
     rows = cursor.fetchall()

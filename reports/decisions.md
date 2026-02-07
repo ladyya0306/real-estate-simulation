@@ -5,23 +5,77 @@
 ### Agent 1 -> SELLER
 **Reasoning**: 市场平稳，高位资产止盈变现，优化税务配置
 
+### Agent 1 -> BUYER_SELLER
+**Reasoning**: 为子女教育置换顶级学区房
+
 ### Agent 2 -> BUYER
 **Reasoning**: 家族成员众多，需为子女购置房产
+
+### Agent 2 -> BUYER_SELLER
+**Reasoning**: 刚结婚，急需置换大平层
 
 ### Agent 3 -> BUYER
 **Reasoning**: 现金流充裕，关注资产保值增值
 
+### Agent 3 -> BUYER_SELLER
+**Reasoning**: 刚结婚，急需置换大平层
+
+### Agent 4 -> BUYER_SELLER
+**Reasoning**: 为子女教育置换顶级学区房
+
 ### Agent 5 -> BUYER
 **Reasoning**: 家族成员众多，需为子女购置房产
+
+### Agent 5 -> BUYER
+**Reasoning**: 刚需上车盘
+
+### Agent 6 -> SELLER
+**Reasoning**: 变现或置换
+
+### Agent 9 -> SELLER
+**Reasoning**: 变现或置换
+
+### Agent 10 -> BUYER
+**Reasoning**: 为孩子上学买学区房
+
+### Agent 11 -> BUYER
+**Reasoning**: 为孩子上学买学区房
 
 ### Agent 12 -> BUYER
 **Reasoning**: 刚结婚，急需置换大平层
 
+### Agent 12 -> BUYER
+**Reasoning**: 想买养老房
+
 ### Agent 13 -> BUYER
 **Reasoning**: 刚结婚，急需置换大平层
 
+### Agent 13 -> BUYER_SELLER
+**Reasoning**: 为孩子上学换学区房
+
+### Agent 14 -> BUYER
+**Reasoning**: 为孩子上学买学区房
+
+### Agent 15 -> BUYER_SELLER
+**Reasoning**: 为孩子上学换学区房
+
+### Agent 16 -> BUYER_SELLER
+**Reasoning**: 为孩子上学换学区房
+
+### Agent 17 -> BUYER
+**Reasoning**: 想买养老房
+
+### Agent 18 -> SELLER
+**Reasoning**: 变现或置换
+
 ### Agent 19 -> BUYER
 **Reasoning**: 想买养老房
+
+### Agent 19 -> BUYER_SELLER
+**Reasoning**: 为孩子上学换学区房
+
+### Agent 20 -> SELLER
+**Reasoning**: 变现或置换
 
 ### Agent 23 -> BUYER
 **Reasoning**: 为了孩子上学换学区房

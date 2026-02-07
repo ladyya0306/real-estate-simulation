@@ -107,19 +107,39 @@ def main():
     
     if mode == "2":
         resume = True
-        print("📂 Will attempt to resume from 'real_estate_stage2.db'...")
-        months = int(input_default("How many MORE months to simulate?", "12"))
+        print("📂 Select a project to RESUME:")
+        import project_manager
+        projects = project_manager.list_projects()
         
-        # Load config from file
-        config = SimulationConfig("config/baseline.yaml")
+        if not projects:
+            print("❌ No projects found to resume.")
+            return
+            
+        for i, p in enumerate(projects):
+            print(f"  {i+1}. {os.path.basename(p)}")
+            
+        idx = int(input_default("Select project (0 to cancel)", "1")) - 1
+        if idx < 0: return
+        
+        if 0 <= idx < len(projects):
+            selected_proj = projects[idx]
+            config_path, db_path = project_manager.load_project_paths(selected_proj)
+            print(f"✅ Loading project: {selected_proj}")
+            
+            # Load config from project
+            config = SimulationConfig(config_path)
+            months = int(input_default("How many MORE months to simulate?", "12"))
+        else:
+            print("❌ Invalid selection.")
+            return
+
     else:
         # NEW Simulation
-        try:
-            if os.path.exists("real_estate_stage2.db"):
-                os.remove("real_estate_stage2.db")
-                print("🗑️ Removed old database file.")
-        except Exception as e:
-            print(f"⚠️ Warning: Could not remove old DB: {e}")
+        pass
+        # Remove old DB handled by project_manager logic (new folder)
+
+        # Remove old DB handled by project_manager logic (new folder)
+        # try-except block removed as it was orphaned
 
         print("\n" + "=" * 60)
         print("--- Configuration ---")
@@ -129,9 +149,20 @@ def main():
         if use_custom.lower() != 'y':
             # 使用默认配置
             print("✅ Using Default Parameters.")
-            config = SimulationConfig("config/baseline.yaml")
+            
+            # [Fix] Also create project folder for default config
+            import project_manager
+            proj_dir, config_path, db_path = project_manager.create_new_project("config/baseline.yaml")
+            print(f"✅ Created New Project at: {proj_dir}")
+            
+            config = SimulationConfig(config_path)
+            
             agent_count = 100
             months = 12
+            
+            if seed_to_use is not None:
+                config.update('simulation.random_seed', seed_to_use)
+            config.save()
         else:
             print("\n⚠️  注意: 以下参数将直接影响市场流动性和交易活跃度")
             print("   不当配置可能导致0交易，请参考默认值谨慎设置\n")
@@ -274,15 +305,26 @@ def main():
                 print("已取消模拟。")
                 return
             
-            # === 创建配置对象 ===
-            # 动态修改 baseline.yaml 的内容
-            config = SimulationConfig("config/baseline.yaml")
+            # === 创建项目文件夹 ===
+            import project_manager
+            proj_dir, config_path, db_path = project_manager.create_new_project("config/baseline.yaml")
+            print(f"✅ Created New Project at: {proj_dir}")
             
-            # 注入用户自定义配置（这里简化处理，实际应该修改yaml或传递参数）
-            # 暂时通过 SimulationRunner 的参数传递
-            config.user_agent_config = agent_config
-            config.user_property_count = property_count
-    
+            # 重新加载新位置的配置
+            config = SimulationConfig(config_path)
+            
+            # 更新配置并保存到项目目录
+            if seed_to_use is not None:
+                config.update('simulation.random_seed', seed_to_use)
+            
+            # 保存用户自定义参数
+            if 'agent_config' in locals() and agent_config:
+                config._config['user_agent_config'] = agent_config
+            if 'property_count' in locals():
+                config._config['user_property_count'] = property_count
+                
+            config.save()
+
     # --- 3. Execution ---
     print("\n🚀 Initializing Runner...")
     
@@ -291,7 +333,8 @@ def main():
         months=months,
         seed=seed_to_use,
         resume=resume,
-        config=config
+        config=config,
+        db_path=db_path
     )
     
     try:
@@ -302,7 +345,9 @@ def main():
         print("\n📦 Exporting Results...")
         try:
             import scripts.export_results as exporter
-            exporter.export_data()
+            # Pass correct paths to exporter
+            output_dir = os.path.dirname(db_path)
+            exporter.export_data(db_path=db_path, output_dir=output_dir)
         except ImportError:
             import subprocess
             subprocess.run([sys.executable, "scripts/export_results.py"])

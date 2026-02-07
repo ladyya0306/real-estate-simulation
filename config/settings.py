@@ -5,13 +5,13 @@
 # ---------------------------------------------------------
 INITIAL_MARKET_CONFIG = {
     "A": {
-        "base_price_per_sqm": 80000,
-        "price_range": (60000, 120000),
+        "base_price_per_sqm": 35000,
+        "price_range": (30000, 45000),
         "school_district_ratio": 0.3
     },
     "B": {
-        "base_price_per_sqm": 35000,
-        "price_range": (25000, 50000),
+        "base_price_per_sqm": 15000,
+        "price_range": (12000, 20000),
         "school_district_ratio": 0.1
     }
 }

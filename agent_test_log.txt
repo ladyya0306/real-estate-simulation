@@ -1,0 +1,181 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.2, pytest-9.0.2, pluggy-1.6.0
+rootdir: D:\GitProj\oasis-main
+configfile: pyproject.toml
+plugins: anyio-4.12.1, hypothesis-6.148.7, cov-7.0.0
+collected 4 items
+
+tests\unit\test_agent_behavior.py .FFF                                   [100%]
+
+================================== FAILURES ===================================
+____________ TestAgentBehavior.test_should_agent_exit_market_exit _____________
+
+self = <unit.test_agent_behavior.TestAgentBehavior testMethod=test_should_agent_exit_market_exit>
+mock_llm = <MagicMock name='safe_call_llm' id='1722053023728'>
+
+    @patch('agent_behavior.safe_call_llm')
+    def test_should_agent_exit_market_exit(self, mock_llm):
+        # Scenario: Agent wants to EXIT
+        mock_llm.return_value = {"decision": "EXIT", "reason": "Too much pressure"}
+    
+>       should_exit, reason = should_agent_exit_market(self.agent, self.market, 5)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_agent_behavior.py:44: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+agent = <models.Agent object at 0x00000190F1345A90>
+market = <MagicMock spec='Market' id='1722033835712'>, months_waiting = 5
+
+    def should_agent_exit_market(agent, market, months_waiting: int) -> Tuple[bool, str]:
+        """
+        Ask LLM if an agent should exit the market after waiting for months_waiting.
+        Replaces hardcoded 3-month timeout with intelligent decision-making.
+    
+        Args:
+            agent: Agent object with background_story, life_pressure, role
+            market: Market object for getting market condition hints
+            months_waiting: How many months the agent has been waiting
+    
+        Returns:
+            (should_exit: bool, reason: str)
+        """
+        # Get market condition hint
+        market_hint = "市场平稳"
+        try:
+            if hasattr(market, 'get_market_condition'):
+                condition = market.get_market_condition()
+                market_hint = {
+                    'hot': '卖方市场，一房难求',
+                    'balanced': '市场平稳',
+                    'cold': '买方市场，供过于求'
+                }.get(condition, '市场平稳')
+        except:
+            pass
+    
+        role_desc = {
+            'BUYER': '买家',
+            'SELLER': '卖家',
+            'BUYER_SELLER': '换房者（既是买家也是卖家）'
+>       }.get(agent.role, '参与者')
+              ^^^^^^^^^^
+E       AttributeError: 'Agent' object has no attribute 'role'
+
+agent_behavior.py:627: AttributeError
+__________ TestAgentBehavior.test_should_agent_exit_market_fallback ___________
+
+self = <unit.test_agent_behavior.TestAgentBehavior testMethod=test_should_agent_exit_market_fallback>
+mock_llm = <MagicMock name='safe_call_llm' id='1722053025408'>
+
+    @patch('agent_behavior.safe_call_llm')
+    def test_should_agent_exit_market_fallback(self, mock_llm):
+        # Scenario: LLM fails (returns None or non-dict)
+        mock_llm.return_value = None
+    
+        # Urgent agent waiting > 2 months -> Should EXIT in fallback
+        self.agent.life_pressure = "urgent"
+        self.agent.role_duration = 3
+    
+>       should_exit, reason = should_agent_exit_market(self.agent, self.market, 3)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_agent_behavior.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+agent = <models.Agent object at 0x00000190F23EB750>
+market = <MagicMock spec='Market' id='1722053025072'>, months_waiting = 3
+
+    def should_agent_exit_market(agent, market, months_waiting: int) -> Tuple[bool, str]:
+        """
+        Ask LLM if an agent should exit the market after waiting for months_waiting.
+        Replaces hardcoded 3-month timeout with intelligent decision-making.
+    
+        Args:
+            agent: Agent object with background_story, life_pressure, role
+            market: Market object for getting market condition hints
+            months_waiting: How many months the agent has been waiting
+    
+        Returns:
+            (should_exit: bool, reason: str)
+        """
+        # Get market condition hint
+        market_hint = "市场平稳"
+        try:
+            if hasattr(market, 'get_market_condition'):
+                condition = market.get_market_condition()
+                market_hint = {
+                    'hot': '卖方市场，一房难求',
+                    'balanced': '市场平稳',
+                    'cold': '买方市场，供过于求'
+                }.get(condition, '市场平稳')
+        except:
+            pass
+    
+        role_desc = {
+            'BUYER': '买家',
+            'SELLER': '卖家',
+            'BUYER_SELLER': '换房者（既是买家也是卖家）'
+>       }.get(agent.role, '参与者')
+              ^^^^^^^^^^
+E       AttributeError: 'Agent' object has no attribute 'role'
+
+agent_behavior.py:627: AttributeError
+____________ TestAgentBehavior.test_should_agent_exit_market_stay _____________
+
+self = <unit.test_agent_behavior.TestAgentBehavior testMethod=test_should_agent_exit_market_stay>
+mock_llm = <MagicMock name='safe_call_llm' id='1722053027088'>
+
+    @patch('agent_behavior.safe_call_llm')
+    def test_should_agent_exit_market_stay(self, mock_llm):
+        # Scenario: Agent wants to STAY
+        mock_llm.return_value = {"decision": "STAY", "reason": "Market is improving"}
+    
+>       should_exit, reason = should_agent_exit_market(self.agent, self.market, 3)
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests\unit\test_agent_behavior.py:34: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+agent = <models.Agent object at 0x00000190F23EB9D0>
+market = <MagicMock spec='Market' id='1722053026752'>, months_waiting = 3
+
+    def should_agent_exit_market(agent, market, months_waiting: int) -> Tuple[bool, str]:
+        """
+        Ask LLM if an agent should exit the market after waiting for months_waiting.
+        Replaces hardcoded 3-month timeout with intelligent decision-making.
+    
+        Args:
+            agent: Agent object with background_story, life_pressure, role
+            market: Market object for getting market condition hints
+            months_waiting: How many months the agent has been waiting
+    
+        Returns:
+            (should_exit: bool, reason: str)
+        """
+        # Get market condition hint
+        market_hint = "市场平稳"
+        try:
+            if hasattr(market, 'get_market_condition'):
+                condition = market.get_market_condition()
+                market_hint = {
+                    'hot': '卖方市场，一房难求',
+                    'balanced': '市场平稳',
+                    'cold': '买方市场，供过于求'
+                }.get(condition, '市场平稳')
+        except:
+            pass
+    
+        role_desc = {
+            'BUYER': '买家',
+            'SELLER': '卖家',
+            'BUYER_SELLER': '换房者（既是买家也是卖家）'
+>       }.get(agent.role, '参与者')
+              ^^^^^^^^^^
+E       AttributeError: 'Agent' object has no attribute 'role'
+
+agent_behavior.py:627: AttributeError
+=========================== short test summary info ===========================
+FAILED tests/unit/test_agent_behavior.py::TestAgentBehavior::test_should_agent_exit_market_exit
+FAILED tests/unit/test_agent_behavior.py::TestAgentBehavior::test_should_agent_exit_market_fallback
+FAILED tests/unit/test_agent_behavior.py::TestAgentBehavior::test_should_agent_exit_market_stay
+========================= 3 failed, 1 passed in 5.09s =========================

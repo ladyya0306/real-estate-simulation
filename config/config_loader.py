@@ -65,6 +65,16 @@ class SimulationConfig:
         
         target[keys[-1]] = value
 
+
+    def save(self, path: str = None):
+        """保存配置到YAML文件"""
+        target_path = path if path else self.config_path
+        try:
+            with open(target_path, 'w', encoding='utf-8') as f:
+                yaml.dump(self._config, f, allow_unicode=True, default_flow_style=False)
+        except Exception as e:
+            raise RuntimeError(f"无法保存配置文件 {target_path}: {str(e)}")
+
     # ====== 便捷访问属性 ======
     @property
     def simulation(self) -> Dict: return self._config.get('simulation', {})
@@ -92,3 +102,10 @@ class SimulationConfig:
 
     @property
     def system(self) -> Dict: return self._config.get('system', {})
+
+    @property
+    def life_events(self) -> Dict: return self._config.get('life_events', {})
+
+    @property
+    def user_property_count(self) -> int:
+        return self._config.get('user_property_count')

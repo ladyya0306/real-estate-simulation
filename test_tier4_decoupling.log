@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\real_estate_demo_v2_1.py", line 14, in <module>
+    from simulation_runner import SimulationRunner
+  File "D:\GitProj\oasis-main\simulation_runner.py", line 11, in <module>
+    from services.market_service import MarketService
+  File "D:\GitProj\oasis-main\services\market_service.py", line 4, in <module>
+    from market_mechanics import Market, initialize_market_properties
+ModuleNotFoundError: No module named 'market_mechanics'

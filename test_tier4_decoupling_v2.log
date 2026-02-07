@@ -1,0 +1,220 @@
+
+============================================================
+     馃彔 Oasis Real Estate Sandbox (Scholar Edition v2.2)     
+============================================================
+Enter Random Seed (for reproducibility) [default: random]: 鉁?Random Seed set to: 42
+
+Select Mode:
+1. Start NEW Simulation (Wipe previous data)
+2. RESUME Simulation (Load from DB)
+Choose option [default: 1]: 
+============================================================
+--- Configuration ---
+============================================================
+Use Custom Parameters? (y/N) [default: n]: 
+鈿狅笍  娉ㄦ剰: 浠ヤ笅鍙傛暟灏嗙洿鎺ュ奖鍝嶅競鍦烘祦鍔ㄦ€у拰浜ゆ槗娲昏穬搴?
+   涓嶅綋閰嶇疆鍙兘瀵艰嚧0浜ゆ槗锛岃鍙傝€冮粯璁ゅ€艰皑鎱庤缃?
+
+============================================================
+銆愭楠?1/4銆慉gent 鏁伴噺涓庢敹鍏ユ。娆￠厤缃?
+============================================================
+
+鎬籄gent鏁伴噺 [default: 100]: 
+馃搳 鏀跺叆妗ｆ閰嶇疆 (鍏?妗?:
+   鎻愮ず: 鏀跺叆鍒嗙晫绾垮崟浣嶄负 鍏?鏈?
+   鍙傝€? 浣庢敹鍏?20k, 涓綆鏀跺叆20-40k, 涓瓑鏀跺叆40-80k, 楂樻敹鍏?0-150k, 瓒呴珮鏀跺叆>150k
+
+
+銆愯秴楂樻敹鍏ユ。銆?
+  榛樿鏀跺叆鑼冨洿: 150,000 - 300,000 鍏?鏈?
+  璇ユ。Agent鏁伴噺 [default: 2]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€灏? [default: 2]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€澶? [default: 5]: 
+銆愰珮鏀跺叆妗ｃ€?
+  榛樿鏀跺叆鑼冨洿: 80,000 - 150,000 鍏?鏈?
+  璇ユ。Agent鏁伴噺 [default: 5]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€灏? [default: 1]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€澶? [default: 3]: 
+銆愪腑绛夋敹鍏ユ。銆?
+  榛樿鏀跺叆鑼冨洿: 40,000 - 80,000 鍏?鏈?
+  璇ユ。Agent鏁伴噺 [default: 25]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€灏? [default: 0]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€澶? [default: 1]: 
+銆愪腑浣庢敹鍏ユ。銆?
+  榛樿鏀跺叆鑼冨洿: 20,000 - 40,000 鍏?鏈?
+  璇ユ。Agent鏁伴噺 [default: 10]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€灏? [default: 0]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€澶? [default: 1]: 
+銆愪綆鏀跺叆妗ｃ€?
+  榛樿鏀跺叆鑼冨洿: 8,000 - 20,000 鍏?鏈?
+  璇ユ。Agent鏁伴噺: 8 (鍓╀綑鑷姩鍒嗛厤)
+  璇ユ。浜哄潎鎴夸骇鏁?鏈€灏? [default: 0]:   璇ユ。浜哄潎鎴夸骇鏁?鏈€澶? [default: 0]: 
+============================================================
+銆愭楠?2/4銆戞埧浜ф€婚噺閰嶇疆
+============================================================
+
+鏍规嵁閰嶇疆锛岃嚦灏戦渶瑕?9 濂楁埧浜?
+鏈€澶氶渶瑕?60 濂楁埧浜?
+寤鸿: 72 濂?(鐣?0%甯傚満搴撳瓨)
+
+鎴夸骇鎬绘暟閲?[default: 72]: 
+============================================================
+銆愭楠?3/4銆戝競鍦哄仴搴锋鏌?
+============================================================
+
+鉁?閰嶇疆妫€鏌ラ€氳繃锛?
+
+============================================================
+銆愭楠?4/4銆戦厤缃€昏涓庣‘璁?
+============================================================
+
+妯℃嫙鏈堟暟 [default: 12]: 
+閰嶇疆鎬昏:
+  - Agent鎬绘暟: 50
+      瓒呴珮鏀跺叆: 2浜? 鏀跺叆150-300k, 鎷ユ埧2-5濂?
+      楂樻敹鍏? 5浜? 鏀跺叆80-150k, 鎷ユ埧1-3濂?
+      涓敹鍏? 25浜? 鏀跺叆40-80k, 鎷ユ埧0-1濂?
+      涓綆鏀跺叆: 10浜? 鏀跺叆20-40k, 鎷ユ埧0-1濂?
+      浣庢敹鍏? 8浜? 鏀跺叆8-20k, 鎷ユ埧0-0濂?
+  - 鎴夸骇鎬绘暟: 72
+  - 妯℃嫙鏈堟暟: 1
+  - 闅忔満绉嶅瓙: 42
+
+2026-02-05 23:22:15,026 - INFO - Initializing Simulation with Seed: 42
+2026-02-05 23:22:15,026 - INFO - Initializing market with User Defined Property Count: 72
+2026-02-05 23:22:15,027 - INFO - Starting Batch Agent Generation (V2 Schema)...
+2026-02-05 23:22:15,027 - INFO - Using User Custom Agent Configuration
+2026-02-05 23:22:15,027 - INFO - Generating 2 agents for tier: ultra_high
+2026-02-05 23:22:15,028 - INFO - Generating 5 agents for tier: high
+2026-02-05 23:22:15,028 - INFO - Generating 25 agents for tier: middle
+2026-02-05 23:22:15,028 - INFO - Generating 10 agents for tier: lower_middle
+2026-02-05 23:22:15,029 - INFO - Generating 8 agents for tier: low
+2026-02-05 23:22:15,037 - INFO - Assigning 43 properties to agents...
+2026-02-05 23:22:15,037 - INFO - Initialization Complete (V2). Generated 50 Agents.
+2026-02-05 23:22:15,037 - INFO - Created 3 initial listings (V2 properties_market).
+2026-02-05 23:22:15,039 - INFO - Starting Simulation: 1 Months
+2026-02-05 23:22:15,039 - INFO - --- Month 1 ---
+2026-02-05 23:22:15,041 - INFO - 
+【\U0001f4ca 市场公报 - 第1月】
+━━━━━━━━━━━━━━━━━━━━━━━
+\U0001f4c8 上月成交: 0 套
+\U0001f4b0 成交均价: \xa50 (+0.0%)
+\U0001f3e2 A区热度: BALANCED | B区热度: BALANCED
+\U0001f4ca 趋势信号: \u27a1\ufe0f STABLE (连续0月)
+━━━━━━━━━━━━━━━━━━━━━━━
+
+2026-02-05 23:22:18,384 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:22:20,005 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:22:20,008 - INFO - Activation Candidates: 42
+2026-02-05 23:22:20,008 - INFO - Running parallel LLM activation...
+2026-02-05 23:22:21,129 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:08,194 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:09,340 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:10,747 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:12,732 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:14,419 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:15,510 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:16,726 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:28,783 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:29,764 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:30,811 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:31,862 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:32,794 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:33,864 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:34,939 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:36,091 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:38,176 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:39,442 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:40,681 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:42,105 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:43,029 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:44,294 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:45,339 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:47,281 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:48,363 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:49,679 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:23:59,442 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:00,412 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:09,024 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:10,127 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:11,133 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:12,972 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:14,700 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:16,123 - INFO - HTTP Request: POST https://api.deepseek.com/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:24,969 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:25,995 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-05 23:24:27,352 - INFO - HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions "HTTP/1.1 200 OK"
+纭鍚姩妯℃嫙? [Y/n]: 鉁?Created New Project at: results\run_20260205_232214
+
+馃殌 Initializing Runner...
+Database initialized at results\run_20260205_232214\simulation.db with V2 schema.
+
+============================================================
+  馃搵 闃舵1锛欰gent 鏁版嵁鐢熸垚
+============================================================
+
+鍏辩敓鎴?50 涓?Agent銆傚墠 3 涓牱鏈?
+
+銆怉gent 1銆?
+  濮撳悕: 鍞愬鎬?
+  骞撮緞: 51 | 濠氬Щ: single
+  鏀跺叆: 249,390 鍏?鏈?
+  鐜伴噾: 45,368,338 鍏?
+  鑱屼笟: 澶╀娇鎶曡祫浜?
+  鎴夸骇: 5 濂?
+
+銆怉gent 2銆?
+  濮撳悕: 榫欏嘲
+  骞撮緞: 60 | 濠氬Щ: single
+  鏀跺叆: 150,106 鍏?鏈?
+  鐜伴噾: 17,216,782 鍏?
+  鑱屼笟: 姘戣惀浼佷笟瀹?
+  鎴夸骇: 4 濂?
+
+銆怉gent 3銆?
+  濮撳悕: 鏂囧埄杩?
+  骞撮緞: 54 | 濠氬Щ: single
+  鏀跺叆: 137,905 鍏?鏈?
+  鐜伴噾: 10,086,568 鍏?
+  鑱屼笟: 涓夌敳鍖婚櫌涓撳鍖荤敓
+  鎴夸骇: 3 濂?
+
+... (鐪佺暐鍓╀綑 47 涓?Agent)
+
+==================================================
+馃彔 鎴夸骇浜ゆ槗鎵€ - 绗?1 鏈?
+瀹忚鐜: STABLE: 缁忔祹骞崇ǔ锛屾斂绛栫ǔ瀹氾紝甯傚満渚涢渶骞宠　銆?
+==================================================
+
+
+============================================================
+  馃幆 闃舵2锛歀LM 瑙掕壊婵€娲?
+============================================================
+
+鏈湀鍏辨湁 20 涓?Agent 琚縺娲讳负涔板鎴栧崠瀹躲€?
+鍓?3 涓喅绛栨牱鏈?
+
+銆怉gent 28銆?馃洅 BUYER
+  瑙﹀彂鍘熷洜: 瀛╁瓙涓婂璐拱瀛﹀尯鎴?
+  绱ц揩绋嬪害: 0.0
+
+銆怉gent 8銆?馃洅 BUYER
+  瑙﹀彂鍘熷洜: 璐拱鍏昏€佹埧
+  绱ц揩绋嬪害: 0.0
+
+銆怉gent 10銆?馃洅 BUYER
+  瑙﹀彂鍘熷洜: 瀛╁瓙涓婂璐拱瀛﹀尯鎴?
+  绱ц揩绋嬪害: 0.0
+馃搵 褰撳墠鏃犳寕鐗屾埧浜?
+馃洅 娲昏穬涔板闃熷垪 (32浜?
+----------------------------------------
+  涔板13: 鐜伴噾 楼836,406
+  涔板28: 鐜伴噾 楼3,181,062
+  涔板8: 鐜伴噾 楼2,565,738
+  涔板15: 鐜伴噾 楼903,779
+  涔板10: 鐜伴噾 楼3,839,522
+  ... 鍏?32 浜?
+
+
+Buyer Matching:   0%|          | 0/32 [00:00<?]
+Buyer Matching: 100%|██████████| 32/32 [00:00<00:00]
+2026-02-05 23:24:27,398 - INFO - Month 1 Complete. Transactions: 0, Failed Negs: 0
+2026-02-05 23:24:27,813 - ERROR -   Failed to export agents: no such table: agents
+2026-02-05 23:24:27,814 - INFO -   - Exported thoughts.csv (35 rows)
+2026-02-05 23:24:27,815 - INFO - \u2705 Export Complete.
+
+鉁?Simulation Completed Successfully.
+
+馃摝 Exporting Results...

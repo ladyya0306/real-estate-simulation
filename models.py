@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 import json
 
 class AgentStory:
-    def __init__(self, occupation="", career_outlook="", family_plan="", education_need="", housing_need="", selling_motivation="", background_story="", negotiation_style="balanced"):
+    def __init__(self, occupation="", career_outlook="", family_plan="", education_need="", housing_need="", selling_motivation="", background_story="", investment_style="balanced"):
         self.occupation = occupation
         self.career_outlook = career_outlook
         self.family_plan = family_plan
@@ -10,7 +10,7 @@ class AgentStory:
         self.housing_need = housing_need
         self.selling_motivation = selling_motivation
         self.background_story = background_story
-        self.negotiation_style = negotiation_style
+        self.investment_style = investment_style
 
 class AgentPreference:
     def __init__(self, target_zone="", max_price=0.0, min_bedrooms=1, need_school_district=False):
@@ -88,6 +88,7 @@ class Agent:
                 f"Net Worth: {self.net_worth/10000:.0f}w")
 
     def to_dict(self):
+        # Legacy V1 dict
         return {
             "id": self.id,
             "age": self.age,
@@ -100,6 +101,102 @@ class Agent:
             "occupation": self.occupation,
             "education_need": self.education_need,
             "housing_need": self.housing_need
+        }
+
+    # --- V2 Schema Helpers ---
+    @property
+    def investment_style(self): return self.story.investment_style
+
+    def to_v2_static_dict(self):
+        return {
+            "agent_id": self.id,
+            "name": self.name,
+            "birth_year": 2024 - self.age, # Approx
+            "marital_status": self.marital_status,
+            "children_ages": json.dumps(self.children_ages),
+            "occupation": self.story.occupation,
+            "background_story": self.story.background_story,
+            "investment_style": self.story.investment_style
+        }
+
+    def to_v2_finance_dict(self):
+        # Calculate total debt (sum of all properties? Simplified for now)
+        total_debt = 0 # Placeholder if mortgage object not linked
+        return {
+            "agent_id": self.id,
+            "monthly_income": self.monthly_income,
+            "cash": self.cash,
+            "total_assets": self.net_worth,
+            "total_debt": total_debt,
+            "monthly_payment": self.monthly_payment
+        }
+
+    def to_v2_active_dict(self, role, market=None):
+        return {
+            "agent_id": self.id,
+            "role": role,
+            "target_zone": self.preference.target_zone if role == "BUYER" else None,
+            "max_price": self.preference.max_price if role == "BUYER" else None,
+            "selling_property_id": None, # Should be set by caller logic
+            "min_price": None, # Set by logic
+            "listed_price": None, # Set by logic
+            "life_pressure": getattr(self, 'life_pressure', 'patient'),
+            "llm_intent_summary": str(self.monthly_event) if self.monthly_event else ""
+        }
+
+class PropertyStatic:
+    def __init__(self, property_id: int, zone: str, quality: int, building_area: float, 
+                 property_type: str, is_school_district: bool, school_tier: int, 
+                 base_value: float = 0.0, unit_price: float = 0.0, created_at: int = 0):
+        self.property_id = property_id
+        self.zone = zone
+        self.quality = quality
+        self.building_area = building_area
+        self.property_type = property_type
+        self.is_school_district = is_school_district
+        self.school_tier = school_tier
+        self.base_value = base_value # Also acts as initial_value
+        self.unit_price = unit_price
+        self.created_at = created_at
+        
+    def to_dict(self):
+         return {
+            "property_id": self.property_id,
+            "zone": self.zone,
+            "quality": self.quality,
+            "base_value": self.base_value,
+            "building_area": self.building_area,
+            "unit_price": self.unit_price,
+            "property_type": self.property_type,
+            "is_school_district": self.is_school_district,
+            "school_tier": self.school_tier,
+            "created_at": self.created_at
+        }
+
+class PropertyMarket:
+    def __init__(self, property_id: int, owner_id: int = None, status: str = 'off_market',
+                 listed_price: float = None, min_price: float = None,
+                 current_valuation: float = None, 
+                 listing_month: int = None, last_transaction_month: int = None):
+        self.property_id = property_id
+        self.owner_id = owner_id
+        self.status = status # 'off_market', 'for_sale'
+        self.listed_price = listed_price
+        self.min_price = min_price
+        self.current_valuation = current_valuation
+        self.listing_month = listing_month
+        self.last_transaction_month = last_transaction_month
+
+    def to_dict(self):
+        return {
+            "property_id": self.property_id,
+            "owner_id": self.owner_id,
+            "status": self.status,
+            "listed_price": self.listed_price,
+            "min_price": self.min_price,
+            "current_valuation": self.current_valuation,
+            "listing_month": self.listing_month,
+            "last_transaction_month": self.last_transaction_month
         }
 
 class Market:

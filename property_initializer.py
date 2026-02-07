@@ -93,10 +93,40 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
         "is_school_district": is_district,
         "school_tier": school_tier,
         "owner_id": None,  # System owned initially
-        "status": "for_sale",
+        "status": "off_market",  # Fixed: was "for_sale", but unowned properties shouldn't be listed
         "listed_price": round(listed_price, 0),
-        "last_transaction_month": None
+        "min_price": round(base_value * 0.95, 0), # Added for V2
+        "current_valuation": base_value, # Added for V2
+        "listing_month": 0, # Added for V2
+        "last_transaction_month": None,
+        "created_at": 0 # Added for V2
     }
+
+def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
+    """Helper to split a property dict into Static and Market dicts for V2 DB insertion"""
+    static_data = {
+        "property_id": prop_dict["property_id"],
+        "zone": prop_dict["zone"],
+        "quality": prop_dict["quality"],
+        "building_area": prop_dict["building_area"],
+        "property_type": prop_dict["property_type"],
+        "is_school_district": prop_dict["is_school_district"],
+        "school_tier": prop_dict["school_tier"],
+        "initial_value": prop_dict["base_value"], # Map base_value to initial_value
+        "created_at": prop_dict.get("created_at", 0)
+    }
+    
+    market_data = {
+        "property_id": prop_dict["property_id"],
+        "owner_id": prop_dict.get("owner_id"),
+        "status": prop_dict.get("status", "off_market"),
+        "current_valuation": prop_dict.get("current_valuation", prop_dict["base_value"]),
+        "listed_price": prop_dict.get("listed_price"),
+        "min_price": prop_dict.get("min_price"),
+        "listing_month": prop_dict.get("listing_month"),
+        "last_transaction_month": prop_dict.get("last_transaction_month")
+    }
+    return static_data, market_data
 
 def initialize_market_properties(target_total_count: int = None, config=None) -> List[Dict]:
     """

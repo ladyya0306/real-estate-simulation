@@ -17,8 +17,9 @@ import pandas as pd
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
 
-DB_PATH = 'real_estate_stage2.db'
-LOG_FILE = 'simulation_run.log'
+# Default Paths (V1)
+DEFAULT_DB_PATH = 'real_estate_stage2.db'
+LOG_FILE = 'simulation_run.log' # This is often local to CWD
 
 def find_latest_result_dir(base_dir="results"):
     """Find the most recently created result directory"""
@@ -33,37 +34,53 @@ def find_latest_result_dir(base_dir="results"):
     dirs.sort(key=os.path.getmtime, reverse=True)
     return dirs[0]
 
-def export_data():
-    # 1. Determine Result Directory
-    # Strategy: If a result directory was created recently (e.g. < 5 mins), use it.
-    # Otherwise create new.
-    # Actually, BehaviorLogger always creates a dir. We should find that one.
-    
-    result_dir = find_latest_result_dir()
-    
-    # If no recent dir (e.g. within 10 mins), or doesn't exist, create one
-    if not result_dir or (datetime.datetime.now().timestamp() - os.path.getmtime(result_dir)) > 600:
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        result_dir = os.path.join("results", f"result_{timestamp}")
-        os.makedirs(result_dir, exist_ok=True)
-        logger.info(f"📦 Created new result directory: {result_dir}")
+def export_data(db_path=None, output_dir=None):
+    # Determine DB Path
+    if not db_path:
+        db_path = DEFAULT_DB_PATH
+
+    # Determine Result Directory
+    if not output_dir:
+        # V1 Behavior: find latest or create new in "results"
+        result_dir = find_latest_result_dir()
+        if not result_dir or (datetime.datetime.now().timestamp() - os.path.getmtime(result_dir)) > 600:
+            timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            result_dir = os.path.join("results", f"result_{timestamp}")
+            os.makedirs(result_dir, exist_ok=True)
+            logger.info(f"📦 Created new result directory: {result_dir}")
+        else:
+            logger.info(f"📂 Using existing result directory: {result_dir}")
     else:
-        logger.info(f"📂 Using existing result directory: {result_dir}")
+        # V2 Behavior: Use provided directory
+        result_dir = output_dir
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir, exist_ok=True)
     
     # 2. Copy Logs
     if os.path.exists(LOG_FILE):
         shutil.copy(LOG_FILE, os.path.join(result_dir, "console_log.txt"))
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
     # 3. Export Standard Tables (Raw)
+    # 3. Export Standard Tables (Raw)
     standard_tables = {
-        'agents': 'SELECT * FROM agents',
-        'trans': 'SELECT * FROM transactions', 
-        'properties': 'SELECT * FROM properties',
-        'property_listings': 'SELECT * FROM property_listings'
+        'agents_view': '''
+            SELECT t1.*, t2.monthly_income, t2.cash, t2.total_assets, t2.total_debt 
+            FROM agents_static t1 
+            LEFT JOIN agents_finance t2 ON t1.agent_id = t2.agent_id
+        ''',
+        'agents_static': 'SELECT * FROM agents_static',
+        'agents_finance': 'SELECT * FROM agents_finance',
+        'active_participants': 'SELECT * FROM active_participants',
+        'properties_static': 'SELECT * FROM properties_static',
+        'properties_market': 'SELECT * FROM properties_market',
+        'transactions': 'SELECT * FROM transactions',
+        'negotiations': 'SELECT * FROM negotiations',
+        'decision_logs': 'SELECT * FROM decision_logs',
+        'market_bulletin': 'SELECT * FROM market_bulletin'
     }
     
     agents_map = {} # Cache for processing
@@ -74,7 +91,7 @@ def export_data():
             rows = cursor.fetchall()
             
             # Cache agents for later lookup
-            if filename == 'agents':
+            if filename == 'agents_view':
                 for r in rows:
                     agents_map[r['agent_id']] = dict(r)
             
@@ -117,7 +134,7 @@ def export_data():
                 ]
                 writer.writerow(header)
                 
-                cursor.execute("SELECT property_id, zone, property_type, building_area FROM properties")
+                cursor.execute("SELECT property_id, zone, property_type, building_area FROM properties_static")
                 props = {r[0]: dict(r) for r in cursor.fetchall()}
                 
                 for t in transactions:

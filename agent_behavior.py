@@ -3,12 +3,13 @@ Core Logic for Agent Behavior (LLM Driven)
 """
 import json
 import random
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, List
 from models import Agent, Market, AgentStory, AgentPreference
-from config.settings import LIFE_EVENT_POOL, INITIAL_MARKET_CONFIG
+from config.settings import INITIAL_MARKET_CONFIG
 
 # --- LLM Integration ---
-from utils.llm_client import call_llm, safe_call_llm
+# --- LLM Integration ---
+from utils.llm_client import call_llm, safe_call_llm, safe_call_llm_async
 
 # --- 1. Story Generation ---
 
@@ -16,17 +17,17 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
     """
     Generate background story and structured attributes for a new agent.
     """
-    # 1. Negotiation Style (Personality) Selection
+    # 1. Investment Style (Personality) Selection
     weights = {'balanced': 0.4} # default
     if config:
         weights = config.negotiation.get('personality_weights', {
-            'aggressive': 0.25, 'conservative': 0.25, 
-            'balanced': 0.40, 'desperate': 0.10
+            'aggressive': 0.30, 'conservative': 0.30, 
+            'balanced': 0.40
         })
     
     styles = list(weights.keys())
     probs = list(weights.values())
-    negotiation_style = random.choices(styles, weights=probs, k=1)[0]
+    investment_style = random.choices(styles, weights=probs, k=1)[0]
 
     prompt = f"""
     为这个Agent生成背景故事：
@@ -37,12 +38,11 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
     
     请包含：occupation(职业), career_outlook(职业前景), family_plan(家庭规划), education_need(教育需求), housing_need(住房需求), selling_motivation(卖房动机), background_story(3-5句故事).
     
-    另外，请为该人物设定一个谈判风格 (negotiation_style)，可选值: 
-    - aggressive (激进): 追求最大利益，宁可不成交
-    - conservative (保守): 谨慎决策，不轻易让步
-    - balanced (平衡): 理性妥协，寻求双赢
-    - desperate (急迫): 急需成交，愿意大幅让步
-    (建议风格: {negotiation_style})
+    另外，请为该人物设定一个投资风格 (investment_style)，可选值: 
+    - aggressive (激进): 愿意承担风险，追求高回报
+    - conservative (保守): 厌恶风险，追求本金安全
+    - balanced (平衡): 权衡风险与收益
+    (建议风格: {investment_style})
 
     输出JSON格式。
     """
@@ -55,10 +55,10 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
         housing_need="刚需",
         selling_motivation="无",
         background_story="普通工薪阶层。",
-        negotiation_style="balanced"
+        investment_style="balanced"
     )
     
-    result = safe_call_llm(prompt, default_story, system_prompt="你是小说家，擅长构建人物小传。")
+    result = safe_call_llm(prompt, default_story, system_prompt="你是小说家，擅长构建人物小传。", model_type="fast")
     
     # If result is dict (success), map to AgentStory
     if isinstance(result, dict):
@@ -70,7 +70,7 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
             housing_need=result.get("housing_need", "刚需"),
             selling_motivation=result.get("selling_motivation", "无"),
             background_story=result.get("background_story", "平凡的一生。"),
-            negotiation_style=result.get("negotiation_style", negotiation_style)
+            investment_style=result.get("investment_style", investment_style)
         )
     return result
 
@@ -94,7 +94,7 @@ def generate_buyer_preference(agent: Agent) -> AgentPreference:
     【真实购买力(含贷款)】{real_max_price:,.0f}元
     
     输出JSON：
-    {{"target_zone":"A或B", "max_price":...(不超过购买力), "min_bedrooms":..., "need_school_district": true/false}}
+    {{"target_zone":"A" 或 "B" (必须二选一), "max_price":... (不超过购买力), "min_bedrooms":..., "need_school_district": true/false}}
     """
     
     default_pref = AgentPreference(
@@ -104,7 +104,7 @@ def generate_buyer_preference(agent: Agent) -> AgentPreference:
         need_school_district=False
     )
     
-    result = safe_call_llm(prompt, default_pref)
+    result = safe_call_llm(prompt, default_pref, model_type="fast")
     
     # Map dictionary result to AgentPreference object if it's a dict
     if isinstance(result, dict):
@@ -112,8 +112,18 @@ def generate_buyer_preference(agent: Agent) -> AgentPreference:
         # 确保不超过真实购买力
         final_max = min(float(llm_max), real_max_price) if llm_max else real_max_price
         
+        # Sanitize Zone
+        raw_zone = result.get("target_zone", "B")
+        if raw_zone not in ["A", "B"]:
+            # Fallback for "A或B" or other invalid strings
+            if "A" in raw_zone and "B" in raw_zone:
+                raw_zone = random.choice(["A", "B"])
+            elif "A" in raw_zone: raw_zone = "A"
+            elif "B" in raw_zone: raw_zone = "B"
+            else: raw_zone = "B"
+            
         return AgentPreference(
-            target_zone=result.get("target_zone", "B"),
+            target_zone=raw_zone,
             max_price=final_max,
             min_bedrooms=result.get("min_bedrooms", 1),
             need_school_district=result.get("need_school_district", False)
@@ -145,20 +155,30 @@ def generate_real_thought(agent: Agent, trigger: str, market: Market) -> str:
 
 # --- 2. Event System ---
 
-def select_monthly_event(agent: Agent, month: int) -> dict:
+# --- 2. Event System ---
+
+def select_monthly_event(agent: Agent, month: int, config=None) -> dict:
     """
     Select a life event for the agent for this month.
     """
+    event_pool = []
+    if config:
+        event_pool = config.life_events.get('pool', [])
+    
+    if not event_pool:
+        # Fallback or return None
+        return {"event": None, "reasoning": "No event pool or config"}
+        
     prompt = f"""
     Agent {agent.id} 背景：{agent.story.background_story}
-    可能发生的事件：{[e["event"] for e in LIFE_EVENT_POOL]}
+    可能发生的事件：{[e["event"] for e in event_pool]}
     
     第{month}月最可能发生什么？（无事件返回null）
     输出JSON：{{"event": "..." 或 null, "reasoning": "..."}}
     """
-    return safe_call_llm(prompt, {"event": None, "reasoning": "No event"})
+    return safe_call_llm(prompt, {"event": None, "reasoning": "No event"}, model_type="fast")
 
-def apply_event_effects(agent: Agent, event_data: dict):
+def apply_event_effects(agent: Agent, event_data: dict, config=None):
     """
     Apply the financial effects of an event.
     """
@@ -166,12 +186,206 @@ def apply_event_effects(agent: Agent, event_data: dict):
     if not event_name:
         return
         
-    event_config = next((e for e in LIFE_EVENT_POOL if e["event"] == event_name), None)
+    event_pool = []
+    if config:
+        event_pool = config.life_events.get('pool', [])
+    
+    event_config = next((e for e in event_pool if e["event"] == event_name), None)
     if event_config:
         cash_change_pct = event_config["cash_change"]
         agent.cash *= (1 + cash_change_pct)
         agent.set_life_event(0, event_name) # Using 0 as current month placeholder or pass actual month
-        print(f"Agent {agent.id} experienced {event_name}, cash changed by {cash_change_pct*100}%")
+        # print(f"Agent {agent.id} experienced {event_name}, cash changed by {cash_change_pct*100}%")
+
+def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float], market_bulletin: str = "") -> dict:
+    """
+    For multi-property owners, decide which properties to sell and the pricing strategy.
+    Uses market bulletin + strategy menu (A+C architecture).
+    """
+    props_info = []
+    for p in agent.owned_properties:
+        zone = p.get('zone', 'A')
+        current_market_value = market_price_map.get(zone, p['base_value'])
+        props_info.append({
+            "id": p['property_id'],
+            "zone": zone,
+            "base_value": p['base_value'],
+            "est_market_value": current_market_value
+        })
+
+    prompt = f"""
+你是Agent {agent.id}，卖家。
+【你的背景】{agent.story.background_story}
+【你的性格】{agent.story.investment_style}
+【财务状况】现金: {agent.cash:,.0f}, 月收入: {agent.monthly_income:,.0f}
+【生活压力】{getattr(agent, 'life_pressure', 'patient')}
+【名下房产】
+{json.dumps(props_info, indent=2, ensure_ascii=False)}
+
+{market_bulletin if market_bulletin else "【市场信息】暂无市场公报"}
+
+━━━━━━━━━━━━━━━━━━━━━━━
+请基于市场公报，选择你的定价策略:
+
+A. 【激进挂高】挂牌价 = 估值 × [1.10 ~ 1.20]，请自选系数
+   适用于: 市场上涨、不急用钱、看好后市
+   (如: 1.12 表示估值加价12%)
+
+B. 【随行就市】挂牌价 = 市场均价 × [0.98 ~ 1.05]，请自选系数
+   适用于: 市场平稳、正常置换需求
+   (如: 1.02 表示略高于市场均价2%)
+
+C. 【以价换量】挂牌价 = 估值 × [0.90 ~ 0.97]，请自选系数
+   适用于: 市场下行、急需现金、恐慌避险
+   (如: 0.93 表示估值降价7%)
+
+D. 【暂不挂牌】本月观望，等待更好时机
+   适用于: 市场恐慌、惜售心理、看好反弹
+━━━━━━━━━━━━━━━━━━━━━━━
+
+输出JSON:
+{{
+    "strategy": "A/B/C/D",
+    "pricing_coefficient": 1.15,  # 必填！根据策略选择区间内的系数
+    "properties_to_sell": [property_id, ...],
+    "reasoning": "你的决策理由"
+}}
+"""
+    
+    # Default: Sell the cheapest one with balanced strategy
+    sorted_props = sorted(props_info, key=lambda x: x['base_value'])
+    default_resp = {
+        "strategy": "B",
+        "pricing_coefficient": 1.0,
+        "properties_to_sell": [sorted_props[0]['id']] if sorted_props else [],
+        "reasoning": "Default balanced strategy"
+    }
+    
+    return safe_call_llm(prompt, default_resp)
+
+def decide_negotiation_format(seller: Agent, interested_buyers: List[Agent], market_info: str) -> str:
+    """
+    Decide the negotiation format based on seller's situation and market interest.
+    Options: 'classic', 'batch_bidding', 'flash_deal'
+    """
+    buyer_count = len(interested_buyers)
+    if buyer_count == 0:
+        return "classic"
+        
+    prompt = f"""
+    你是卖家 {seller.id}。
+    【背景】{seller.story.background_story}
+    【性格】{seller.story.investment_style}
+    【市场环境】{market_info}
+    【当前状况】有 {buyer_count} 位买家对你的房产感兴趣。
+    
+    请选择谈判方式：
+    1. CLASSIC: 传统谈判 (一个个谈，稳妥)
+    2. BATCH: 盲拍/批量竞价 (仅当买家>1时可选，适合市场火热，价高者得)
+    3. FLASH: 闪电成交 (一口价甩卖，适合急需用钱或市场冷清，需降价换速度)
+    
+    输出JSON: {{"format": "CLASSIC"|"BATCH"|"FLASH", "reasoning": "..."}}
+    """
+    # Default fallback: CLASSIC
+    default_resp = {"format": "CLASSIC", "reasoning": "Default safe choice"}
+    
+    result = safe_call_llm(prompt, default_resp)
+    fmt = result.get("format", "CLASSIC").upper()
+    
+    # Enforce logic: Batch requires > 1 buyer
+    if fmt == "BATCH" and buyer_count < 2:
+        return "CLASSIC"
+        
+    if fmt not in ["CLASSIC", "BATCH", "FLASH"]:
+        return "CLASSIC"
+        
+    return fmt
+
+
+async def decide_price_adjustment(
+    agent_id: int,
+    agent_name: str,
+    investment_style: str,
+    property_id: int,
+    current_price: float,
+    listing_duration: int,
+    market_trend: str,
+    db_conn
+) -> dict:
+    """
+    LLM decides whether to adjust price for a property that has been listed for too long.
+    Tier 3: Part A - Replaces hardcoded 5% reduction.
+    
+    Args:
+        agent_id: Agent ID
+        agent_name: Agent name
+        investment_style: aggressive/conservative/balanced
+        property_id: Property ID
+        current_price: Current listed price
+        listing_duration: How many months it's been listed
+        market_trend: UP/DOWN/STABLE/PANIC
+        db_conn: Database connection
+        
+    Returns:
+        {
+            "action": "A"/"B"/"C"/"D",  # A=维持 B=小降 C=大降 D=撤牌
+            "new_price": float,
+            "coefficient": float,
+            "reason": str
+        }
+    """
+    
+    # Fetch agent background
+    cursor = db_conn.cursor()
+    cursor.execute("SELECT background_story FROM agents_static WHERE agent_id = ?", (agent_id,))
+    row = cursor.fetchone()
+    background = row[0] if row else "普通投资者"
+    
+    prompt = f"""
+你是 {agent_name}，投资风格：{investment_style}。
+背景：{background}
+
+【当前处境】
+你的房产（ID: {property_id}）已挂牌 {listing_duration} 个月未成交。
+当前挂牌价：¥{current_price:,.0f}
+市场趋势：{market_trend}
+
+【决策选项】
+A. 维持原价 (patient, 看好后市反弹)
+B. 小幅降价 (系数 0.95~0.97，适度灵活)
+C. 大幅降价 (系数 0.85~0.92，急于脱手)
+D. 撤牌观望 (严重悲观，等待时机)
+
+请根据你的性格和市场状况做出决策。
+
+返回 JSON:
+{{
+    "action": "A",  # 选择 A/B/C/D
+    "coefficient": 1.0,  # A=1.0, B=0.95~0.97, C=0.85~0.92, D=1.0
+    "reason": "简述原因（一句话）"
+}}
+"""
+    
+    default_return = {
+        "action": "B",
+        "coefficient": 0.96,
+        "reason": "默认小幅降价"
+    }
+    
+    result = await safe_call_llm_async(
+        prompt,
+        default_return,
+        system_prompt="你是房产投资顾问，根据性格和市场做出理性决策。",
+        model_type="smart"
+    )
+    
+    # Calculate new price
+    coefficient = result.get("coefficient", 0.96)
+    new_price = current_price * coefficient
+    
+    result["new_price"] = new_price
+    
+    return result
 
 # --- 3. Role Determination ---
 
@@ -179,24 +393,30 @@ from enum import Enum
 class AgentRole(Enum):
     BUYER = "buyer"
     SELLER = "seller"
+    BUYER_SELLER = "buyer_seller"
     OBSERVER = "observer"
 
 def determine_role(agent: Agent, month: int, market: Market) -> Tuple[AgentRole, str]:
     """
     Determine the agent's role (Buyer/Seller/Observer) for the month.
     """
-    # 1. Hard Constraints
+    # 1. Context Hints (No Hard Constraints)
+    hints = []
     if agent.cash < agent.monthly_income * 2 and agent.owned_properties:
-        return AgentRole.SELLER, "Cash tight, forced to sell"
-        
+        hints.append("【资金预警】现金流紧张（不足2个月），请认真考虑是否需要变现资产。")
     if agent.cash > agent.monthly_income * 60 and not agent.owned_properties:
-        return AgentRole.BUYER, "Sufficient savings, looking to buy"
+        hints.append("【存款充裕】存款超过5年收入，长期持有现金可能贬值，建议考虑置业。")
+        
+    hint_str = "\n".join(hints)
         
     # 2. LLM Decision
     prompt = f"""
     你是Agent {agent.id}。
     【背景】{agent.story.background_story}
     【本月事件】{agent.monthly_event}
+    
+    {hint_str}
+    
     判断角色（BUYER/SELLER/OBSERVER）：
     输出JSON：{{"role": "...", "reasoning": "..."}}
     """
@@ -209,7 +429,14 @@ def determine_role(agent: Agent, month: int, market: Market) -> Tuple[AgentRole,
         "OBSERVER": AgentRole.OBSERVER
     }
     
-    return role_map.get(role_str, AgentRole.OBSERVER), result.get("reasoning", "")
+    role = role_map.get(role_str, AgentRole.OBSERVER)
+    
+    # Enforce Hard Constraint: No property = Cannot be SELLER
+    if role == AgentRole.SELLER and not agent.owned_properties:
+        role = AgentRole.OBSERVER
+        result["reasoning"] = (result.get("reasoning", "") + " [System Corrected: No property to sell]").strip()
+    
+    return role, result.get("reasoning", "")
 
 # --- 4. Batch Activation Logic (Million Agent Scale) ---
 
@@ -254,15 +481,41 @@ def calculate_activation_probability(agent: Agent) -> float:
         
     return max(0.0, min(1.0, prob_score))
 
+# --- Constant System Prompt for Caching ---
+BATCH_ROLE_SYSTEM_PROMPT = """你是一个房地产市场模拟引擎。
+【任务】判断Agent本月是否产生买卖房产需求。
+【规则】
+1. 默认角色为 OBSERVER (无操作)
+2. 角色定义:
+   - BUYER: 刚需或投资买入
+   - SELLER: 变现或置换卖出
+   - BUYER_SELLER: 置换需求 (既买又卖)
+3. **重要限制**: 
+   - 只有持有房产 (props > 0) 才能成为 SELLER 或 BUYER_SELLER。
+   - 现金不足 (cash < 50w) 且无房产者只能是 OBSERVER。
+   - **推理约束**: 若无房产(props=0)，严禁在 reasoning 中虚构“卖掉名下房产”/“卖老破小”。资金来源必须描述为“卖掉外省老家房产”或“父母资助”。
+4. 输出JSON列表，包含所有产生变化的Agent。
+5. 每个条目包含：
+   - id
+   - role (BUYER/SELLER/BUYER_SELLER)
+   - trigger (触发原因)
+   - life_pressure: "urgent"(迫切), "patient"(耐心), "opportunistic"(投机)
+   - price_expectation: 浮点数 (1.0-1.2)
+   
+输出示例：
+[
+    {"id": 101, "role": "BUYER", "trigger": "婚房刚需", "life_pressure": "urgent", "price_expectation": 1.1},
+    {"id": 102, "role": "SELLER", "trigger": "资金周转", "life_pressure": "urgent", "price_expectation": 0.95}
+]"""
+
 def batched_determine_role(agents: list[Agent], month: int, market: Market, macro_summary: str = "平稳") -> list[dict]:
     """
     Batch process agents to determine roles using a single LLM call per batch.
-    Returns a list of dicts: [{"id": 1, "role": "BUYER", "reason": "...", "price_expectation": 1.1}, ...]
     """
     if not agents:
         return []
 
-    # Construct Batch Prompt
+    # Construct Batch Data
     agent_summaries = []
     for a in agents:
         summary = {
@@ -271,36 +524,79 @@ def batched_determine_role(agents: list[Agent], month: int, market: Market, macr
             "income": a.monthly_income,
             "cash": a.cash,
             "props": len(a.owned_properties),
-            "has_property": len(a.owned_properties) > 0,  # 是否持有房产
             "background": a.story.background_story[:50] + "...",
-            "need": a.story.housing_need
+            "need": a.story.housing_need,
+            "style": a.story.investment_style
+        }
+        agent_summaries.append(summary)
+
+    # Dynamic part follows static system prompt
+    prompt = f"""
+    【当前宏观环境】{macro_summary}
+    
+    【待处理Agent列表】({len(agents)}人):
+    {json.dumps(agent_summaries, ensure_ascii=False)}
+    """
+    
+    default_response = []
+    
+    # Use global system prompt for caching
+    response = safe_call_llm(prompt, default_response, system_prompt=BATCH_ROLE_SYSTEM_PROMPT)
+    
+    if not isinstance(response, list):
+        return []
+        
+    return response
+
+async def batched_determine_role_async(agents: list[Agent], month: int, market: Market, macro_summary: str = "平稳") -> list[dict]:
+    """
+    Async Batch process agents to determine roles. Optimizes prompt caching.
+    """
+    if not agents:
+        return []
+
+    # Construct Batch Data
+    agent_summaries = []
+    for a in agents:
+        summary = {
+            "id": a.id,
+            "age": a.age,
+            "income": a.monthly_income,
+            "cash": a.cash,
+            "props": len(a.owned_properties),
+            "background": a.story.background_story[:50] + "...",
+            "need": a.story.housing_need,
+            "style": a.story.investment_style
         }
         agent_summaries.append(summary)
 
     prompt = f"""
-    【宏观环境】{macro_summary}
-    【任务】判断以下Agent本月是否产生买卖房产需求。
-    【规则】
-    1. 默认角色为 OBSERVER (无操作)
-    2. 触发条件：有刚需(结婚/学区)或投资机会且资金充足 -> BUYER；资金紧张或止盈变现 -> SELLER
-    3. **重要**：has_property=false 的Agent **不能** 成为SELLER，因为他们没有房产可卖！
-    4. 输出JSON列表，包含所有产生变化的Agent。未列出的默认为OBSERVER。
-    5. 每个条目包含：id, role (BUYER/SELLER), trigger (触发原因), urgency (0-1), price_expectation (1.0-1.2, 买家愿溢价/卖家愿折价程度)
+    【当前宏观环境】{macro_summary}
     
-    Agent列表 ({len(agents)}人):
-    {json.dumps(agent_summaries, ensure_ascii=False)}
-    
-    输出示例：
+    【任务】
+    请分析以下Agent列表，根据他们的财务状况、需求和宏观环境，决定每个人本月的角色 (BUYER, SELLER, OBSERVER)。
+    - BUYER: 有购房意愿且有能力
+    - SELLER: 有卖房意愿且持有房产
+    - OBSERVER: 暂时观望
+
+    【重要约束】
+    1. 若Agent无房产(props=0)，严禁在 reasoning 中虚构“卖掉郊区房产”或“卖掉名下房产”等理由。若需描述资金来源，必须描述为“卖掉外省老家房产”或“父母资助”。
+    2. 无房产者不可成为 SELLER。
+
+    【输出要求】
+    请输出严格的JSON列表格式，包含每个Agent的决策：
     [
-        {{"id": 101, "role": "BUYER", "trigger": "孩子上学", "urgency": 0.9, "price_expectation": 1.15}},
-        {{"id": 102, "role": "SELLER", "trigger": "资金周转", "urgency": 0.8, "price_expectation": 0.95}}
+      {{"id": 123, "role": "BUYER", "trigger": "life_event", "reason": "...", "life_pressure": "calm", "price_expectation": 1.0}}
     ]
+
+    【待处理Agent列表】({len(agents)}人):
+    {json.dumps(agent_summaries, ensure_ascii=False)}
     """
     
-    # Determine default "all observer" response structure for safe fallback
     default_response = []
     
-    response = safe_call_llm(prompt, default_response, system_prompt="你是房地产市场模拟引擎。")
+    # Use global system prompt for caching
+    response = await safe_call_llm_async(prompt, default_response, system_prompt=BATCH_ROLE_SYSTEM_PROMPT)
     
     if not isinstance(response, list):
         return []
@@ -467,3 +763,102 @@ def build_agent_context(agent: Agent, config) -> str:
         context_lines.append(f"- {hints.get('high_wealth_no_property', '高净值刚需')}")
         
     return "【你的特殊处境】\n" + "\n".join(context_lines) if context_lines else ""
+
+
+# --- P1: LLM-Driven Exit Decision ---
+
+def should_agent_exit_market(agent, market, months_waiting: int) -> Tuple[bool, str]:
+    """
+    Ask LLM if an agent should exit the market after waiting for months_waiting.
+    Replaces hardcoded 3-month timeout with intelligent decision-making.
+    
+    Args:
+        agent: Agent object with background_story, life_pressure, role
+        market: Market object for getting market condition hints
+        months_waiting: How many months the agent has been waiting
+    
+    Returns:
+        (should_exit: bool, reason: str)
+    """
+    # Get market condition hint
+    market_hint = "市场平稳"
+    try:
+        if hasattr(market, 'get_market_condition'):
+            condition = market.get_market_condition()
+            market_hint = {
+                'hot': '卖方市场，一房难求',
+                'balanced': '市场平稳',
+                'cold': '买方市场，供过于求'
+            }.get(condition, '市场平稳')
+    except:
+        pass
+    
+    role_desc = {
+        'BUYER': '买家',
+        'SELLER': '卖家',
+        'BUYER_SELLER': '换房者（既是买家也是卖家）'
+    }.get(agent.role, '参与者')
+    
+    prompt = f"""
+你是 {agent.name}，{role_desc}。
+
+【背景信息】
+- 你的故事: {agent.background_story if hasattr(agent, 'background_story') else '普通购房者'}
+- 当前压力状态: {agent.life_pressure if hasattr(agent, 'life_pressure') else 'patient'}
+- 市场状况: {market_hint}
+- 你已在市场等待了 {months_waiting} 个月
+
+【决策任务】
+请根据你的性格、处境和市场情况，决定是否继续在市场等待，还是暂时退出观望。
+
+输出 JSON 格式:
+{{
+    "decision": "STAY" 或 "EXIT",
+    "reason": "决策理由（1-2句话）"
+}}
+
+**提示**:
+- 如果你很急迫（urgent），可能在2-3月后就退出
+- 如果你很有耐心（patient），可能愿意等待6个月甚至更久
+- 如果市场对你不利（买方市场但你是卖家），可能更快退出
+- 如果你的背景故事表明有明确时间压力（如孩子要上学），要考虑时间成本
+"""
+    
+    try:
+        response = safe_call_llm(prompt, default_return={"decision": "STAY", "reason": "LLM Error"})
+        
+        # Parse response
+        if isinstance(response, dict):
+            decision = response.get('decision', 'STAY').upper()
+            reason = response.get('reason', 'LLM决策')
+        else:
+            # Try to parse JSON from string
+            try:
+                data = json.loads(response)
+                decision = data.get('decision', 'STAY').upper()
+                reason = data.get('reason', 'LLM决策')
+            except:
+                # Fallback: simple text parsing
+                if 'EXIT' in response or '退出' in response:
+                    decision = 'EXIT'
+                    reason = '等待时间过长，暂时退出观望'
+                else:
+                    decision = 'STAY'
+                    reason = '继续等待合适机会'
+        
+        should_exit = (decision == 'EXIT')
+        return should_exit, reason
+        
+    except Exception as e:
+        # Fallback to heuristic if LLM fails
+        print(f"⚠️ LLM exit decision failed for agent {agent.id}: {e}")
+        
+        # Simple heuristic: very urgent agents exit after 2 months, patient after 6
+        if agent.life_pressure == 'urgent' and months_waiting > 2:
+            return True, "生活压力大，暂时退出观望"
+        elif agent.life_pressure == 'patient' and months_waiting > 6:
+            return True, "等待时间过长，暂时退出观望"
+        elif months_waiting > 4:
+            return True, "等待超过4个月，暂时退出观望"
+        else:
+            return False, "继续等待"
