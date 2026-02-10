@@ -1,0 +1,13 @@
+Checking database: d:/GitProj/oasis-main/results\run_20260208_164417\simulation.db
+
+--- Checking agents_finance Persistence ---
+Active Participants Roles: [('BUYER', 29), ('BUYER_SELLER', 25), ('SELLER', 13)]
+Rows with Tier 6 data: 0
+Avg Psycho Price: 0.00
+Avg Max Afford: 0.00
+Avg Net Cashflow: 0.00
+❌ FAILURE: Persistence failed or data is zero.
+
+--- Checking decision_logs Schema ---
+Columns: ['log_id', 'agent_id', 'month', 'event_type', 'decision', 'reason', 'thought_process', 'llm_called', 'timestamp']
+✅ SUCCESS: decision_logs has ['event_type', 'decision', 'thought_process']

@@ -7,10 +7,11 @@ import time
 import asyncio
 from typing import List, Dict
 
-from database_v2 import init_db
+from database import init_db
 from services.market_service import MarketService
 from services.agent_service import AgentService
 from services.transaction_service import TransactionService
+from services.intervention_service import InterventionService
 from utils.behavior_logger import BehaviorLogger
 from utils.exchange_display import ExchangeDisplay
 from utils.workflow_logger import WorkflowLogger
@@ -61,9 +62,18 @@ class SimulationRunner:
         self.market_service = MarketService(self.config, self.conn)
         self.agent_service = AgentService(self.config, self.conn)
         self.transaction_service = TransactionService(self.config, self.conn)
+        self.intervention_service = InterventionService(self.conn)
+        
+        # Pending Interventions (Tier 5)
+        self.pending_interventions = []
+
+    def set_interventions(self, news_items: List[str]):
+        """Set interventions for the upcoming month."""
+        self.pending_interventions = news_items
 
     def initialize(self):
         """Initialize Simulation State"""
+
         if self.resume:
             self.load_from_db()
             return
@@ -89,14 +99,36 @@ class SimulationRunner:
 
     def load_from_db(self):
         """Load state from DB"""
+        from database import migrate_db_v2_7
+        # Ensure Schema is up to date (V2.7)
+        migrate_db_v2_7(self.db_path)
+        
         self.agent_service.load_agents_from_db()
         self.market_service.load_market_from_db(self.agent_service.agents)
 
+    def get_last_simulation_month(self) -> int:
+        """Get the last simulated month from DB."""
+        try:
+            cursor = self.conn.cursor()
+            # Check decision_logs or transactions
+            cursor.execute("SELECT MAX(month) FROM decision_logs")
+            result = cursor.fetchone()
+            if result and result[0]:
+                return int(result[0])
+            return 0
+        except Exception as e:
+            logger.warning(f"Could not determine last month: {e}")
+            return 0
+
     def run(self):
         """Main Simulation Loop (Coordinator)"""
+        start_month = 0
+        
         if self.resume:
              logger.info("Resuming simulation...")
              self.load_from_db()
+             start_month = self.get_last_simulation_month()
+             logger.info(f"Resuming from Month {start_month}")
         else:
              self.initialize()
              
@@ -106,10 +138,12 @@ class SimulationRunner:
         exchange_display = ExchangeDisplay(use_rich=True)
         wf_logger = WorkflowLogger(self.config)
              
-        logger.info(f"Starting Simulation: {self.months} Months")
+        logger.info(f"Starting Simulation: {self.months} Months (From {start_month+1} to {start_month+self.months})")
         
         try:
-            for month in range(1, self.months + 1):
+            # Shifted Loop Range
+            for month in range(start_month + 1, start_month + self.months + 1):
+
                 logger.info(f"--- Month {month} ---")
                 
                 # 1. Macro Environment
@@ -118,8 +152,14 @@ class SimulationRunner:
                 exchange_display.show_exchange_header(month, macro_desc)
                 
                 # 2. Market Bulletin (Service)
-                bulletin = self.market_service.generate_market_bulletin(month)
+                # Pass pending interventions
+                bulletin = asyncio.run(self.market_service.generate_market_bulletin(month, self.pending_interventions))
                 logger.info(bulletin)
+                
+                # Clear interventions after broadcasting (unless they are persistent? No, news is valid for one month usually)
+                # If policy is persistent, the EFFECT is persistent, but the NEWS is one-off.
+                self.pending_interventions = []
+                
                 market_trend = self.market_service.get_market_trend(month)
                 
                 # 3. Agent Updates (Financials)
@@ -138,7 +178,10 @@ class SimulationRunner:
                 
                 # 7. Agent Activation (New Participants)
                 new_buyers, decisions = asyncio.run(
-                    self.agent_service.activate_new_agents(month, self.market_service.market, macro_desc, batch_decision_logs)
+                    self.agent_service.activate_new_agents(
+                        month, self.market_service.market, macro_desc, 
+                        batch_decision_logs, market_trend, bulletin
+                    )
                 )
                 
                 # Merge lists for display/processing
@@ -198,6 +241,7 @@ class SimulationRunner:
                     wf_logger, exchange_display
                 ))
                 
+                
                 logger.info(f"Month {month} Complete. Transactions: {tx_count}, Failed Negs: {fail_count}")
                 
         except KeyboardInterrupt:
@@ -206,7 +250,9 @@ class SimulationRunner:
             logger.error(f"Simulation Error: {e}")
             import traceback
             traceback.print_exc()
-        finally:
+            
+    def close(self):
+        if self.conn:
             self.conn.close()
 
 if __name__ == "__main__":
@@ -223,3 +269,5 @@ if __name__ == "__main__":
 
     runner = SimulationRunner(agent_count=50, months=1)
     runner.run()
+    runner.close()
+

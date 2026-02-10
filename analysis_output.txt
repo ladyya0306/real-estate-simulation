@@ -1,0 +1,217 @@
+================================================================================
+数据库结构分析
+================================================================================
+
+数据库包含的表: ['agents_static', 'agents_finance', 'active_participants', 'properties_static', 'properties_market', 'transactions', 'sqlite_sequence', 'negotiations', 'decision_logs', 'market_bulletin']
+
+================================================================================
+AGENTS 财务状况分析
+================================================================================
+
+总agent数: 200
+
+Cash统计:
+count    2.000000e+02
+mean     3.955284e+06
+std      8.008866e+06
+min      2.126903e+04
+25%      6.284365e+05
+50%      1.673775e+06
+75%      3.379541e+06
+max      5.577181e+07
+Name: cash, dtype: float64
+
+现金分布:
+  > 1000万: 16人
+  500-1000万: 13人
+  100-500万: 99人
+  < 100万: 72人
+
+================================================================================
+ACTIVE PARTICIPANTS 分析
+================================================================================
+
+总激活参与者: 163
+角色分布:
+role
+BUYER           120
+BUYER_SELLER     25
+SELLER           18
+Name: count, dtype: int64
+
+================================================================================
+PROPERTIES 分析
+================================================================================
+
+properties_market字段: ['property_id', 'owner_id', 'status', 'current_valuation', 'listed_price', 'min_price', 'listing_month', 'last_transaction_month', 'last_price_update_month', 'last_price_update_reason']
+properties_static字段: ['property_id', 'zone', 'quality', 'building_area', 'property_type', 'is_school_district', 'school_tier', 'initial_value', 'created_at']
+
+总房产数: 100
+
+状态分布:
+status
+for_sale      59
+off_market    41
+Name: count, dtype: int64
+
+使用价格字段: current_valuation
+
+For Sale房产价格统计:
+count    5.900000e+01
+mean     2.396568e+06
+std      2.010987e+06
+min      7.232536e+05
+25%      1.118074e+06
+50%      1.699503e+06
+75%      3.002223e+06
+max      1.025232e+07
+Name: current_valuation, dtype: float64
+
+价格分布:
+  > 500万: 6套
+  300-500万: 9套
+  150-300万: 21套
+  < 150万: 23套
+
+For Sale房产zone分布:
+zone
+B    43
+A    16
+Name: count, dtype: int64
+
+For Sale房产owner_id情况:
+  有owner_id: 59套
+  无owner_id (NULL/NaN): 0套
+  owner_id样本: [10, 11, 15, 7, 4, 7, 3, 3, 3, 7]
+
+================================================================================
+TRANSACTIONS 分析
+================================================================================
+
+总交易数: 1
+
+成功的交易详情:
+   buyer_id  seller_id  property_id  final_price  month
+0       153         40           35    1580000.0      1
+
+成功交易的买家(ID:153)信息:
+   agent_id  monthly_income  ...  last_price_update_reason         last_updated
+0       153         29264.0  ...                            2026-02-08 12:28:05
+
+[1 rows x 12 columns]
+
+成功交易的卖家(ID:40)信息:
+   agent_id  monthly_income  ...  last_price_update_reason         last_updated
+0        40         59130.0  ...                            2026-02-08 12:28:05
+
+[1 rows x 12 columns]
+
+成功交易的房产(ID:35)信息:
+                                       34
+property_id                            35
+zone                                    B
+quality                                 1
+building_area                       74.28
+property_type                       刚需小户型
+is_school_district                      1
+school_tier                             2
+initial_value              1151695.164539
+created_at                              0
+owner_id                              153
+status                         off_market
+current_valuation               1580000.0
+listed_price               1604921.242424
+min_price                  1556773.605152
+listing_month                           1
+last_transaction_month                1.0
+last_price_update_month               1.0
+last_price_update_reason  Initial Listing
+
+================================================================================
+NEGOTIATIONS 分析
+================================================================================
+
+总谈判记录数: 1
+
+negotiations表字段: ['negotiation_id', 'buyer_id', 'seller_id', 'property_id', 'round_count', 'final_price', 'success', 'reason', 'log', 'created_at']
+
+谈判成功/失败分布:
+success
+1    1
+Name: count, dtype: int64
+
+失败的谈判数: 0
+
+失败原因分布:
+Series([], Name: count, dtype: int64)
+
+前10条失败谈判的详情:
+Empty DataFrame
+Columns: [buyer_id, seller_id, property_id, final_price, success, reason]
+Index: []
+
+================================================================================
+交叉分析：买家购买力 vs 房产价格
+================================================================================
+
+买家数量: 120
+
+买家现金统计:
+count    1.200000e+02
+mean     3.164043e+06
+std      6.157204e+06
+min      4.041950e+05
+25%      9.103972e+05
+50%      1.728154e+06
+75%      2.897096e+06
+max      5.577181e+07
+Name: cash, dtype: float64
+
+买家最大购买力统计（按30%首付计算）:
+count    1.200000e+02
+mean     1.054681e+07
+std      2.052401e+07
+min      1.347317e+06
+25%      3.034657e+06
+50%      5.760514e+06
+75%      9.656988e+06
+max      1.859060e+08
+Name: max_affordability, dtype: float64
+
+房产价格范围:
+  最低价: 723,254
+  中位数: 1,699,503
+  最高价: 10,252,320
+
+买家购买力匹配分析:
+  能买得起最便宜房子的买家: 120人
+  能买得起中位数价格房子的买家: 114人
+  能买得起最贵房子的买家: 27人
+
+================================================================================
+买家偏好 vs 房产zone匹配分析
+================================================================================
+警告：数据库中没有agents_preference表
+
+================================================================================
+深入案例分析：随机抽取3个买家
+================================================================================
+
+【买家 #39】
+  现金: 1,272,926
+  最大购买力(30%首付): 4,243,086
+  参与谈判次数: 0
+
+【买家 #67】
+  现金: 3,629,628
+  最大购买力(30%首付): 12,098,760
+  参与谈判次数: 0
+
+【买家 #114】
+  现金: 984,484
+  最大购买力(30%首付): 3,281,614
+  参与谈判次数: 0
+
+================================================================================
+分析完成
+================================================================================

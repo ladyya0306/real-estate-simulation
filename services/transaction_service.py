@@ -73,11 +73,19 @@ class TransactionService:
                 logger.debug(f"Property {pid}: 维持原价 - {reason}")
             elif action in ["B", "C"]:
                 # Update price (V2)
-                cursor.execute("UPDATE properties_market SET listed_price = ? WHERE property_id = ?", (new_price, pid))
+                cursor.execute("""
+                    UPDATE properties_market 
+                    SET listed_price = ?, last_price_update_month = ?, last_price_update_reason = ?
+                    WHERE property_id = ?
+                """, (new_price, month, reason, pid))
                 logger.info(f"Property {pid}: 调价至 {new_price:,.0f} - {reason}")
             elif action == "D":
                 # Delist (V2)
-                cursor.execute("UPDATE properties_market SET status='off_market' WHERE property_id = ?", (pid,))
+                cursor.execute("""
+                    UPDATE properties_market 
+                    SET status='off_market', last_price_update_month = ?, last_price_update_reason = ?
+                    WHERE property_id = ?
+                """, (month, reason, pid))
                 logger.info(f"Property {pid}: 撤牌观望 - {reason}")
             
             # Log decision
@@ -103,24 +111,19 @@ class TransactionService:
         transactions_count = 0
         failed_negotiations = 0
         
-        # --- 1. Matching Phase ---
-        interest_registry = {} # {property_id: [buyers]}
+        # --- 1. Matching Phase (批量匹配重构) ---
+        from transaction_engine import bulk_match_all_buyers, build_property_to_buyers_map
         
-        if buyers:
-            for buyer in wf_logger.get_progress_bar(buyers, desc="Buyer Matching"):
-                target_zone = buyer.preference.target_zone
-                relevant_listings = listings_by_zone.get(target_zone, [])
-                
-                if not relevant_listings:
-                    continue
-                
-                matched_listing = match_property_for_buyer(buyer, relevant_listings, props_map)
-                
-                if matched_listing:
-                    pid = matched_listing['property_id']
-                    if pid not in interest_registry:
-                        interest_registry[pid] = []
-                    interest_registry[pid].append(buyer)
+        logger.info("=== 批量匹配开始 ===")
+        
+        # Step 1: 批量匹配（纯规则，无LLM）
+        buyer_matches = bulk_match_all_buyers(buyers, active_listings, props_map)
+        logger.info(f"匹配结果：{len(buyer_matches)} 个买家找到候选房源")
+        
+        # Step 2: 反向映射（房源 → 买家列表）
+        interest_registry = build_property_to_buyers_map(buyer_matches, agent_map)
+        logger.info(f"房源数量：{len(interest_registry)} 套房源有买家感兴趣")
+
 
         # --- 2. Negotiation Phase ---
         if interest_registry:
@@ -136,6 +139,26 @@ class TransactionService:
                  seller_agent = agent_map.get(listing['seller_id'])
                  if not seller_agent: continue
                  
+                 # Determine Negotiation Mode
+                 market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
+                 from transaction_engine import decide_negotiation_format, run_batch_bidding, run_flash_deal
+                 
+                 # Sync call to decide mode (fast enough) or could be async
+                 mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
+                 
+                 if mode == 'BATCH':
+                     # Batch Bidding (Synchronous for now, or wrap in async)
+                     # For simplicity in this async loop, and since run_batch_bidding calls LLM sync, 
+                     # we should Ideally make run_batch_bidding async. 
+                     # For this fix, let's wrap it or just call it. 
+                     # Since we are in an async function, calling blocking code is sub-optimal but functional for prototype.
+                     # BETTER: Dispatch to run_negotiation_session_async which handles the mode logic internally?
+                     # No, run_negotiation_session_async in transaction_engine.py is currently just a shell for CLASSIC.
+                     # Let's update THAT function in transaction_engine.py instead to be the proper dispatcher.
+                     pass 
+                 
+                 # UPDATE: We will use run_negotiation_session_async as the single entry point.
+                 # It needs to be updated to handle modes.
                  tasks.append(run_negotiation_session_async(seller_agent, interested_buyers, listing, market, self.config))
                  session_metadata.append({
                      "pid": pid,
@@ -178,7 +201,14 @@ class TransactionService:
                      if tx_record:
                          transactions_count += 1
                          batch_transactions.append((
-                             month, winner.id, seller_agent.id, pid, final_price, 'market'
+                             month, 
+                             winner.id, 
+                             seller_agent.id, 
+                             pid, 
+                             tx_record['price'], 
+                             tx_record['down_payment'],
+                             tx_record['loan_amount'],
+                             len(history)
                          ))
                          
                          batch_negotiations.append((winner.id, seller_agent.id, pid, len(history), final_price, True, "Deal Concluded", json.dumps(history)))
@@ -188,10 +218,21 @@ class TransactionService:
                          cursor.execute("UPDATE properties_market SET status='off_market', owner_id=?, last_transaction_month=?, current_valuation=? WHERE property_id=?", 
                                       (winner.id, month, final_price, pid))
                          
+                         # Update Buyer Financials (Persist Mortgage & Cash)
+                         # Use helper to ensure all fields (especially net_cashflow) are consistent
+                         w_fin = winner.to_v2_finance_dict()
+                         cursor.execute("UPDATE agents_finance SET monthly_payment=?, cash=?, total_assets=?, total_debt=?, net_cashflow=? WHERE agent_id=?",
+                                      (w_fin['monthly_payment'], w_fin['cash'], w_fin['total_assets'], w_fin['total_debt'], w_fin['net_cashflow'], winner.id))
+
                          # Reset winner role
                          winner.role = "OBSERVER"
                          # Clean up active_participants
                          cursor.execute("DELETE FROM active_participants WHERE agent_id = ?", (winner.id,))
+                         
+                         # Seller Role Update?
+                         # Seller might still be selling other props, but for this prop, they are done.
+                         # If they have no other props to sell, they revert to observer?
+                         # For now, let's leave them as matches simulation flow (they might become buyer next month)
                          
                 else:
                      failed_negotiations += 1
@@ -217,8 +258,8 @@ class TransactionService:
             # Batch Insert
             if batch_transactions:
                 cursor.executemany("""
-                    INSERT INTO transactions (month, buyer_id, seller_id, property_id, price, transaction_type)
-                    VALUES (?, ?, ?, ?, ?, ?)
+                    INSERT INTO transactions (month, buyer_id, seller_id, property_id, final_price, down_payment, loan_amount, negotiation_rounds)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 """, batch_transactions)
                 
             if batch_negotiations:

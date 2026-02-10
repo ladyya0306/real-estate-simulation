@@ -7,7 +7,8 @@ RESULTS_DIR = "results"
 def list_projects():
     if not os.path.exists(RESULTS_DIR):
         return []
-    return [os.path.join(RESULTS_DIR, d) for d in os.listdir(RESULTS_DIR) if os.path.isdir(os.path.join(RESULTS_DIR, d))]
+    projects = [os.path.join(RESULTS_DIR, d) for d in os.listdir(RESULTS_DIR) if os.path.isdir(os.path.join(RESULTS_DIR, d))]
+    return sorted(projects)
 
 def load_project_paths(project_dir):
     config_path = os.path.join(project_dir, "config.yaml")

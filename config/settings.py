@@ -75,26 +75,13 @@ MACRO_ENVIRONMENT = {
     }
 }
 
-# Schedule: Month -> Sentiment Key
-# Example: 1-12 months scenario
-MACRO_SENTIMENT_SCHEDULE = {
-    1: "stable",
-    2: "stable",
-    3: "optimistic",
-    4: "optimistic", 
-    5: "optimistic",
-    6: "stable",    # Cooling down
-    7: "pessimistic", # Shock
-    8: "pessimistic",
-    9: "stable",    # Recovery
-    10: "stable",
-    11: "optimistic",
-    12: "optimistic"
-}
+# Macro-Economic Environment (Tier 2)
+# Removed fixed schedule in favor of Interactive Macro (v2.6)
 
 def get_current_macro_sentiment(month: int) -> str:
-    """Get sentiment key for the given month, defaulting to stable."""
-    # Loop scenario if month > 12 to allow longer sims
-    norm_month = (month - 1) % 12 + 1
-    return MACRO_SENTIMENT_SCHEDULE.get(norm_month, "stable")
-
+    """
+    Return current macro sentiment.
+    Default: STABLE.
+    Future: Could query DB if we implement 'Set Macro State' intervention.
+    """
+    return "stable"

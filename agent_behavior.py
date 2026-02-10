@@ -13,7 +13,7 @@ from utils.llm_client import call_llm, safe_call_llm, safe_call_llm_async
 
 # --- 1. Story Generation ---
 
-def generate_agent_story(agent: Agent, config=None) -> AgentStory:
+def generate_agent_story(agent: Agent, config=None, occupation_hint: str = None) -> AgentStory:
     """
     Generate background story and structured attributes for a new agent.
     """
@@ -29,12 +29,29 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
     probs = list(weights.values())
     investment_style = random.choices(styles, weights=probs, k=1)[0]
 
+    # Logic Consistency Fix (Tier 6)
+    prop_count = len(agent.owned_properties)
+    has_properties = prop_count > 0
+    total_asset_est = agent.cash + sum(p['current_valuation'] for p in agent.owned_properties) if has_properties else agent.cash
+    
+    occ_str = f"建议职业: {occupation_hint}" if occupation_hint else ""
+
     prompt = f"""
     为这个Agent生成背景故事：
+    【基础信息】
     年龄：{agent.age}
     婚姻：{agent.marital_status}
-    月收入：{agent.monthly_income}
-    现金：{agent.cash}
+    月收入：{agent.monthly_income:,.0f}
+    现金：{agent.cash:,.0f}
+    {occ_str}
+    【关键资产】
+    持有房产数量：{prop_count} 套
+    总资产预估：{total_asset_est:,.0f}
+    
+    【强制约束】
+    1. 若持有房产({prop_count} > 0)，严禁在 story/housing_need 中描述为“无房刚需”、“首次置业”或“租房居住”。必须描述为“改善型需求”或“投资客”。
+    2. 若现金充裕(>100w)且有房，严禁描述为“积蓄不多”。
+    3. 住房需求(housing_need)的可选值：刚需(仅限无房), 改善(有房但小), 投资(有钱有房), 学区(有娃).
     
     请包含：occupation(职业), career_outlook(职业前景), family_plan(家庭规划), education_need(教育需求), housing_need(住房需求), selling_motivation(卖房动机), background_story(3-5句故事).
     
@@ -43,12 +60,12 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
     - conservative (保守): 厌恶风险，追求本金安全
     - balanced (平衡): 权衡风险与收益
     (建议风格: {investment_style})
-
+ 
     输出JSON格式。
     """
     
     default_story = AgentStory(
-        occupation="普通职员",
+        occupation=occupation_hint if occupation_hint else "普通职员",
         career_outlook="稳定",
         family_plan="暂无",
         education_need="无",
@@ -74,59 +91,132 @@ def generate_agent_story(agent: Agent, config=None) -> AgentStory:
         )
     return result
 
-def generate_buyer_preference(agent: Agent) -> AgentPreference:
+def determine_psychological_price(agent: Agent, market_avg_price: float, market_trend: str) -> float:
+    """
+    Calculate psychological price based on agent personality and market trend.
+    Returns the price/sqm or total price depending on input market_avg_price.
+    Assumes market_avg_price is TOTAL price for a typical unit in target zone.
+    """
+    style = agent.story.investment_style
+    
+    # Coefficients
+    #          Bear    Bull    Stable
+    # Aggr     0.80    1.10    1.02
+    # Cons     0.70    1.05    0.98
+    # Bal      0.90    1.02    1.00
+    
+    coeffs = {
+        "aggressive":   {"UP": 1.10, "DOWN": 0.80, "PANIC": 0.70, "STABLE": 1.02},
+        "conservative": {"UP": 1.05, "DOWN": 0.70, "PANIC": 0.60, "STABLE": 0.95},
+        "balanced":     {"UP": 1.02, "DOWN": 0.90, "PANIC": 0.80, "STABLE": 1.00}
+    }
+    
+    # Map trend string if needed (assuming "UP", "DOWN", "STABLE", "PANIC")
+    # market_trend usually comes from MarketBulletin or MarketService
+    trend = market_trend.upper()
+    if trend not in coeffs["balanced"]:
+        trend = "STABLE"
+        
+    coeff = coeffs.get(style, coeffs["balanced"]).get(trend, 1.0)
+    
+    return market_avg_price * coeff
+
+def generate_buyer_preference(agent: Agent, market: Market = None, market_trend: str = "STABLE") -> AgentPreference:
     """
     Generate buyer preferences based on agent story and financial status.
-    修复：使用真实购买力计算（考虑按揭贷款）
+    Updated for Tier 6: Includes Psychological Price & Max Affordable.
+    
+    🔧 FIX: 
+    1. Use real_max_price as operational max (not psych_price which is too conservative)
+    2. Smart zone allocation based on affordability
     """
     from mortgage_system import calculate_max_affordable
     
-    # 计算真实购买力
+    # 1. Financial Limit (Affordability)
     existing_payment = getattr(agent, 'monthly_payment', 0)
     real_max_price = calculate_max_affordable(agent.cash, agent.monthly_income, existing_payment)
+    
+    # 2. Psychological Limit (for reference, but NOT as hard constraint)
+    # Get Market Context (Zone B avg as baseline for entry)
+    zone_a_avg = 5000000  # Default 500w Zone A
+    zone_b_avg = 2000000  # Default 200w Zone B
+    
+    if market:
+         try:
+             zone_a_avg = market.get_avg_price("A") or 5000000
+             zone_b_avg = market.get_avg_price("B") or 2000000
+         except:
+             pass
+             
+    psych_price = determine_psychological_price(agent, zone_b_avg, market_trend)
+    
+    # 3. 🔧 FIX: Operational Max Price = real_max_price (not min with psych)
+    # Psychological price is a preference indicator, not a hard financial limit
+    # Buyers should use their ACTUAL affordability, not self-imposed lower limits
+    final_operational_max = real_max_price  # Changed from min(real_max_price, psych_price)
+    
+    # 4. 🔧 FIX: Smart Zone Allocation based on affordability
+    # Instead of letting LLM always choose Zone A, make a data-driven decision
+    can_afford_zone_a = real_max_price >= zone_a_avg * 0.8  # Need 80% of avg to consider
+    can_afford_zone_b = real_max_price >= zone_b_avg * 0.6  # More lenient for entry-level
+    
+    # Determine default zone based on affordability
+    if can_afford_zone_a:
+        default_zone = "A"  # Can afford premium zone
+    elif can_afford_zone_b:
+        default_zone = "B"  # Can only afford entry zone
+    else:
+        default_zone = "B"  # Fallback to cheaper zone
+    
+    # Log for debugging
+    import logging
+    logger = logging.getLogger(__name__)
+    logger.debug(f"Agent {agent.id}: max_affordable={real_max_price:,.0f}, zone_a_threshold={zone_a_avg*0.8:,.0f}, "
+                 f"zone_b_threshold={zone_b_avg*0.6:,.0f}, selected_zone={default_zone}")
     
     prompt = f"""
     根据你的背景，设定购房偏好：
     【背景】{agent.story.background_story}
-    【需求类型】{agent.story.housing_need}
-    【教育需求】{agent.story.education_need}
-    【现金】{agent.cash:,.0f}元
-    【真实购买力(含贷款)】{real_max_price:,.0f}元
+    【性格】{agent.story.investment_style}
+    【财务】现金:{agent.cash:,.0f}, 购买力上限:{real_max_price:,.0f}
+    【市场】趋势:{market_trend}
+    【建议区域】基于你的购买力，系统建议你关注{default_zone}区
+       (A区均价约{zone_a_avg:,.0f}，B区均价约{zone_b_avg:,.0f})
     
     输出JSON：
-    {{"target_zone":"A" 或 "B" (必须二选一), "max_price":... (不超过购买力), "min_bedrooms":..., "need_school_district": true/false}}
+    {{"target_zone":"{default_zone}", "min_bedrooms":...}}
     """
     
     default_pref = AgentPreference(
-        target_zone="B", 
-        max_price=real_max_price,
+        target_zone=default_zone,  # Use calculated zone, not hardcoded "B"
+        max_price=final_operational_max,
         min_bedrooms=1,
-        need_school_district=False
+        need_school_district=False,
+        max_affordable_price=real_max_price,
+        psychological_price=psych_price
     )
     
     result = safe_call_llm(prompt, default_pref, model_type="fast")
     
-    # Map dictionary result to AgentPreference object if it's a dict
+    # Map dictionary result
     if isinstance(result, dict):
-        llm_max = result.get("max_price", real_max_price)
-        # 确保不超过真实购买力
-        final_max = min(float(llm_max), real_max_price) if llm_max else real_max_price
-        
-        # Sanitize Zone
-        raw_zone = result.get("target_zone", "B")
+        # Sanitize Zone - BUT respect system recommendation for affordability
+        raw_zone = result.get("target_zone", default_zone)
         if raw_zone not in ["A", "B"]:
-            # Fallback for "A或B" or other invalid strings
-            if "A" in raw_zone and "B" in raw_zone:
-                raw_zone = random.choice(["A", "B"])
-            elif "A" in raw_zone: raw_zone = "A"
-            elif "B" in raw_zone: raw_zone = "B"
-            else: raw_zone = "B"
+            raw_zone = default_zone
+        
+        # 🔧 FIX: Override zone if buyer tries to select A but can't afford it
+        if raw_zone == "A" and not can_afford_zone_a and can_afford_zone_b:
+            logger.debug(f"Agent {agent.id}: Overriding zone A->B (can't afford A)")
+            raw_zone = "B"
             
         return AgentPreference(
             target_zone=raw_zone,
-            max_price=final_max,
+            max_price=final_operational_max, # Hard constraint override
             min_bedrooms=result.get("min_bedrooms", 1),
-            need_school_district=result.get("need_school_district", False)
+            need_school_district=result.get("need_school_district", False),
+            max_affordable_price=real_max_price,
+            psychological_price=psych_price
         )
     return result
 
@@ -197,7 +287,7 @@ def apply_event_effects(agent: Agent, event_data: dict, config=None):
         agent.set_life_event(0, event_name) # Using 0 as current month placeholder or pass actual month
         # print(f"Agent {agent.id} experienced {event_name}, cash changed by {cash_change_pct*100}%")
 
-def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float], market_bulletin: str = "") -> dict:
+def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float], market_bulletin: str = "", market_trend: str = "STABLE") -> dict:
     """
     For multi-property owners, decide which properties to sell and the pricing strategy.
     Uses market bulletin + strategy menu (A+C architecture).
@@ -213,6 +303,14 @@ def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float],
             "est_market_value": current_market_value
         })
 
+    # Psychological Anchor
+    psych_advice = ""
+    if props_info:
+        # Use first property as reference for simplicity or general sentiment
+        ref_val = props_info[0]['est_market_value']
+        psych_val = determine_psychological_price(agent, ref_val, market_trend)
+        psych_advice = f"【参考心理价】基于你的风格({agent.story.investment_style})和市场({market_trend})，建议关注 {psych_val:,.0f} 附近的价位。"
+
     prompt = f"""
 你是Agent {agent.id}，卖家。
 【你的背景】{agent.story.background_story}
@@ -223,21 +321,20 @@ def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float],
 {json.dumps(props_info, indent=2, ensure_ascii=False)}
 
 {market_bulletin if market_bulletin else "【市场信息】暂无市场公报"}
+{psych_advice}
 
 ━━━━━━━━━━━━━━━━━━━━━━━
 请基于市场公报，选择你的定价策略:
 
-A. 【激进挂高】挂牌价 = 估值 × [1.10 ~ 1.20]，请自选系数
-   适用于: 市场上涨、不急用钱、看好后市
-   (如: 1.12 表示估值加价12%)
+A. 【激进挂高/牛市追涨】挂牌价 = 估值 × [1.05 ~ 1.30]，请自选系数
+   适用于: 市场上涨、不急用钱、看好后市 (牛市可挂更高)
 
 B. 【随行就市】挂牌价 = 市场均价 × [0.98 ~ 1.05]，请自选系数
    适用于: 市场平稳、正常置换需求
-   (如: 1.02 表示略高于市场均价2%)
 
-C. 【以价换量】挂牌价 = 估值 × [0.90 ~ 0.97]，请自选系数
-   适用于: 市场下行、急需现金、恐慌避险
-   (如: 0.93 表示估值降价7%)
+C. 【以价换量/熊市止损】挂牌价 = 估值 × [0.80 ~ 0.97]，请自选系数
+   适用于: 市场下行、急需现金、恐慌避险 (熊市可大幅降价)
+   (如: 0.85 表示85折甩卖)
 
 D. 【暂不挂牌】本月观望，等待更好时机
    适用于: 市场恐慌、惜售心理、看好反弹
@@ -341,6 +438,16 @@ async def decide_price_adjustment(
     row = cursor.fetchone()
     background = row[0] if row else "普通投资者"
     
+    # Calculate Psych Price
+    mock_agent = Agent(id=agent_id)
+    mock_agent.story = AgentStory(investment_style=investment_style)
+    psych_price = determine_psychological_price(
+        mock_agent, # Mock agent wrapper for function
+        current_price, 
+        market_trend
+    )
+    psych_advice = f"【参考建议】心理价位约 {psych_price:,.0f} (基于风格{investment_style})"
+
     prompt = f"""
 你是 {agent_name}，投资风格：{investment_style}。
 背景：{background}
@@ -349,11 +456,12 @@ async def decide_price_adjustment(
 你的房产（ID: {property_id}）已挂牌 {listing_duration} 个月未成交。
 当前挂牌价：¥{current_price:,.0f}
 市场趋势：{market_trend}
+{psych_advice}
 
 【决策选项】
 A. 维持原价 (patient, 看好后市反弹)
-B. 小幅降价 (系数 0.95~0.97，适度灵活)
-C. 大幅降价 (系数 0.85~0.92，急于脱手)
+B. 小幅降价 (系数 0.95~0.98，适度灵活)
+C. 大幅降价/止损 (系数 0.80~0.92，急于脱手)
 D. 撤牌观望 (严重悲观，等待时机)
 
 请根据你的性格和市场状况做出决策。
@@ -361,7 +469,7 @@ D. 撤牌观望 (严重悲观，等待时机)
 返回 JSON:
 {{
     "action": "A",  # 选择 A/B/C/D
-    "coefficient": 1.0,  # A=1.0, B=0.95~0.97, C=0.85~0.92, D=1.0
+    "coefficient": 1.0,  # A=1.0, B=0.95~0.98, C=0.80~0.92, D=1.0
     "reason": "简述原因（一句话）"
 }}
 """

@@ -2,6 +2,13 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any, Optional
 
+# Fix for !!python/tuple in SafeLoader
+def tuple_constructor(loader, node):
+    return tuple(loader.construct_sequence(node))
+
+yaml.SafeLoader.add_constructor('tag:yaml.org,2002:python/tuple', tuple_constructor)
+
+
 class SimulationConfig:
     """
     统一配置加载器

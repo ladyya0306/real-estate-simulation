@@ -69,6 +69,106 @@ def validate_config(agent_config, property_count):
     
     return (len(errors) == 0, warnings, errors)
 
+def show_intervention_menu(runner):
+    """
+    显示研究员干预面板
+    """
+    print("\n" + "="*50)
+    print("🔬 研究员干预面板 (Researcher Intervention Panel)")
+    print("="*50)
+    print("通过调整以下参数，模拟不同的宏观经济环境。")
+    print("📉 消极影响: 降薪、失业、加息 -> 抑制需求")
+    print("📈 积极影响: 人口流入、降息、增供 -> 刺激交易")
+    
+    interventions = []
+    
+    while True:
+        print("\n--- 干预选项 ---")
+        print("1. [劳动力] 薪资调整 (Wage Shock)")
+        print("2. [劳动力] 失业潮 (Unemployment Shock)")
+        print("3. [人口] 新增人口 (Migration In)")
+        print("4. [人口] 移除人口 (Migration Out)")
+        print("5. [房产] 新增房源 (New Supply)")
+        print("6. [房产] 下架房源 (Supply Cut)")
+        print("0. ✅ 执行策略并继续 (Execute)")
+        
+        choice = input("Select option [0-6]: ").strip()
+        
+        try:
+            if choice == '0':
+                if interventions:
+                    runner.set_interventions(interventions)
+                    print(f"✅ 已提交 {len(interventions)} 项干预措施给公告栏。")
+                break
+                
+            elif choice == '1':
+                val = input("调整幅度 (e.g. -0.1 for -10%, 0.1 for +10%): ").strip()
+                if not val: continue
+                pct = float(val)
+                tier = input_default("覆盖阶层 (all/low/middle/high...)", "all")
+                count = runner.intervention_service.apply_wage_shock(runner.agent_service, pct, tier)
+                msg = f"Policy: Wage adjusted by {pct*100:+.1f}% for {tier} tier."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+
+            elif choice == '2':
+                val = input("失业率 (e.g. 0.2 for 20%): ").strip()
+                if not val: continue
+                rate = float(val)
+                tier = input_default("目标阶层 (low/middle...)", "low")
+                count = runner.intervention_service.apply_unemployment_shock(runner.agent_service, rate, tier)
+                msg = f"Policy: Unemployment shock of {rate*100:.1f}% hit {tier} tier ({count} affected)."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+                
+            elif choice == '3':
+                val = input("新增数量: ").strip()
+                if not val: continue
+                count = int(val)
+                tier = input_default("阶层 (low/middle/high...)", "middle")
+                added = runner.intervention_service.add_population(runner.agent_service, count, tier)
+                msg = f"Demographics: {added} new {tier} income agents entered the city."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+                
+            elif choice == '4':
+                val = input("移除数量: ").strip()
+                if not val: continue
+                count = int(val)
+                tier = input_default("阶层 (low/middle/high...)", "low")
+                removed = runner.intervention_service.remove_population(runner.agent_service, count, tier)
+                msg = f"Demographics: {removed} {tier} income agents left the city."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+
+            elif choice == '5':
+                val = input("新增房源数: ").strip()
+                if not val: continue
+                count = int(val)
+                zone = input_default("区域 (A/B)", "A")
+                runner.intervention_service.adjust_housing_supply(runner.market_service, count, zone)
+                msg = f"Supply: {count} new properties released in Zone {zone}."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+
+            elif choice == '6':
+                val = input("下架房源数: ").strip()
+                if not val: continue
+                count = int(val)
+                zone = input_default("区域 (A/B)", "A")
+                removed = runner.intervention_service.supply_cut(runner.market_service, count, zone)
+                msg = f"Supply: {removed} listings removed from Zone {zone}."
+                interventions.append(msg)
+                print(f"✅ {msg}")
+                
+            else:
+                print("❌ Invalid option.")
+                
+        except Exception as e:
+            print(f"❌ Error executing intervention: {e}")
+            import traceback
+            traceback.print_exc()
+
 def main():
     # UTF-8
     try:
@@ -338,6 +438,9 @@ def main():
     )
     
     try:
+        # NEW: Researcher Intervention Panel
+        show_intervention_menu(runner)
+        
         runner.run()
         print("\n✅ Simulation Completed Successfully.")
         

@@ -63,7 +63,12 @@ class MarketService:
     def load_market_from_db(self, agents: List):
         """Load market properties from database and link to owners."""
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM properties") # V1 table still used for reading temporarily? Or should use static?
+        # Use V2 Schema: Join properties_static with properties_market
+        cursor.execute("""
+            SELECT ps.*, pm.status, pm.owner_id, pm.listed_price, pm.current_valuation 
+            FROM properties_static ps 
+            LEFT JOIN properties_market pm ON ps.property_id = pm.property_id
+        """)
         # V1 table 'properties' contains everything. V2 split checks?
         # SimulationRunner.load_from_db checks 'properties'.
         # Since we just verified V1 cleanup, 'properties' table might still exist? 
@@ -134,15 +139,19 @@ class MarketService:
         self.market = Market(properties)
         logger.info(f"Loaded {len(properties)} properties from DB (V2).")
 
-    def generate_market_bulletin(self, month: int) -> str:
-        """Generate monthly market bulletin with transaction stats and trend signals."""
+    async def generate_market_bulletin(self, month: int, extra_news: List[str] = None) -> str:
+        """
+        Generate monthly market bulletin with LLM analysis.
+        """
+        from utils.llm_client import safe_call_llm_async
+        
         cursor = self.conn.cursor()
         
         # 1. Query last month's transactions
-        cursor.execute("SELECT COUNT(*) as count, AVG(price) as avg_price FROM transactions WHERE month = ?", (month - 1,))
+        cursor.execute("SELECT COUNT(*) as count, AVG(final_price) as avg_price FROM transactions WHERE month = ?", (month - 1,))
         last_month_stats = cursor.fetchone()
-        transaction_count = last_month_stats['count'] if last_month_stats else 0
-        avg_price = last_month_stats['avg_price'] if last_month_stats and last_month_stats['avg_price'] else 0
+        transaction_count = last_month_stats[0] if last_month_stats else 0
+        avg_price = last_month_stats[1] if last_month_stats and last_month_stats[1] else 0
         
         # 2. Calculate price change
         price_change_pct = 0.0
@@ -152,12 +161,16 @@ class MarketService:
             if prev_bulletin and prev_bulletin[0] and prev_bulletin[0] > 0:
                 price_change_pct = ((avg_price - prev_bulletin[0]) / prev_bulletin[0]) * 100
         
-        # 3. Calculate zone heat (supply/demand ratio)
+        # 3. Calculate zone heat
         def calc_zone_heat(zone):
             cursor.execute("SELECT COUNT(*) FROM properties_market WHERE status = 'for_sale' AND property_id IN (SELECT property_id FROM properties_static WHERE zone = ?)", (zone,))
-            listings = cursor.fetchone()[0]
+            result = cursor.fetchone()
+            listings = result[0] if result else 0
+            
             cursor.execute("SELECT COUNT(*) FROM active_participants WHERE role IN ('BUYER', 'BUYER_SELLER') AND target_zone = ?", (zone,))
-            buyers = cursor.fetchone()[0]
+            result = cursor.fetchone()
+            buyers = result[0] if result else 0
+            
             if buyers == 0:
                 return "COLD" if listings > 5 else "BALANCED"
             ratio = listings / max(buyers, 1)
@@ -180,24 +193,78 @@ class MarketService:
         if self.consecutive_trend <= -2:
             trend_signal = "PANIC"
         
-        # 5. Format bulletin text
         trend_emoji = {"UP": "📈", "DOWN": "📉", "STABLE": "➡️", "PANIC": "⚠️"}.get(trend_signal, "")
-        bulletin_text = f"""
-【📊 市场公报 - 第{month}月】
-━━━━━━━━━━━━━━━━━━━━━━━
-📈 上月成交: {transaction_count} 套
-💰 成交均价: ¥{avg_price:,.0f} ({price_change_pct:+.1f}%)
-🏢 A区热度: {zone_a_heat} | B区热度: {zone_b_heat}
-📊 趋势信号: {trend_emoji} {trend_signal} (连续{abs(self.consecutive_trend)}月)
-━━━━━━━━━━━━━━━━━━━━━━━
-"""
         
-       # 6. Save to database
-        cursor.execute("""
-            INSERT OR REPLACE INTO market_bulletin 
-            (month, transaction_count, avg_price, price_change_pct, zone_a_heat, zone_b_heat, trend_signal, consecutive_direction, bulletin_text)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """, (month, transaction_count, avg_price, price_change_pct, zone_a_heat, zone_b_heat, trend_signal, self.consecutive_trend, bulletin_text))
+        # 5. Generate LLM Analysis
+        base_stats = f"""
+        第{month}月市场数据：
+        - 成交量: {transaction_count}套
+        - 均价: {avg_price:,.0f}元 (环比 {price_change_pct:+.1f}%)
+        - A区热度: {zone_a_heat}
+        - B区热度: {zone_b_heat}
+        - 趋势: {trend_signal} (连续 {abs(self.consecutive_trend)} 个月)
+        - 政策新闻: {", ".join(extra_news) if extra_news else "无"}
+        """
+        
+        prompt = f"""
+        你是一位资深房地产分析师。请根据以下市场核心数据，撰写一份简短犀利的【市场分析点评】（LLM Analysis）。
+        
+        {base_stats}
+        
+        请包含：
+        1. 核心观点（一句话概括当前形势）
+        2. 对买家的建议（观望/入手/砍价）
+        3. 对卖家的建议（降价/坚守/惜售）
+        4. 可能会对{", ".join(extra_news) if extra_news else "当前环境"}产生什么解读。
+
+        输出纯文本，控制在150字以内。
+        """
+        
+        default_analysis = f"市场{trend_signal}，成交{transaction_count}套，建议谨慎操作。"
+        llm_analysis_text = await safe_call_llm_async(prompt, default_analysis, model_type="smart")
+        
+        if isinstance(llm_analysis_text, dict): # Handle if returns dict by mistake (though safe_call usually handles schema if provided, here we want text)
+             llm_analysis_text = str(llm_analysis_text)
+
+        # 6. Save to database (FIXED: Added llm_analysis)
+        policy_news_str = "\\n".join(extra_news) if extra_news else ""
+        
+        # Check if llm_analysis column exists, if not match schema
+        # Assuming schema has llm_analysis as per user request
+        
+        try:
+            cursor.execute("""
+                INSERT OR REPLACE INTO market_bulletin 
+                (month, transaction_volume, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news, llm_analysis)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (month, transaction_count, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news_str, llm_analysis_text))
+            self.conn.commit()
+        except sqlite3.OperationalError:
+            # Fallback if column missing (should not happen in V3 but safe guard)
+             logger.error("Database schema mismatch: missing llm_analysis column?")
+             cursor.execute("""
+                INSERT OR REPLACE INTO market_bulletin 
+                (month, transaction_volume, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            """, (month, transaction_count, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news_str))
+             self.conn.commit()
+
+        # 7. Return Enriched Bulletin
+        bulletin_text = f"""
+        【📊 市场公报 - 第{month}月】
+        ━━━━━━━━━━━━━━━━━━━━━━━
+        📈 上月成交: {transaction_count} 套
+        💰 成交均价: ¥{avg_price:,.0f} ({price_change_pct:+.1f}%)
+        🏢 A区热度: {zone_a_heat} | B区热度: {zone_b_heat}
+        📊 趋势信号: {trend_emoji} {trend_signal}
+        
+        【📝 专家点评】
+        {llm_analysis_text}
+        
+        【🔔 政策动态】
+        {policy_news_str if policy_news_str else "本月无重大政策变动"}
+        ━━━━━━━━━━━━━━━━━━━━━━━
+        """
         
         return bulletin_text
 

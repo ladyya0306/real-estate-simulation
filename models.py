@@ -13,11 +13,15 @@ class AgentStory:
         self.investment_style = investment_style
 
 class AgentPreference:
-    def __init__(self, target_zone="", max_price=0.0, min_bedrooms=1, need_school_district=False):
+    def __init__(self, target_zone="", max_price=0.0, min_bedrooms=1, need_school_district=False, 
+                 max_affordable_price=0.0, psychological_price=0.0):
         self.target_zone = target_zone
         self.max_price = max_price
         self.min_bedrooms = min_bedrooms
         self.need_school_district = need_school_district
+        self.max_affordable_price = max_affordable_price
+        self.psychological_price = psychological_price
+
 
 class Agent:
     def __init__(self, id: int, name: str = "", age: int = 30, marital_status: str = "single", cash: float = 0.0, monthly_income: float = 0.0):
@@ -120,15 +124,23 @@ class Agent:
         }
 
     def to_v2_finance_dict(self):
-        # Calculate total debt (sum of all properties? Simplified for now)
-        total_debt = 0 # Placeholder if mortgage object not linked
+        # Calculate total debt (sum of all properties?)
+        total_debt = 0 
+        # Net Cashflow = Income - Payment - Living (30%)
+        net_cf = self.monthly_income - self.monthly_payment - (self.monthly_income * 0.3)
+        
         return {
             "agent_id": self.id,
             "monthly_income": self.monthly_income,
             "cash": self.cash,
             "total_assets": self.net_worth,
             "total_debt": total_debt,
-            "monthly_payment": self.monthly_payment
+            "monthly_payment": self.monthly_payment,
+            "net_cashflow": net_cf,
+            "max_affordable_price": getattr(self.preference, 'max_affordable_price', 0),
+            "psychological_price": getattr(self.preference, 'psychological_price', 0),
+            "last_price_update_month": 0, # Default
+            "last_price_update_reason": ""
         }
 
     def to_v2_active_dict(self, role, market=None):

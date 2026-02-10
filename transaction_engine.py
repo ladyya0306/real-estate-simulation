@@ -2,14 +2,67 @@
 Transaction Engine: Handles Listings, Matching, Negotiation, and Execution
 """
 import json
+import asyncio
 import random
+import logging
 from typing import List, Dict, Optional, Tuple, Any
 from models import Agent, Market
 from agent_behavior import safe_call_llm, safe_call_llm_async, build_macro_context, decide_negotiation_format
 from mortgage_system import check_affordability, calculate_monthly_payment
 from config.settings import MORTGAGE_CONFIG
 
+logger = logging.getLogger(__name__)
+
 # --- New Negotiation Modes (Phase 5) ---
+
+async def run_batch_bidding_async(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, config=None) -> Dict:
+    """Mode A: Batch Bidding (Blind Auction) - Async"""
+    history = []
+    min_price = listing['min_price']
+    
+    # 1. Buyers Submit Bids (Parallel)
+    async def get_buyer_bid(buyer):
+        max_budget = buyer.preference.max_price
+        prompt = f"""
+        你是买家 {buyer.id}。参与房产盲拍（Batch Bidding）。
+        房产: {listing['zone']}区 {listing.get('building_area')}㎡
+        你的预算: {max_budget}
+        当前挂牌价: {listing['listed_price']}
+        
+        这是盲拍，只有一次出价机会。价高者得（需高于底价）。
+        
+        请出价（0表示放弃）：
+        输出JSON: {{"bid_price": float, "reason": "..."}}
+        """
+        resp = await safe_call_llm_async(prompt, {"bid_price": 0, "reason": "Pass"})
+        bid_price = float(resp.get("bid_price", 0))
+        return {"buyer": buyer, "price": bid_price, "reason": resp.get("reason")}
+
+    tasks = [get_buyer_bid(b) for b in buyers]
+    results = await asyncio.gather(*tasks)
+    
+    bids = [r for r in results if r['price'] > 0 and r['price'] <= r['buyer'].preference.max_price]
+
+    # 2. Seller Selects Winner
+    if not bids:
+        return {"outcome": "failed", "reason": "No valid bids"}
+        
+    # Sort by price desc
+    bids.sort(key=lambda x: x['price'], reverse=True)
+    best_bid = bids[0]
+    
+    # Seller Final Decision (Auto-accept if > min_price + simple logic, or ask LLM?)
+    # For speed, if highest bid > min_price, accept.
+    if best_bid['price'] >= min_price:
+        return {
+            "outcome": "success", 
+            "buyer_id": best_bid['buyer'].id, 
+            "final_price": best_bid['price'],
+            "mode": "batch_bidding",
+            "history": [{"action": "WIN_BID", "price": best_bid['price'], "buyer": best_bid['buyer'].id}]
+        }
+    else:
+        return {"outcome": "failed", "reason": "Highest bid below min_price"}
 
 def run_batch_bidding(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, config=None) -> Dict:
     """Mode A: Batch Bidding (Blind Auction)"""
@@ -55,6 +108,34 @@ def run_batch_bidding(seller: Agent, buyers: List[Agent], listing: Dict, market:
         }
     else:
         return {"outcome": "failed", "reason": "Highest bid below min_price"}
+
+async def run_flash_deal_async(seller: Agent, buyer: Agent, listing: Dict, market: Market) -> Dict:
+    """Mode B: Flash Deal (Take it or Leave it) - Async"""
+    # 1. Seller sets Flash Price (usually discounted)
+    flash_price = listing['listed_price'] * 0.95 # Auto-discount for speed
+    if flash_price < listing['min_price']: 
+        flash_price = listing['min_price']
+        
+    # 2. Buyer Decision
+    prompt = f"""
+    你是买家 {buyer.id}。卖家发起闪电成交（Flash Deal）。
+    一口价: {flash_price:,.0f} (原价 {listing['listed_price']:,.0f})
+    
+    必须马上决定：接受(ACCEPT) 或 拒绝(REJECT)。
+    输出JSON: {{"action": "ACCEPT"|"REJECT", "reason": "..."}}
+    """
+    resp = await safe_call_llm_async(prompt, {"action": "REJECT", "reason": "Pass"})
+    action = resp.get("action", "REJECT").upper()
+    
+    if action == "ACCEPT" and flash_price <= buyer.preference.max_price:
+        return {
+            "outcome": "success",
+            "buyer_id": buyer.id,
+            "final_price": flash_price,
+            "mode": "flash_deal",
+            "history": [{"action": "FLASH_ACCEPT", "price": flash_price}]
+        }
+    return {"outcome": "failed", "reason": "Buyer rejected flash deal"}
 
 def run_flash_deal(seller: Agent, buyer: Agent, listing: Dict, market: Market) -> Dict:
     """Mode B: Flash Deal (Take it or Leave it)"""
@@ -126,9 +207,19 @@ async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], list
     # but run_batch_bidding DOES use LLM, so they should be async too. For urgency, we map everything to classic async or implement others)
     
     
+    import asyncio
+    
     consolidated_log = []
     
-    if mode == "CLASSIC":
+    if mode == "BATCH":
+        return await run_batch_bidding_async(seller, buyers, listing, market, config)
+        
+    elif mode == "FLASH":
+        # Pick one buyer to offer flash deal (e.g. first one or random)
+        target_buyer = buyers[0] 
+        return await run_flash_deal_async(seller, target_buyer, listing, market)
+        
+    elif mode == "CLASSIC":
          for buyer in buyers:
             # Await the async negotiate
             result = await negotiate_async(buyer, seller, listing, market, len(buyers), config)
@@ -259,18 +350,19 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market, 
 
 # --- 2. Buyer Matching Logic ---
 
-def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map: Dict[int, Dict]) -> Optional[Dict]:
+def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map: Dict[int, Dict], ignore_zone: bool = False) -> Optional[Dict]:
     """
     Find the best matching property for a buyer from active listings.
     listings: List of listing dicts (from property_listings table)
     properties_map: property_id -> property_data dict (full details)
+    ignore_zone: If True, skip zone matching (for desperation fallback)
     """
     pref = buyer.preference
     candidates = []
     
     print(f"\n=== DEBUG Buyer {buyer.id} Matching ===")
-    print(f"Buyer Zone: {pref.target_zone}, Max Price: {pref.max_price:,.0f}")
-    print(f"Received {len(listings)} listings for zone {pref.target_zone}")
+    print(f"Buyer Zone: {pref.target_zone}, Max Price: {pref.max_price:,.0f} (IgnoreZone={ignore_zone})")
+    print(f"Received {len(listings)} listings for matching")
     
     for listing in listings:
         prop = properties_map.get(listing['property_id'])
@@ -279,13 +371,14 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
             continue
             
         # 1. Zone Check
-        if pref.target_zone and prop['zone'] != pref.target_zone:
+        if not ignore_zone and pref.target_zone and prop['zone'] != pref.target_zone:
             print(f"  ✗ Prop {listing['property_id']}: Zone mismatch ({prop['zone']} != {pref.target_zone})")
             continue
             
-        # 2. Price Check (Listed Price <= Max Price)
-        if listing['listed_price'] > pref.max_price:
-            print(f"  ✗ Prop {listing['property_id']}: Price too high ({listing['listed_price']:,.0f} > {pref.max_price:,.0f})")
+        # 2. Price Check (Listed Price <= Max Price * Buffer)
+        # Allow 20% buffer for negotiation (e.g. asking 120, max 100 -> might negotiate down)
+        if listing['listed_price'] > pref.max_price * 1.2:
+            print(f"  ✗ Prop {listing['property_id']}: Price too high ({listing['listed_price']:,.0f} > {pref.max_price * 1.2:,.0f})")
             continue
             
 
@@ -578,6 +671,9 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
     }
 
     for r in range(1, rounds + 1):
+        is_final_round = (r == rounds)
+        final_round_hint = "\n        ⚡️【最后通牒】这是最后这一轮谈判。如果达不成一致，交易将失败。请慎重决策！" if is_final_round else ""
+
         # --- Buyer Turn ---
         buyer_prompt = f"""
         {macro_context}
@@ -589,7 +685,7 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         - 卖方当前报价: {current_price:,.0f}
         - 你的上轮出价: {buyer_offer_price:,.0f}
         
-        【市场提示】{market_hint}
+        【市场提示】{market_hint}{final_round_hint}
         
         【谈判历史】
         {json.dumps(negotiation_log, ensure_ascii=False)}
@@ -622,6 +718,8 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
              return {"outcome": "success", "final_price": current_price, "history": negotiation_log}
              
         # --- Seller Turn ---
+        seller_final_hint = "\n        ⚡️【最后通牒】这是买家的最终出价。必须决定：接受(ACCEPT) 或 拒绝(REJECT 导致交易失败)。不建议再还价。" if is_final_round else ""
+        
         seller_prompt = f"""
         {macro_context}
         你是卖方Agent {seller.id}，第{r}/{rounds}轮谈判。
@@ -632,7 +730,9 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         - 买方最新出价: {buyer_offer_price:,.0f}
         - 当前你的报价: {current_price:,.0f}
         
-        【市场提示】{market_hint}
+        【市场提示】{market_hint}{seller_final_hint}
+        {'【趋势建议】市场上涨中，可以坚守价格或适当提价。' if market_condition == 'undersupply' else ''}
+        {'【趋势建议】市场低迷，建议适度灵活，避免流拍。' if market_condition == 'oversupply' else ''}
         
         【谈判历史】
         {json.dumps(negotiation_log, ensure_ascii=False)}
@@ -648,6 +748,16 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         seller_action = seller_resp.get("action", "REJECT")
         
         if seller_action == "COUNTER":
+             if is_final_round:
+                 # In final round, COUNTER is effectively REJECT if buyer cannot accept immediately? 
+                 # Or we can allow ONE last counter, but buyer needs to accept?
+                 # Simpler: If seller counters in final round, treat as "Take it or leave it" for buyer?
+                 # The loop ends after this. So if seller counters, and loop ends -> "Max rounds reached" -> Failed.
+                 # So effectively COUNTER in final round == FAIL unless we handle it.
+                 # Let's trust LLM to follow "Accept or Reject" hint. 
+                 # If they Counter, it fails.
+                 pass
+
              current_price = float(seller_resp.get("counter_price", current_price))
              if current_price <= buyer_offer_price:
                  seller_action = "ACCEPT"
@@ -970,3 +1080,131 @@ def open_negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market,
         "final_price": 0
     }
 
+
+
+# ==================== 批量匹配函数 (Batch Matching Redesign) ====================
+def bulk_match_all_buyers(
+    buyers: List[Agent], 
+    listings: List[Dict], 
+    props_map: Dict[int, Dict]
+) -> Dict[int, List[int]]:
+    """
+    批量匹配：为所有买家找到候选房源（纯规则筛选，无LLM调用）
+    
+    这是匹配重构的核心函数，替代了原来的串行LLM选房逻辑。
+    
+    Args:
+        buyers: 所有激活的买家列表
+        listings: 所有for_sale的房源列表
+        props_map: property_id -> property详细信息的映射
+    
+    Returns:
+        {
+            buyer_id: [property_id1, property_id2, ...],  # 每个买家的候选房源ID列表
+            ...
+        }
+    
+    Example:
+        Input:  buyers=[买家1, 买家2, ...], listings=[房源A, 房源B, ...]
+        Output: {1: [房源A, 房源C], 2: [房源A, 房源B, 房源D], ...}
+    """
+    matches = {}
+    
+    logger.info(f"=== 批量匹配开始 ===")
+    logger.info(f"买家数量: {len(buyers)}, 房源数量: {len(listings)}")
+    
+    for buyer in buyers:
+        if not hasattr(buyer, 'preference') or not buyer.preference:
+            logger.warning(f"买家 {buyer.id} 没有偏好设置，跳过")
+            continue
+            
+        pref = buyer.preference
+        candidates = []
+        
+        for listing in listings:
+            prop = props_map.get(listing['property_id'])
+            if not prop:
+                continue
+            
+            # === 硬规则筛选（和原match_property_for_buyer的逻辑一致）===
+            
+            # 1. 区域匹配
+            if pref.target_zone and prop.get('zone') != pref.target_zone:
+                continue
+            
+            # 2. 价格匹配（允许20%溢价空间用于谈判）
+            if listing['listed_price'] > pref.max_price * 1.2:
+                continue
+            
+            # 3. 学区匹配（如果买家要求学区房）
+            need_school = getattr(pref, 'need_school_district', False)
+            if need_school and not prop.get('is_school_district', False):
+                continue
+            
+            # 4. 卧室数匹配（防御性检查）
+            min_beds = getattr(pref, 'min_bedrooms', 1)
+            if prop.get('bedrooms', 999) < min_beds:
+                continue
+            
+            # === 通过所有筛选，加入候选列表 ===
+            candidates.append(listing['property_id'])
+        
+        # 如果这个买家有候选房源，记录下来
+        if candidates:
+            matches[buyer.id] = candidates
+            logger.debug(f"买家 {buyer.id}: 找到 {len(candidates)} 个候选房源")
+    
+    logger.info(f"批量匹配完成: {len(matches)} 个买家找到候选房源")
+    return matches
+
+
+def build_property_to_buyers_map(
+    buyer_matches: Dict[int, List[int]],
+    agent_map: Dict[int, Agent]
+) -> Dict[int, List[Agent]]:
+    """
+    反向构建映射：从"买家→房源列表"转为"房源→买家列表"
+    
+    这个函数实现了视角转换，让我们能看到每套房源有多少买家感兴趣，
+    从而触发正确的谈判模式（多买家=竞价，单买家=1v1）。
+    
+    Args:
+        buyer_matches: {buyer_id: [property_ids]} 买家的候选房源
+        agent_map: {agent_id: Agent对象} Agent映射表
+    
+    Returns:
+        {
+            property_id: [Agent1, Agent2, ...],  # 每套房源的意向买家列表
+            ...
+        }
+    
+    Example:
+        Input:  {买家1: [房源A, 房源C], 买家2: [房源A, 房源B]}
+        Output: {房源A: [买家1对象, 买家2对象], 房源B: [买家2对象], 房源C: [买家1对象]}
+    """
+    property_to_buyers = {}
+    
+    # 遍历每个买家的候选列表
+    for buyer_id, property_ids in buyer_matches.items():
+        buyer = agent_map.get(buyer_id)
+        if not buyer:
+            logger.warning(f"买家 {buyer_id} 不在agent_map中，跳过")
+            continue
+        
+        # 将这个买家添加到每个候选房源的买家列表中
+        for prop_id in property_ids:
+            if prop_id not in property_to_buyers:
+                property_to_buyers[prop_id] = []
+            
+            property_to_buyers[prop_id].append(buyer)
+    
+    # 日志输出：显示房源的买家分布
+    logger.info(f"=== 房源买家分布 ===")
+    for prop_id, buyers in property_to_buyers.items():
+        buyer_count = len(buyers)
+        if buyer_count > 1:
+            logger.info(f"房源 {prop_id}: {buyer_count} 个买家感兴趣 → 触发竞价")
+        else:
+            logger.info(f"房源 {prop_id}: {buyer_count} 个买家感兴趣 → 1v1谈判")
+    
+    return property_to_buyers

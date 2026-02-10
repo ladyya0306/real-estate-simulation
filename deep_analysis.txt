@@ -1,0 +1,72 @@
+================================================================================
+鍒嗘瀽鏂版暟鎹簱: run_20260208_221507
+================================================================================
+
+[1] 鍩虹缁熻:
+  鎬籥gents: 100
+  瑙掕壊鍒嗗竷: {'BUYER': 33, 'BUYER_SELLER': 20, 'SELLER': 28}
+  鎴夸骇鐘舵€? {'for_sale': 56, 'off_market': 94}
+  浜ゆ槗鏁? 1
+  璋堝垽鍒嗗竷: {1: 1}
+
+[2] Buyer Preference鏁版嵁:
+  鏍锋湰鏁版嵁 (鍓?5涓?:
+    Agent #6: zone=A, max_price=3,135,000
+    Agent #16: zone=A, max_price=3,300,000
+    Agent #17: zone=A, max_price=3,150,000
+    Agent #19: zone=A, max_price=2,850,000
+    Agent #20: zone=A, max_price=3,120,000
+    Agent #22: zone=A, max_price=3,213,000
+    Agent #23: zone=A, max_price=2,907,000
+    Agent #24: zone=A, max_price=2,996,983
+    Agent #25: zone=A, max_price=3,300,000
+    Agent #26: zone=A, max_price=3,300,000
+    Agent #29: zone=A, max_price=3,304,800
+    Agent #31: zone=A, max_price=3,135,000
+    Agent #32: zone=A, max_price=2,992,500
+    Agent #33: zone=A, max_price=3,366,000
+    Agent #34: zone=A, max_price=3,120,000
+
+  缁熻: 鎬籦uyers=53, 鏈墇one=53, 鏈塸rice=53
+
+[3] 鎴夸骇浠锋牸 vs Buyer棰勭畻:
+  Zone A: 浠锋牸 4,123,516 ~ 8,901,793 (avg: 4,951,841)
+  Zone B: 浠锋牸 1,712,588 ~ 1,757,373 (avg: 1,724,185)
+
+  Buyer max_price鍒嗗竷:
+  Zone A: 棰勭畻 1,062,751 ~ 3,366,000 (avg: 2,943,328)
+
+[4] 鍏抽敭璇婃柇: 涔板棰勭畻鏄惁瓒冲?
+  Zone A: 0/53 buyers鑳戒拱寰楄捣鏈€渚垮疁鎴?(4,123,516)
+    涔颁笉璧风殑buyers:
+      Agent #6: max_price=3,135,000 < 4,123,516
+      Agent #16: max_price=3,300,000 < 4,123,516
+      Agent #17: max_price=3,150,000 < 4,123,516
+      Agent #19: max_price=2,850,000 < 4,123,516
+      Agent #20: max_price=3,120,000 < 4,123,516
+  Zone B: 0/0 buyers鑳戒拱寰楄捣鏈€渚垮疁鎴?(1,712,588)
+
+[5] 璇婃柇: listings_by_zone缁撴瀯
+  Zone A: 37 listings
+    #1: 4,677,896 (owner: 31)
+    #2: 4,677,896 (owner: 71)
+    #3: 4,677,896 (owner: 43)
+  Zone B: 19 listings
+    #91: 1,722,915 (owner: 68)
+    #96: 1,722,915 (owner: 58)
+    #98: 1,722,915 (owner: 78)
+
+[6] 璋堝垽璁板綍璇︽儏:
+  鎬昏皥鍒よ褰? 1
+  (1, 67, 30, 101, 5, 1711000.0, 1, 'Deal Concluded', '[{"round": 1, "party": "buyer", "action": "OFFER", "price": 1700000.0, "content": "\\u4f5c\\u4e3a\\u7406\\u6027\\u6d3e\\uff0c\\u6211\\u5bfb\\u6c42\\u53cc\\u8d62\\u3002\\u5f53\\u524d\\u5b8f\\u89c2\\u73af\\u5883\\u7a33\\u5b9a\\uff0c\\u623f\\u4ef7\\u9884\\u671f\\u6ce2\\u52a80.0%\\uff0c\\u4f46\\u5e02\\u573a\\u63d0\\u793a\\u4e3a\\u5356\\u65b9\\u5e02\\u573a\\uff0c\\u7ade\\u4e89\\u6fc0\\u70c8\\u3002\\u6211\\u7684\\u9884\\u7b97\\u4e0a\\u9650\\u4e3a1,933,382\\uff0c\\u5356\\u65b9\\u62a5\\u4ef71,722,915\\uff0c\\u4e0a\\u8f6e\\u51fa\\u4ef71,636,769\\u3002\\u4e3a\\u5e73\\u8861\\u98ce\\u9669\\u548c\\u6210\\u4ea4\\u673a\\u4f1a\\uff0c\\u6211\\u9002\\u5ea6\\u59a5\\u534f\\uff0c\\u51fa\\u4ef71,700,000\\uff0c\\u8fd9\\u4f4e\\u4e8e\\u62a5\\u4ef7\\u4f46\\u9ad8\\u4e8e\\u4e0a\\u8f6e\\u51fa\\u4ef7\\uff0c\\u663e\\u793a\\u8bda\\u610f\\u5e76\\u4e89\\u53d6\\u8fbe\\u6210\\u4ea4\\u6613\\u3002"}, {"round": 1, "party": "seller", "action": "COUNTER", "price": 1712000.0, "content": "\\u4f5c\\u4e3a\\u7406\\u6027\\u6d3e\\uff0c\\u6211\\u5bfb\\u6c42\\u53cc\\u8d62\\u3002\\u5f53\\u524d\\u5b8f\\u89c2\\u73af\\u5883\\u7a33\\u5b9a\\uff0c\\u623f\\u4ef7\\u9884\\u671f\\u6ce2\\u52a80.0%\\uff0c\\u4f46\\u5e02\\u573a\\u63d0\\u793a\\u4e3a\\u5356\\u65b9\\u5e02\\u573a\\uff0c\\u7ade\\u4e89\\u6fc0\\u70c8\\uff0c\\u51e0\\u5341\\u4e2a\\u4eba\\u62a2\\u4e00\\u5957\\u623f\\u3002\\u6211\\u7684\\u5fc3\\u7406\\u5e95\\u4ef7\\u4e3a1,671,227\\uff0c\\u4e70\\u65b9\\u6700\\u65b0\\u51fa\\u4ef71,700,000\\u5df2\\u63a5\\u8fd1\\u6211\\u7684\\u5e95\\u7ebf\\u3002\\u4e3a\\u5e73\\u8861\\u6210\\u4ea4\\u673a\\u4f1a\\u548c\\u6536\\u76ca\\uff0c\\u6211\\u9002\\u5ea6\\u59a5\\u534f\\uff0c\\u8fd8\\u4ef71,712,000\\uff0c\\u8fd9\\u7565\\u9ad8\\u4e8e\\u4e70\\u65b9\\u51fa\\u4ef7\\u4f46\\u4f4e\\u4e8e\\u6211\\u5f53\\u524d\\u62a5\\u4ef71,722,915\\uff0c\\u663e\\u793a\\u8bda\\u610f\\u5e76\\u4e89\\u53d6\\u5feb\\u901f\\u8fbe\\u6210\\u4ea4\\u6613\\u3002"}, {"round": 2, "party": "buyer", "action": "OFFER", "price": 1710000.0, "content": "\\u4f5c\\u4e3a\\u7406\\u6027\\u6d3e\\uff0c\\u6211\\u5bfb\\u6c42\\u53cc\\u8d62\\u3002\\u5f53\\u524d\\u5b8f\\u89c2\\u73af\\u5883\\u7a33\\u5b9a\\uff0c\\u623f\\u4ef7\\u9884\\u671f\\u6ce2\\u52a80.0%\\uff0c\\u4f46\\u5e02\\u573a\\u63d0\\u793a\\u4e3a\\u5356\\u65b9\\u5e02\\u573a\\uff0c\\u7ade\\u4e89\\u6fc0\\u70c8\\uff0c\\u51e0\\u5341\\u4e2a\\u4eba\\u62a2\\u4e00\\u5957\\u623f\\u3002\\u6211\\u7684\\u9884\\u7b97\\u4e0a\\u9650\\u4e3a1,933,382\\uff0c\\u5356\\u65b9\\u5f53\\u524d\\u62a5\\u4ef71,712,000\\uff0c\\u4e0a\\u8f6e\\u51fa\\u4ef71,700,000\\u3002\\u4e3a\\u5e73\\u8861\\u98ce\\u9669\\u548c\\u6210\\u4ea4\\u673a\\u4f1a\\uff0c\\u6211\\u9002\\u5ea6\\u59a5\\u534f\\uff0c\\u51fa\\u4ef71,710,000\\uff0c\\u8fd9\\u7565\\u9ad8\\u4e8e\\u6211\\u4e0a\\u8f6e\\u51fa\\u4ef7\\u4f46\\u4f4e\\u4e8e\\u5356\\u65b9\\u62a5\\u4ef7\\uff0c\\u663e\\u793a\\u8bda\\u610f\\u5e76\\u4e89\\u53d6\\u8fbe\\u6210\\u4ea4\\u6613\\uff0c\\u540c\\u65f6\\u907f\\u514d\\u56e0\\u72b9\\u8c6b\\u800c\\u9519\\u5931\\u673a\\u4f1a\\u3002"}, {"round": 2, "party": "seller", "action": "COUNTER", "price": 1711000.0, "content": "\\u4f5c\\u4e3a\\u7406\\u6027\\u6d3e\\uff0c\\u6211\\u5bfb\\u6c42\\u53cc\\u8d62\\u3002\\u5f53\\u524d\\u5b8f\\u89c2\\u73af\\u5883\\u7a33\\u5b9a\\uff0c\\u623f\\u4ef7\\u9884\\u671f\\u6ce2\\u52a80.0%\\uff0c\\u4f46\\u5e02\\u573a\\u63d0\\u793a\\u4e3a\\u5356\\u65b9\\u5e02\\u573a\\uff0c\\u51e0\\u5341\\u4e2a\\u4eba\\u62a2\\u4e00\\u5957\\u623f\\uff0c\\u7ade\\u4e89\\u6fc0\\u70c8\\u3002\\u6211\\u7684\\u5fc3\\u7406\\u5e95\\u4ef7\\u4e3a1,671,227\\uff0c\\u4e70\\u65b9\\u6700\\u65b0\\u51fa\\u4ef71,710,000\\u5df2\\u975e\\u5e38\\u63a5\\u8fd1\\u6211\\u7684\\u5e95\\u7ebf\\u3002\\u4e3a\\u5e73\\u8861\\u6210\\u4ea4\\u673a\\u4f1a\\u548c\\u6536\\u76ca\\uff0c\\u6211\\u9002\\u5ea6\\u59a5\\u534f\\uff0c\\u8fd8\\u4ef71,711,000\\uff0c\\u8fd9\\u4ec5\\u6bd4\\u4e70\\u65b9\\u51fa\\u4ef7\\u9ad81,000\\u5143\\uff0c\\u663e\\u793a\\u8bda\\u610f\\u5e76\\u4e89\\u53d6\\u5feb\\u901f\\u8fbe\\u6210\\u4ea4\\u6613\\uff0c\\u907f\\u514d\\u56e0\\u72b9\\u8c6b\\u800c\\u9519\\u5931\\u673a\\u4f1a\\u3002"}, {"round": 3, "party": "buyer", "action": "ACCEPT", "price": 1710000.0, "content": "\\u4f5c\\u4e3a\\u7406\\u6027\\u6d3e\\uff0c\\u6211\\u5bfb\\u6c42\\u53cc\\u8d62\\u3002\\u5f53\\u524d\\u5b8f\\u89c2\\u73af\\u5883\\u7a33\\u5b9a\\uff0c\\u623f\\u4ef7\\u9884\\u671f\\u6ce2\\u52a80.0%\\uff0c\\u4f46\\u5e02\\u573a\\u63d0\\u793a\\u4e3a\\u5356\\u65b9\\u5e02\\u573a\\uff0c\\u51e0\\u5341\\u4e2a\\u4eba\\u62a2\\u4e00\\u5957\\u623f\\uff0c\\u7ade\\u4e89\\u6fc0\\u70c8\\u3002\\u5356\\u65b9\\u5f53\\u524d\\u62a5\\u4ef71,711,000\\u4ec5\\u6bd4\\u6211\\u4e0a\\u8f6e\\u51fa\\u4ef71,710,000\\u9ad81,000\\u5143\\uff0c\\u5df2\\u975e\\u5e38\\u63a5\\u8fd1\\u3002\\u8003\\u8651\\u5230\\u8fd9\\u662f\\u6700\\u540e\\u901a\\u7252\\u8f6e\\uff0c\\u4ea4\\u6613\\u5931\\u8d25\\u98ce\\u9669\\u9ad8\\uff0c\\u4e14\\u6211\\u7684\\u9884\\u7b97\\u4e0a\\u96501,933,382\\u8fdc\\u9ad8\\u4e8e\\u62a5\\u4ef7\\uff0c\\u4e3a\\u5e73\\u8861\\u98ce\\u9669\\u548c\\u6210\\u4ea4\\u673a\\u4f1a\\uff0c\\u6211\\u9002\\u5ea6\\u59a5\\u534f\\uff0c\\u63a5\\u53d7\\u62a5\\u4ef7\\u4ee5\\u907f\\u514d\\u56e0\\u72b9\\u8c6b\\u800c\\u9519\\u5931\\u673a\\u4f1a\\uff0c\\u5b9e\\u73b0\\u53cc\\u8d62\\u3002"}]', '2026-02-08 14:30:07')
+
+[7] Decision Logs:
+  LIFE_EVENT -> 鍗囪亴鍔犺柂: 7
+  LIFE_EVENT -> 鐢熷瓙: 2
+  PRICE_ADJUSTMENT -> B: 1
+  ROLE_DECISION -> BUYER: 34
+  ROLE_DECISION -> BUYER_SELLER: 20
+  ROLE_DECISION -> OBSERVER: 12
+  ROLE_DECISION -> SELLER: 28
+
+================================================================================
