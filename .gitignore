@@ -12,3 +12,5 @@ _archive/
 coverage/
 .idea/
 .vscode/
+v2_project_auto_test/
+simulation_run.log

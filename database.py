@@ -46,6 +46,11 @@ def init_db(db_path):
             total_assets REAL,
             total_debt REAL,
             mortgage_monthly_payment REAL,
+            net_cashflow REAL,              -- Missing Column Added
+            max_affordable_price REAL,      -- Missing Column Added
+            psychological_price REAL,       -- Missing Column Added
+            last_price_update_month INTEGER, -- Missing Column Added
+            last_price_update_reason TEXT,   -- Missing Column Added
             last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(agent_id) REFERENCES agents_static(agent_id)
         )
@@ -99,6 +104,8 @@ def init_db(db_path):
             rental_yield REAL,  -- V3.2 Added
             listing_month INTEGER,
             last_transaction_month INTEGER,
+            last_price_update_month INTEGER, -- Fix: Added missing column
+            last_price_update_reason TEXT,   -- Fix: Added missing column
             FOREIGN KEY(property_id) REFERENCES properties_static(property_id),
             FOREIGN KEY(owner_id) REFERENCES agents_static(agent_id)
         )
@@ -113,6 +120,9 @@ def init_db(db_path):
             seller_id INTEGER,
             property_id INTEGER,
             final_price REAL,
+            down_payment REAL,  -- Fix: Added missing column
+            loan_amount REAL,   -- Fix: Added missing column
+            negotiation_rounds INTEGER, -- Fix: Added missing column
             negotiation_mode TEXT,
             transaction_type TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -132,6 +142,7 @@ def init_db(db_path):
             round_count INTEGER,
             final_price REAL,
             success BOOLEAN,
+            reason TEXT, -- Fix: Added missing column
             log TEXT, -- JSON
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
@@ -184,6 +195,41 @@ def init_db(db_path):
             llm_portrait TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(agent_id) REFERENCES agents_static(agent_id)
+        )
+    """)
+
+    # 11. Market Parameters (V2.2 Policy)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS market_parameters (
+            parameter_name TEXT PRIMARY KEY,
+            current_value REAL,
+            last_updated_month INTEGER,
+            update_count INTEGER DEFAULT 0
+        )
+    """)
+
+    # 12. Policy Events (V2.2 Policy)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS policy_events (
+            event_id INTEGER PRIMARY KEY,
+            event_type TEXT NOT NULL,
+            parameter_name TEXT,
+            old_value REAL,
+            new_value REAL,
+            effective_month INTEGER,
+            description TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    # 13. Base Value Config
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS base_value_config (
+            zone TEXT NOT NULL,
+            quality INTEGER NOT NULL,
+            base_value REAL NOT NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (zone, quality)
         )
     """)
 
