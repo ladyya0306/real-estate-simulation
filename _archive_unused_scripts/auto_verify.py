@@ -96,3 +96,4 @@ else:
 print("="*70)
 
 conn.close()
+

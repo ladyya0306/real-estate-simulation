@@ -40,3 +40,4 @@ def create_new_project(template_config_path):
             
     db_path = os.path.join(proj_dir, "simulation.db")
     return proj_dir, new_config_path, db_path
+

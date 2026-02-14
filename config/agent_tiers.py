@@ -38,3 +38,4 @@ def get_tier_by_income(income: float) -> str:
     if income >= bounds["middle"]: return "middle"
     if income >= bounds["lower_middle"]: return "lower_middle"
     return "low"
+

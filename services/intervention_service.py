@@ -140,11 +140,11 @@ class InterventionService:
                 VALUES (?,?,?,?,?,?,?,?)
             """, (agent.id, agent.name, birth_year, "single", "[]", agent.story.occupation, agent.story.background_story, inv_style))
             
-            # agents_finance: agent_id, monthly_income, cash, total_assets, total_debt, monthly_payment, net_cashflow ...
+            # agents_finance: agent_id, monthly_income, cash, total_assets, total_debt, mortgage_monthly_payment, net_cashflow ...
             # New columns have defaults, but let's be explicit where needed or rely on defaults.
             # Schema has total_debt.
             cursor.execute("""
-                INSERT INTO agents_finance (agent_id, monthly_income, cash, total_assets, total_debt, monthly_payment, net_cashflow) 
+                INSERT INTO agents_finance (agent_id, monthly_income, cash, total_assets, total_debt, mortgage_monthly_payment, net_cashflow) 
                 VALUES (?,?,?,?,?,?,?)
             """, (agent.id, agent.monthly_income, agent.cash, agent.cash, 0, 0, 0))
             
@@ -296,4 +296,5 @@ class InterventionService:
         
         logger.info(f"Intervention: Financial Policy - DP: {down_payment_ratio}, Rate: {mortgage_rate}")
         return True
+
 

@@ -41,3 +41,4 @@ buyer_count = cursor.fetchone()[0]
 print(f"\n✅ Active Buyers Remaining: {buyer_count}")
 
 conn.close()
+

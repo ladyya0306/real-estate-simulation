@@ -72,3 +72,4 @@ class ChineseNameGenerator:
             
         self.used_names.add(name)
         return name
+

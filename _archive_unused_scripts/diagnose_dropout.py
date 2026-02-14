@@ -151,3 +151,4 @@ conn.close()
 print("\n" + "=" * 80)
 print("诊断完成")
 print("=" * 80)
+

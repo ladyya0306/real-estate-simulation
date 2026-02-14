@@ -116,3 +116,28 @@ class SimulationConfig:
     @property
     def user_property_count(self) -> int:
         return self._config.get('user_property_count')
+
+    # 🆕 Price Configuration Helpers
+    def get_zone_price_range(self, zone: str) -> Dict:
+        """
+        获取区域单价配置
+        Returns: {'min': float, 'max': float}
+        """
+        zone_config = self.market.get('zones', {}).get(zone, {})
+        return zone_config.get('price_per_sqm_range', {
+            'min': 10000,  # 默认最低单价
+            'max': 50000   # 默认最高单价
+        })
+    
+    def get_zone_price_tier(self, zone: str, tier: str) -> list:
+        """
+        获取区域价格档位
+        Args:
+            zone: 'A' or 'B'
+            tier: 'budget', 'standard', 'premium'
+        Returns: [min_price, max_price]
+        """
+        zone_config = self.market.get('zones', {}).get(zone, {})
+        tiers = zone_config.get('price_tiers', {})
+        return tiers.get(tier, [10000, 50000])  # 默认区间
+

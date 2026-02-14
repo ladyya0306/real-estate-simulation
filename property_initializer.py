@@ -50,21 +50,29 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     else:              # High quality
         area = random.uniform(130, 250)
         bedrooms = random.choice([3, 4, 5])
-        
-    # 2. Calculate Unit Price
-    base_price = 0
-    if config:
-        base_price = config.market.get('zones', {}).get(zone, {}).get('base_price_per_sqm', 50000)
-    else:
-        base_price = INITIAL_MARKET_CONFIG[zone]["base_price_per_sqm"]
-
-    # Fluctuate based on quality factor (0.9, 1.0, 1.2)
-    quality_factor = {1: 0.9, 2: 1.0, 3: 1.2}[quality]
-    base_unit_price = base_price * quality_factor
-    # Add random variation (+- 10%)
-    unit_price = base_unit_price * random.uniform(0.9, 1.1)
     
-    # 3. Calculate Base Value
+    # 🆕 2. Calculate Unit Price (price_per_sqm) - PRIORITY LOGIC
+    # Use new price_per_sqm_range from config if available
+    if config and hasattr(config, 'get_zone_price_range'):
+        price_range = config.get_zone_price_range(zone)
+        base_unit_price = random.uniform(price_range['min'], price_range['max'])
+    else:
+        # Fallback to old logic
+        base_price = 0
+        if config:
+            base_price = config.market.get('zones', {}).get(zone, {}).get('base_price_per_sqm', 50000)
+        else:
+            base_price = INITIAL_MARKET_CONFIG[zone]["base_price_per_sqm"]
+        
+        # Fluctuate based on quality factor (0.9, 1.0, 1.2)
+        quality_factor = {1: 0.9, 2: 1.0, 3: 1.2}[quality]
+        base_unit_price = base_price * quality_factor
+        # Add random variation (+- 10%)
+        base_unit_price = base_unit_price * random.uniform(0.9, 1.1)
+    
+    unit_price = base_unit_price  # Store original unit price
+    
+    # 3. Calculate Base Value (unit_price × area)
     base_value = area * unit_price
     
     # 4. Classify Type
@@ -75,20 +83,42 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     if is_district:
         # School district adds premium (15%-30%)
         premium = random.uniform(1.15, 1.30)
-        unit_price *= premium
+        unit_price *= premium  # Update unit price with premium
         base_value *= premium
     
     # 6. Listed Price (Base value + 10% premium initially)
     listed_price = base_value * random.uniform(1.05, 1.15)
+    
+    # 🆕 7. Calculate Rental Price and Yield
+    # Default rent per sqm
+    rent_per_sqm_a = 100
+    rent_per_sqm_b = 60
+    
+    if config:
+        rent_per_sqm_a = config.market.get('rental', {}).get('zone_a_rent_per_sqm', 100)
+        rent_per_sqm_b = config.market.get('rental', {}).get('zone_b_rent_per_sqm', 60)
+    
+    rent_unit_price = rent_per_sqm_a if zone == 'A' else rent_per_sqm_b
+    rental_price = area * rent_unit_price
+    
+    # Random fluctuation for rent (+- 5%)
+    rental_price *= random.uniform(0.95, 1.05)
+    
+    # Calculate Yield (Annual Rent / Listed Price)
+    rental_yield = (rental_price * 12) / listed_price if listed_price > 0 else 0
     
     return {
         "property_id": prop_id,
         "zone": zone,
         "quality": quality,
         "base_value": base_value,
-        "base_value": base_value,
         "building_area": round(area, 2),
-        "unit_price": round(unit_price, 0),
+        "price_per_sqm": round(unit_price, 0),  # 🆕 Store unit price
+        "zone_price_tier": None,  # 🆕 Reserved for future tier classification
+        "unit_price": round(unit_price, 0),  # Keep for backwards compatibility
+        "listed_price": round(listed_price, 0),
+        "rental_price": round(rental_price, 0),
+        "rental_yield": round(rental_yield, 4),
         "property_type": prop_type,
         "is_school_district": is_district,
         "school_tier": school_tier,
@@ -112,6 +142,8 @@ def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
         "property_type": prop_dict["property_type"],
         "is_school_district": prop_dict["is_school_district"],
         "school_tier": prop_dict["school_tier"],
+        "price_per_sqm": prop_dict.get("price_per_sqm", 0),  # 🆕
+        "zone_price_tier": prop_dict.get("zone_price_tier", None),  # 🆕
         "initial_value": prop_dict["base_value"], # Map base_value to initial_value
         "created_at": prop_dict.get("created_at", 0)
     }
@@ -123,6 +155,8 @@ def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
         "current_valuation": prop_dict.get("current_valuation", prop_dict["base_value"]),
         "listed_price": prop_dict.get("listed_price"),
         "min_price": prop_dict.get("min_price"),
+        "rental_price": prop_dict.get("rental_price", 0), # Added rental_price
+        "rental_yield": prop_dict.get("rental_yield", 0), # Added rental_yield
         "listing_month": prop_dict.get("listing_month"),
         "last_transaction_month": prop_dict.get("last_transaction_month")
     }
@@ -189,3 +223,4 @@ def initialize_market_properties(target_total_count: int = None, config=None) ->
             properties = properties[:target_total_count]
                 
     return properties
+

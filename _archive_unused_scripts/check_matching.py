@@ -78,3 +78,4 @@ print(f'\nBuyer Max Price Range:')
 print(f'  Min: {r[0]:,.0f}, Max: {r[1]:,.0f}, Avg: {r[2]:,.0f}')
 
 conn.close()
+

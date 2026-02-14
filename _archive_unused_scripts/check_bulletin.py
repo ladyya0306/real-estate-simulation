@@ -31,3 +31,4 @@ except Exception as e:
     print(f"Error querying data: {e}")
 
 conn.close()
+

@@ -22,6 +22,16 @@ class AgentPreference:
         self.max_affordable_price = max_affordable_price
         self.psychological_price = psychological_price
 
+class BuyerPreference:
+    def __init__(self, target_zone="", target_price_range=(0,0), min_bedrooms=1, need_school_district=False, max_affordable_price=0.0, psychological_price=0.0):
+        self.target_zone = target_zone
+        self.target_price_range = target_price_range
+        self.min_bedrooms = min_bedrooms
+        self.max_price = target_price_range[1]
+        self.need_school_district = need_school_district
+        self.max_affordable_price = max_affordable_price
+        self.psychological_price = psychological_price
+
 
 class Agent:
     def __init__(self, id: int, name: str = "", age: int = 30, marital_status: str = "single", cash: float = 0.0, monthly_income: float = 0.0):
@@ -42,7 +52,8 @@ class Agent:
         self.story = AgentStory()
         self.preference = AgentPreference()
         self.monthly_event = None  # To store current month's event
-        self.monthly_payment = 0.0 # Mortgage/Rent monthly payment commitment
+        self.mortgage_monthly_payment = 0.0  # Monthly mortgage payment commitment
+        self.total_debt = 0.0 # Total mortgage debt
 
         # Backward compatibility properties (property routing)
         @property
@@ -125,20 +136,20 @@ class Agent:
 
     def to_v2_finance_dict(self):
         # Calculate total debt (sum of all properties?)
-        total_debt = 0 
-        # Net Cashflow = Income - Payment - Living (30%)
-        net_cf = self.monthly_income - self.monthly_payment - (self.monthly_income * 0.3)
+        # total_debt = 0  <-- Removed logic, utilize self.total_debt
+        # ✅ Phase 3.2: Simplified - Net Cashflow = Income - Mortgage Payment
+        net_cf = self.monthly_income - self.mortgage_monthly_payment
         
         return {
             "agent_id": self.id,
-            "monthly_income": self.monthly_income,
-            "cash": self.cash,
-            "total_assets": self.net_worth,
-            "total_debt": total_debt,
-            "monthly_payment": self.monthly_payment,
-            "net_cashflow": net_cf,
-            "max_affordable_price": getattr(self.preference, 'max_affordable_price', 0),
-            "psychological_price": getattr(self.preference, 'psychological_price', 0),
+            "monthly_income": round(self.monthly_income, 2),
+            "cash": round(self.cash, 2),
+            "total_assets": round(self.net_worth, 2),
+            "total_debt": round(self.total_debt, 2),
+            "mortgage_monthly_payment": round(self.mortgage_monthly_payment, 2),
+            "net_cashflow": round(net_cf, 2),
+            "max_affordable_price": round(getattr(self.preference, 'max_affordable_price', 0), 2),
+            "psychological_price": round(getattr(self.preference, 'psychological_price', 0), 2),
             "last_price_update_month": 0, # Default
             "last_price_update_reason": ""
         }
@@ -257,3 +268,26 @@ class Market:
         
     def add_property(self, property: Dict):
         self.properties.append(property)
+
+class DecisionLog:
+    def __init__(self, agent_id: int, month: int, event_type: str, decision: str, reason: str, thought_process: str, context_metrics: Dict = None, llm_called: bool = False):
+        self.agent_id = agent_id
+        self.month = month
+        self.event_type = event_type
+        self.decision = decision
+        self.reason = reason
+        self.thought_process = thought_process
+        self.context_metrics = context_metrics
+        self.llm_called = llm_called
+
+    def to_dict(self):
+        return {
+            "agent_id": self.agent_id,
+            "month": self.month,
+            "event_type": self.event_type,
+            "decision": self.decision,
+            "reason": self.reason,
+            "thought_process": self.thought_process,
+            "context_metrics": json.dumps(self.context_metrics) if self.context_metrics else None,
+            "llm_called": self.llm_called
+        }

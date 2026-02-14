@@ -51,7 +51,7 @@ def check_affordability(agent, price: float, config=None) -> Tuple[bool, float, 
         loan_term
     )
     
-    total_monthly_payment = agent.monthly_payment + new_monthly_payment
+    total_monthly_payment = agent.mortgage_monthly_payment + new_monthly_payment
     max_payment = agent.monthly_income * max_dti
     
     if total_monthly_payment > max_payment:
@@ -65,7 +65,7 @@ def get_max_loan(agent) -> float:
     Calculate max loan amount agent can get based on income.
     """
     max_payment = agent.monthly_income * MORTGAGE_CONFIG["max_dti_ratio"]
-    available_payment = max(0, max_payment - agent.monthly_payment)
+    available_payment = max(0, max_payment - agent.mortgage_monthly_payment)
     
     # Inverse of monthly payment formula to get Principal
     # P = M * [ (1 + i)^n - 1 ] / [ i(1 + i)^n ]
@@ -109,4 +109,51 @@ def calculate_max_affordable(cash: float, monthly_income: float, existing_paymen
     max_by_loan = cash + loan_capacity
     
     return min(max_by_down, max_by_loan)
+
+
+def calculate_max_loan_from_payment(monthly_payment: float, annual_rate: float, years: int) -> float:
+    """
+    根据月供反推最大贷款额
+    
+    公式推导：
+    月供 P = L * [r*(1+r)^n] / [(1+r)^n - 1]
+    => L = P * [(1+r)^n - 1] / [r*(1+r)^n]
+    
+    Args:
+        monthly_payment: 可用月供金额
+        annual_rate: 年利率（例如 0.05 表示 5%）
+        years: 贷款年限
+    
+    Returns:
+        float: 最大贷款额
+    """
+    monthly_rate = annual_rate / 12
+    n = years * 12
+    
+    if monthly_rate == 0:
+        return monthly_payment * n
+    
+    factor = (1 + monthly_rate) ** n
+    return monthly_payment * (factor - 1) / (monthly_rate * factor)
+
+
+def calculate_max_affordable_price(agent, config=None) -> float:
+    """
+    计算agent能负担的最高房价（基于现金和DTI限制）
+    这是 calculate_max_affordable 的Agent对象包装版本，方便在交易引擎中调用
+    
+    Args:
+        agent: Agent对象，需要有 cash, monthly_income, monthly_payment 属性
+        config: 配置对象（可选），包含 mortgage 配置
+    
+    Returns:
+        float: 最大可负担房价
+    """
+    return calculate_max_affordable(
+        cash=agent.cash,
+        monthly_income=agent.monthly_income,
+        existing_payment=agent.mortgage_monthly_payment,
+        config=config
+    )
+
 

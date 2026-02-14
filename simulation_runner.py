@@ -12,6 +12,8 @@ from services.market_service import MarketService
 from services.agent_service import AgentService
 from services.transaction_service import TransactionService
 from services.intervention_service import InterventionService
+from services.rental_service import RentalService
+from services.reporting_service import ReportingService
 from utils.behavior_logger import BehaviorLogger
 from utils.exchange_display import ExchangeDisplay
 from utils.workflow_logger import WorkflowLogger
@@ -63,6 +65,8 @@ class SimulationRunner:
         self.agent_service = AgentService(self.config, self.conn)
         self.transaction_service = TransactionService(self.config, self.conn)
         self.intervention_service = InterventionService(self.conn)
+        self.rental_service = RentalService(self.config, self.conn)
+        self.reporting_service = ReportingService(self.config, self.conn)
         
         # Pending Interventions (Tier 5)
         self.pending_interventions = []
@@ -133,7 +137,9 @@ class SimulationRunner:
              self.initialize()
              
         # Initialize Loggers
-        log_dir = os.path.dirname(self.db_path) if self.db_path else "results"
+        log_dir = os.path.dirname(self.db_path)
+        if not log_dir:
+            log_dir = "results"
         behavior_logger = BehaviorLogger(results_dir=log_dir)
         exchange_display = ExchangeDisplay(use_rich=True)
         wf_logger = WorkflowLogger(self.config)
@@ -164,6 +170,9 @@ class SimulationRunner:
                 
                 # 3. Agent Updates (Financials)
                 self.agent_service.update_financials()
+
+                # 3.5 Rental Market (Phase 7.2)
+                self.rental_service.process_rental_market(month)
                 
                 # 4. Agent Lifecycle: Manage Active Participants (Timeouts/Exits)
                 batch_decision_logs = []
@@ -171,16 +180,25 @@ class SimulationRunner:
                 
                 # 5. Tier 3: LLM Price Adjustments (Service)
                 # Run async task
+                # Note: TransactionService needs to return logs if we want to batch them here, or insert them directly.
+                # Assuming it inserts directly or returns logs? 
+                # Let's check TransactionService.process_listing_price_adjustments
+                # It likely needs to be updated to capture context_metrics too.
+                # For now just run it.
                 asyncio.run(self.transaction_service.process_listing_price_adjustments(month, market_trend))
                 
                 # 6. Life Events (Stochastic)
                 self.agent_service.process_life_events(month, batch_decision_logs)
                 
+                # 6.5 Market Memory (Phase 7.2)
+                recent_bulletins = self.market_service.get_recent_bulletins(month, n=3)
+                
                 # 7. Agent Activation (New Participants)
                 new_buyers, decisions = asyncio.run(
                     self.agent_service.activate_new_agents(
                         month, self.market_service.market, macro_desc, 
-                        batch_decision_logs, market_trend, bulletin
+                        batch_decision_logs, market_trend, bulletin,
+                        recent_bulletins=recent_bulletins # 🆕 Pass History
                     )
                 )
                 
@@ -190,9 +208,10 @@ class SimulationRunner:
                 
                 # Flush decision logs from activation/lifecycle
                 if batch_decision_logs:
+                    # Update to include context_metrics
                     self.conn.executemany("""INSERT INTO decision_logs 
-                            (agent_id, month, event_type, decision, reason, thought_process, llm_called) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?)""", batch_decision_logs)
+                            (agent_id, month, event_type, decision, reason, thought_process, context_metrics, llm_called) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""", batch_decision_logs)
                     self.conn.commit()
                 
                 # Logging
@@ -244,6 +263,10 @@ class SimulationRunner:
                 
                 logger.info(f"Month {month} Complete. Transactions: {tx_count}, Failed Negs: {fail_count}")
                 
+            # --- Phase 10: End-of-Run Reporting ---
+            logger.info("Generating Final Agent Reports (Automated Portrait)...")
+            asyncio.run(self.reporting_service.generate_all_agent_reports(self.months))
+                
         except KeyboardInterrupt:
             logger.info("Simulation Stopped by User.")
         except Exception as e:
@@ -270,4 +293,3 @@ if __name__ == "__main__":
     runner = SimulationRunner(agent_count=50, months=1)
     runner.run()
     runner.close()
-

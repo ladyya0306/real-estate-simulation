@@ -170,3 +170,4 @@ for l in logs:
 
 conn.close()
 print("\n" + "=" * 80)
+

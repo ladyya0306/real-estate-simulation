@@ -56,3 +56,4 @@ else:
     print(f"\n❌ 修复未完全生效，还有 {len(buyers_without_pref)} 个buyers缺少preference")
 
 conn.close()
+

@@ -47,14 +47,14 @@ class MarketService:
             
         cursor.executemany("""
             INSERT OR IGNORE INTO properties_static 
-            (property_id, zone, quality, building_area, property_type, is_school_district, school_tier, initial_value, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (property_id, zone, quality, building_area, property_type, is_school_district, school_tier, price_per_sqm, zone_price_tier, initial_value, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, batch_static)
         
         cursor.executemany("""
             INSERT OR IGNORE INTO properties_market
-            (property_id, owner_id, status, current_valuation, listed_price, min_price, listing_month, last_transaction_month)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            (property_id, owner_id, status, current_valuation, listed_price, min_price, rental_price, rental_yield, listing_month, last_transaction_month)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, batch_market)
         
         self.conn.commit()
@@ -139,27 +139,69 @@ class MarketService:
         self.market = Market(properties)
         logger.info(f"Loaded {len(properties)} properties from DB (V2).")
 
+    def get_recent_bulletins(self, current_month: int, n: int = 3) -> List[Dict]:
+        """
+        Fetched recent market bulletins from DB for LLM Context.
+        Returns list of dicts: [{'month': m, 'avg_price': p, 'volume': v, 'trend': t}]
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("""
+            SELECT month, avg_price, transaction_volume, trend_signal 
+            FROM market_bulletin 
+            WHERE month < ? 
+            ORDER BY month DESC 
+            LIMIT ?
+        """, (current_month, n))
+        
+        rows = cursor.fetchall()
+        # Return in chronological order
+        return [{'month': r[0], 'avg_price': r[1], 'volume': r[2], 'trend': r[3]} for r in reversed(rows)]
+
     async def generate_market_bulletin(self, month: int, extra_news: List[str] = None) -> str:
         """
         Generate monthly market bulletin with LLM analysis.
+        Includes Phase 5: Unit Price Trends.
         """
         from utils.llm_client import safe_call_llm_async
         
         cursor = self.conn.cursor()
         
-        # 1. Query last month's transactions
-        cursor.execute("SELECT COUNT(*) as count, AVG(final_price) as avg_price FROM transactions WHERE month = ?", (month - 1,))
+        # 1. Query last month's transactions (Volume & Total Price)
+        # JOIN with properties_static to fetch AREA for unit price calculation
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as count, 
+                AVG(t.final_price) as avg_price,
+                SUM(t.final_price) as total_volume,
+                SUM(t.final_price) / SUM(p.building_area) as avg_unit_price
+            FROM transactions t
+            JOIN properties_static p ON t.property_id = p.property_id
+            WHERE t.month = ?
+        """, (month - 1,))
+        
         last_month_stats = cursor.fetchone()
         transaction_count = last_month_stats[0] if last_month_stats else 0
         avg_price = last_month_stats[1] if last_month_stats and last_month_stats[1] else 0
+        avg_unit_price = last_month_stats[3] if last_month_stats and last_month_stats[3] else 0
         
-        # 2. Calculate price change
+        # Handle case where no transactions occurred
+        if not avg_unit_price: avg_unit_price = 0
+        
+        # 2. Calculate price change (MoM for Unit Price)
         price_change_pct = 0.0
+        unit_price_change_pct = 0.0
+        
         if month > 1:
-            cursor.execute("SELECT avg_price FROM market_bulletin WHERE month = ?", (month - 1,))
+            cursor.execute("SELECT avg_price, avg_unit_price FROM market_bulletin WHERE month = ?", (month - 1,))
             prev_bulletin = cursor.fetchone()
+            
+            # Avg Price Change
             if prev_bulletin and prev_bulletin[0] and prev_bulletin[0] > 0:
                 price_change_pct = ((avg_price - prev_bulletin[0]) / prev_bulletin[0]) * 100
+                
+            # Unit Price Change
+            if prev_bulletin and len(prev_bulletin) > 1 and prev_bulletin[1] and prev_bulletin[1] > 0 and avg_unit_price > 0:
+                 unit_price_change_pct = ((avg_unit_price - prev_bulletin[1]) / prev_bulletin[1]) * 100
         
         # 3. Calculate zone heat
         def calc_zone_heat(zone):
@@ -180,10 +222,12 @@ class MarketService:
         zone_b_heat = calc_zone_heat('B')
         
         # 4. Determine trend signal
-        if price_change_pct > 2.0:
+        change_to_use = unit_price_change_pct if avg_unit_price > 0 else price_change_pct
+        
+        if change_to_use > 2.0:
             self.consecutive_trend = self.consecutive_trend + 1 if self.consecutive_trend > 0 else 1
             trend_signal = "UP"
-        elif price_change_pct < -2.0:
+        elif change_to_use < -2.0:
             self.consecutive_trend = self.consecutive_trend - 1 if self.consecutive_trend < 0 else -1
             trend_signal = "DOWN"
         else:
@@ -193,83 +237,78 @@ class MarketService:
         if self.consecutive_trend <= -2:
             trend_signal = "PANIC"
         
-        trend_emoji = {"UP": "📈", "DOWN": "📉", "STABLE": "➡️", "PANIC": "⚠️"}.get(trend_signal, "")
-        
         # 5. Generate LLM Analysis
-        base_stats = f"""
-        第{month}月市场数据：
-        - 成交量: {transaction_count}套
-        - 均价: {avg_price:,.0f}元 (环比 {price_change_pct:+.1f}%)
-        - A区热度: {zone_a_heat}
-        - B区热度: {zone_b_heat}
-        - 趋势: {trend_signal} (连续 {abs(self.consecutive_trend)} 个月)
-        - 政策新闻: {", ".join(extra_news) if extra_news else "无"}
-        """
-        
-        prompt = f"""
-        你是一位资深房地产分析师。请根据以下市场核心数据，撰写一份简短犀利的【市场分析点评】（LLM Analysis）。
-        
-        {base_stats}
-        
-        请包含：
-        1. 核心观点（一句话概括当前形势）
-        2. 对买家的建议（观望/入手/砍价）
-        3. 对卖家的建议（降价/坚守/惜售）
-        4. 可能会对{", ".join(extra_news) if extra_news else "当前环境"}产生什么解读。
+        if month == 1:
+            llm_analysis_text = "市场初始化完成，暂无历史数据可供分析。建议关注后续月份的市场动态。"
+        else:
+            base_stats = f"""
+            第{month}月市场数据：
+            - 成交量: {transaction_count}套
+            - 成交均价: {avg_price:,.0f}元
+            - 📏 单位均价: {avg_unit_price:,.0f} 元/㎡ (环比 {unit_price_change_pct:+.1f}%)
+            - A区热度: {zone_a_heat}
+            - B区热度: {zone_b_heat}
+            - 趋势: {trend_signal} (连续 {abs(self.consecutive_trend)} 个月)
+            - 政策新闻: {", ".join(extra_news) if extra_news else "无"}
+            """
+            
+            prompt = f"""
+            你是一位资深房地产分析师。请根据以下市场核心数据，撰写一份简短犀利的【市场分析点评】（LLM Analysis）。
+            
+            {base_stats}
+            
+            请包含：
+            1. 核心观点（一句话概括当前形势，重点关注单价变化）
+            2. 对买家的建议（观望/入手/砍价）
+            3. 对卖家的建议（降价/坚守/惜售）
+            4. 可能会对{", ".join(extra_news) if extra_news else "当前环境"}产生什么解读。
 
-        输出纯文本，控制在150字以内。
-        """
+            输出纯文本，控制在150字以内。
+            """
+            
+            default_analysis = f"市场{trend_signal}，成交{transaction_count}套，单价{avg_unit_price:,.0f}，建议谨慎操作。"
+            llm_analysis_text = await safe_call_llm_async(prompt, default_analysis, model_type="smart")
         
-        default_analysis = f"市场{trend_signal}，成交{transaction_count}套，建议谨慎操作。"
-        llm_analysis_text = await safe_call_llm_async(prompt, default_analysis, model_type="smart")
-        
-        if isinstance(llm_analysis_text, dict): # Handle if returns dict by mistake (though safe_call usually handles schema if provided, here we want text)
+        if isinstance(llm_analysis_text, dict): 
              llm_analysis_text = str(llm_analysis_text)
 
-        # 6. Save to database (FIXED: Added llm_analysis)
+        # 6. Save to database
         policy_news_str = "\\n".join(extra_news) if extra_news else ""
-        
-        # Check if llm_analysis column exists, if not match schema
-        # Assuming schema has llm_analysis as per user request
         
         try:
             cursor.execute("""
                 INSERT OR REPLACE INTO market_bulletin 
-                (month, transaction_volume, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news, llm_analysis)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            """, (month, transaction_count, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news_str, llm_analysis_text))
+                (month, transaction_volume, avg_price, avg_unit_price, zone_a_heat, zone_b_heat, trend_signal, policy_news, llm_analysis)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (month, transaction_count, avg_price, avg_unit_price, zone_a_heat, zone_b_heat, trend_signal, policy_news_str, llm_analysis_text))
             self.conn.commit()
-        except sqlite3.OperationalError:
-            # Fallback if column missing (should not happen in V3 but safe guard)
-             logger.error("Database schema mismatch: missing llm_analysis column?")
-             cursor.execute("""
-                INSERT OR REPLACE INTO market_bulletin 
-                (month, transaction_volume, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-            """, (month, transaction_count, avg_price, zone_a_heat, zone_b_heat, trend_signal, policy_news_str))
-             self.conn.commit()
+        except sqlite3.OperationalError as e:
+            print(f"Error saving market bulletin: {e}")
+        
+        trend_emoji = {"UP": "📈", "DOWN": "📉", "STABLE": "➡️", "PANIC": "⚠️"}.get(trend_signal, "")
 
-        # 7. Return Enriched Bulletin
-        bulletin_text = f"""
+        result_text = f"""
         【📊 市场公报 - 第{month}月】
         ━━━━━━━━━━━━━━━━━━━━━━━
         📈 上月成交: {transaction_count} 套
-        💰 成交均价: ¥{avg_price:,.0f} ({price_change_pct:+.1f}%)
+        💰 成交均价: ¥{avg_price:,.0f}
+        📏 单位均价: ¥{avg_unit_price:,.0f}/㎡ ({unit_price_change_pct:+.1f}%)
         🏢 A区热度: {zone_a_heat} | B区热度: {zone_b_heat}
-        📊 趋势信号: {trend_emoji} {trend_signal}
-        
+        📊 趋势信号: {trend_signal} {trend_emoji}
+
         【📝 专家点评】
-        {llm_analysis_text}
-        
+        {llm_analysis_text.strip()}
+
         【🔔 政策动态】
         {policy_news_str if policy_news_str else "本月无重大政策变动"}
         ━━━━━━━━━━━━━━━━━━━━━━━
         """
         
-        return bulletin_text
+        return result_text
 
     def get_market_trend(self, month):
         cursor = self.conn.cursor()
         cursor.execute("SELECT trend_signal FROM market_bulletin WHERE month = ?", (month,))
         trend_row = cursor.fetchone()
         return trend_row[0] if trend_row else "STABLE"
+

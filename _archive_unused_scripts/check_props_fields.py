@@ -20,3 +20,4 @@ print(df2.to_string())
 print(f"\n字段名: {df2.columns.tolist()}")
 
 conn.close()
+

@@ -184,3 +184,4 @@ class WorkflowLogger:
         """获取 tqdm 进度条"""
         return tqdm(iterable, desc=desc, total=total, 
                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]")
+

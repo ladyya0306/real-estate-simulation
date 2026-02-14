@@ -238,3 +238,4 @@ class ExchangeDisplay:
             self.console.print(f"[{color}]{status}[/{color}] - 在售{supply}套 / 买家{demand}人 (比例:{ratio:.2f})")
         else:
             print(f"{status} - 在售{supply}套 / 买家{demand}人")
+

@@ -199,3 +199,4 @@ class BehaviorLogger:
             return ""
             
         return "\n".join(history_lines)
+

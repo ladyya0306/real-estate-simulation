@@ -1,0 +1,99 @@
+# Git 操作指南 (Git Guide & Cheatsheet)
+
+本指南旨在帮助您安全地管理项目版本。请将此文件保存在项目根目录下随时查阅。
+
+---
+
+## 一、 日常开发与保存 (Saving Changes)
+
+最常用的三部曲：
+
+1.  **查看状态** (改了哪些文件?)
+    ```bash
+    git status
+    ```
+2.  **暂存修改** (准备提交)
+    ```bash
+    git add .
+    ```
+3.  **提交保存** (写下版本说明)
+    ```bash
+    git commit -m "描述这次修改的内容 (例如: 修复了匹配逻辑bug)"
+    ```
+
+---
+
+## 二、 同步到 GitHub (Cloud Sync)
+
+### 1. 推送到云端 (Push)
+当你在本地 `commit` 完成后，需要推送到 GitHub 备份：
+```bash
+git push origin main
+```
+
+### 2. 从云端拉取 (Pull)
+当你在其他电脑修改了代码，或者想要获取最新的更新时：
+```bash
+git pull origin main
+```
+
+---
+
+## 三、 "后悔药"：本地恢复与撤销 (Undo & Restore)
+
+### 场景 A: 代码改乱了，还没 Commit
+想放弃所有修改，回到上一次 Commit 的干净状态：
+```bash
+# ⚠️ 警告: 所有未提交的修改都会丢失
+git checkout .
+```
+
+### 场景 B: 已经 Commit 了，想撤回
+提交了代码，但发现有问题，想撤销这次 Commit (但保留代码修改)：
+```bash
+git reset --soft HEAD~1
+```
+
+### 场景 C: 想彻底回退到某个历史版本 (时光机)
+1.  **查看历史记录**，找到目标版本的 `Commit ID` (如 `f86a2c`)：
+    ```bash
+    git log --oneline
+    ```
+2.  **强制回退** (⚠️ 警告: 这之后的所有修改都会消失)：
+    ```bash
+    git reset --hard f86a2c
+    ```
+
+---
+
+## 四、 GitHub 远程恢复 (Remote Restore)
+
+如果本地搞砸了，想强制用 GitHub 上的版本覆盖本地：
+
+```bash
+# 1. 下载远程最新内容 (不合并)
+git fetch origin
+
+# 2. 强制将本地重置为远程 main 分支的状态
+# ⚠️ 警告: 本地所有未推送的修改都会丢失！
+git reset --hard origin/main
+```
+
+---
+
+## 五、 常用命令速查
+
+| 场景 | 命令 |
+| :--- | :--- |
+| 初始化仓库 | `git init` |
+| 关联远程库 | `git remote add origin <URL>` |
+| 查看修改内容差异 | `git diff` |
+| 查看提交历史 | `git log` |
+| 查看操作记录 (找回丢失的commit) | `git reflog` |
+| 创建新分支 | `git checkout -b <分支名>` |
+| 切换分支 | `git checkout <分支名>` |
+| 合并分支 | `git merge <分支名>` |
+
+---
+
+> 💡 **小贴士**: 在执行任何 `reset --hard` (强制回退) 操作前，最好先确认 `git status` 状态，确保没有重要的未提交代码。
