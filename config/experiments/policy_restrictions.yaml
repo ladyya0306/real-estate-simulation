@@ -20,7 +20,7 @@ decision_factors:
   activation:
     weights:
       multi_property_holder: -1.0  # 多房者激活概率大幅降低（禁止买入）
-      high_wealth_no_property: 0.3 # 无房高净值者激活率进一步提升
+      high_wealth_no_property: 0.3  # 无房高净值者激活率进一步提升
 
 market:
   zones:

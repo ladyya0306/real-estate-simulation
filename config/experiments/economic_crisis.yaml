@@ -31,7 +31,7 @@ decision_factors:
     base_probability: 0.001  # 激活率降至0.1% (市场冻结)
     weights:
       low_cash_poor: -0.8  # 现金流压力极大
-      high_wealth_no_property: 0.0 # 抄底意愿低
+      high_wealth_no_property: 0.0  # 抄底意愿低
 
 # 强制抛售机制及其触发阈值
 forced_sale:
