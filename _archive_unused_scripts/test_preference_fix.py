@@ -3,10 +3,11 @@
 """
 import sqlite3
 import sys
+
 sys.path.insert(0, 'd:/GitProj/oasis-main')
 
-from services.agent_service import AgentService
 from config.config_loader import SimulationConfig
+from services.agent_service import AgentService
 
 db_path = 'results/run_20260208_201643/simulation.db'
 conn = sqlite3.connect(db_path)
@@ -56,4 +57,3 @@ else:
     print(f"\n❌ 修复未完全生效，还有 {len(buyers_without_pref)} 个buyers缺少preference")
 
 conn.close()
-

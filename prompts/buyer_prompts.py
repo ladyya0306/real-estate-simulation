@@ -32,7 +32,7 @@ BUYER_PREFERENCE_TEMPLATE = """
 
 请输出JSON：
 {{
-    "target_zone": "{default_zone}", 
+    "target_zone": "{default_zone}",
     "min_bedrooms": 1,
     "max_price": {max_price:.0f},
     "investment_motivation": "high/medium/low",

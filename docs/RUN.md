@@ -3,12 +3,14 @@
 ## 第一步：配置 DeepSeek API Key
 
 1. **编辑配置文件**：
+
    ```bash
    # 方式 1：直接修改 .env.deepseek 文件
    # 将 sk-your-deepseek-api-key-here 替换为你的真实 API Key
    ```
 
-2. **或者使用环境变量**（推荐）：
+1. **或者使用环境变量**（推荐）：
+
    ```powershell
    # Windows PowerShell
    $env:DEEPSEEK_API_KEY = "sk-你的API密钥"
@@ -120,6 +122,7 @@ conn.close()
 ## 常见问题
 
 ### Q1：找不到模块？
+
 ```bash
 # 确认已安装 camel-ai
 pip show camel-ai
@@ -129,7 +132,9 @@ pip install camel-ai==0.2.78
 ```
 
 ### Q2：API Key 错误？
+
 确认环境变量设置正确：
+
 ```powershell
 # 检查环境变量
 echo $env:DEEPSEEK_API_KEY  # PowerShell
@@ -137,6 +142,7 @@ echo $DEEPSEEK_API_KEY      # Linux/macOS
 ```
 
 ### Q3：运行很慢？
+
 这是正常的，因为 LLM 需要时间推理。每个智能体的决策大约需要 1-3 秒。
 
 ## 下一步
@@ -144,8 +150,8 @@ echo $DEEPSEEK_API_KEY      # Linux/macOS
 运行成功后，你可以：
 
 1. **修改智能体数量**：在 `quick_start_deepseek.py` 中添加更多智能体
-2. **修改行动类型**：在 `available_actions` 中添加更多行动
-3. **运行其他示例**：查看 `examples/` 目录
-4. **查看文档**：阅读之前创建的配置指南
+1. **修改行动类型**：在 `available_actions` 中添加更多行动
+1. **运行其他示例**：查看 `examples/` 目录
+1. **查看文档**：阅读之前创建的配置指南
 
 祝你使用愉快！🎉

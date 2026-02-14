@@ -5,14 +5,11 @@ Export Results Script
 Exports DB tables and Logs to a timestamped folder.
 Enhanced to produce "房产交易中心记录.csv" with rich details.
 """
-import sqlite3
-import shutil
-import csv
-import os
 import datetime
 import logging
-import json
-import pandas as pd
+import os
+import shutil
+import sqlite3
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
 logger = logging.getLogger(__name__)
@@ -25,11 +22,11 @@ def find_latest_result_dir(base_dir="results"):
     """Find the most recently created result directory"""
     if not os.path.exists(base_dir):
         return None
-    
+
     dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) if d.startswith("result_")]
     if not dirs:
         return None
-        
+
     # Sort by creation time (or name which has timestamp)
     dirs.sort(key=os.path.getmtime, reverse=True)
     return dirs[0]
@@ -55,7 +52,7 @@ def export_data(db_path=None, output_dir=None):
         result_dir = output_dir
         if not os.path.exists(result_dir):
             os.makedirs(result_dir, exist_ok=True)
-    
+
     # 2. Copy Logs
     if os.path.exists(LOG_FILE):
         # ✅ User Request: Rename to run.log
@@ -65,10 +62,10 @@ def export_data(db_path=None, output_dir=None):
     # ✅ User Request: Disable all CSV Exports
     # The DB is already in the result_dir (handled by project_manager), so we don't need to do anything else.
     # Just close connection and return.
-    
+
     conn = sqlite3.connect(db_path)
     conn.close()
-    
+
     logger.info("✅ Export Complete (Log only).")
     return
 
@@ -81,4 +78,3 @@ def export_data(db_path=None, output_dir=None):
 
 if __name__ == "__main__":
     export_data()
-

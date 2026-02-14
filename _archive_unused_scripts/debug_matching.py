@@ -1,5 +1,4 @@
 import sqlite3
-import os
 
 db_path = r'd:\GitProj\oasis-main\results\run_20260208_171858\simulation.db'
 
@@ -54,4 +53,3 @@ try:
 
 except Exception as e:
     print(f"Error: {e}")
-

@@ -1,5 +1,6 @@
 """快速检查properties_market的字段"""
 import sqlite3
+
 import pandas as pd
 
 db_path = 'results/run_20260208_201643/simulation.db'
@@ -20,4 +21,3 @@ print(df2.to_string())
 print(f"\n字段名: {df2.columns.tolist()}")
 
 conn.close()
-

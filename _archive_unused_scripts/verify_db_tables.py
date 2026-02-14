@@ -8,7 +8,7 @@ tables = [row[0] for row in cursor.fetchall()]
 print("数据库中的表:")
 for table in sorted(tables):
     print(f"  ✓ {table}")
-    
+
 print(f"\n总计: {len(tables)} 个表")
 
 # 验证所有必需的表都存在

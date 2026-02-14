@@ -1,11 +1,10 @@
-import sqlite3
+import csv
 import json
 import os
-import csv
-import csv
+import sqlite3
 from datetime import datetime
+
 import matplotlib.pyplot as plt
-import numpy as np
 
 # Default Constants
 DB_PATH = 'real_estate_stage2.db'
@@ -21,7 +20,7 @@ def export_legacy_csvs(results_dir):
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
-    
+
     # 1. agents.csv
     print(f"Exporting agents.csv to {results_dir}...")
     cursor.execute("SELECT * FROM agents")
@@ -32,7 +31,7 @@ def export_legacy_csvs(results_dir):
             writer.writeheader()
             for row in rows:
                 writer.writerow(dict(row))
-                
+
     # 2. thoughts.csv (Mapped from decision_logs, 解析JSON为易读格式)
     print("Exporting thoughts.csv...")
     cursor.execute("SELECT month, agent_id, decision as role, reason as trigger, thought_process FROM decision_logs")
@@ -54,7 +53,7 @@ def export_legacy_csvs(results_dir):
                     price_exp = tp.get('price_expectation', '')
                 except:
                     pass
-                
+
                 writer.writerow({
                     '月份': row_dict.get('month', ''),
                     '代理人ID': row_dict.get('agent_id', ''),
@@ -75,7 +74,7 @@ def export_legacy_csvs(results_dir):
             writer.writeheader()
             for row in rows:
                 writer.writerow(dict(row))
-                
+
     # 4. trans.csv (transactions)
     print("Exporting trans.csv...")
     try:
@@ -93,7 +92,7 @@ def export_legacy_csvs(results_dir):
                 f.write("transaction_id,buyer_id,seller_id,board_id,price,date\n")
     except Exception as e:
         print(f"Error exporting trans.csv: {e}")
-        
+
     # 5. console_log.txt (Copy current log)
     print("Copying console_log.txt...")
     try:
@@ -113,7 +112,7 @@ def generate_agent_personas(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT agent_id, name, age, occupation, background_story, housing_need, selling_motivation FROM agents")
-    
+
     content = "# Agent Personas Report\n\n"
     for row in cursor.fetchall():
         content += f"## Agent {row[0]}: {row[1]} ({row[2]}岁)\n"
@@ -122,7 +121,7 @@ def generate_agent_personas(report_dir=REPORT_DIR):
         content += f"- **Housing Need**: {row[5]}\n"
         content += f"- **Selling Motivation**: {row[6]}\n"
         content += "---\n"
-        
+
     with open(f"{report_dir}/agent_personas.md", "w", encoding='utf-8') as f:
         f.write(content)
     print(f"Generated {report_dir}/agent_personas.md")
@@ -132,7 +131,7 @@ def generate_negotiations(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT negotiation_id, buyer_id, seller_id, property_id, success, log, final_price FROM negotiations")
-    
+
     content = "# Negotiation Logs\n\n"
     for row in cursor.fetchall():
         status = "✅ SUCCESS" if row[4] else "❌ FAILED"
@@ -140,7 +139,7 @@ def generate_negotiations(report_dir=REPORT_DIR):
         content += f"## Negotiation #{row[0]} ({status})\n"
         content += f"**Buyer**: {row[1]} | **Seller**: {row[2]} | **Property**: {row[3]} | **Final Price**: {price}\n\n"
         content += "### Dialogue History\n"
-        
+
         try:
             logs = json.loads(row[5])
             for entry in logs:
@@ -148,11 +147,11 @@ def generate_negotiations(report_dir=REPORT_DIR):
                 action = entry.get('action', 'Unknown')
                 price_call = entry.get('price', 0)
                 reason = entry.get('content', '') or entry.get('reason', '')
-                
+
                 content += f"- **{party}** ({action} @ ${price_call:,.0f}): {reason}\n"
         except:
              content += f"Raw Log: {row[5]}\n"
-        
+
         content += "\n---\n"
 
     with open(f"{report_dir}/negotiations.md", "w", encoding='utf-8') as f:
@@ -164,14 +163,14 @@ def generate_decisions(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT month, agent_id, decision, reason, thought_process FROM decision_logs ORDER BY month, agent_id")
-    
+
     content = "# Decision Logs (Thoughts)\n\n"
     current_month = -1
     for row in cursor.fetchall():
         if row[0] != current_month:
             content += f"\n## Month {row[0]}\n"
             current_month = row[0]
-            
+
         content += f"### Agent {row[1]} -> {row[2]}\n"
         content += f"**Reasoning**: {row[3]}\n"
         content += "\n"
@@ -184,25 +183,25 @@ def generate_decisions(report_dir=REPORT_DIR):
 def generate_market_report(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    
+
     content = "# Market Report\n\n"
-    
+
     # Overview
     cursor.execute("SELECT COUNT(*), AVG(initial_value) FROM properties_static")
     row = cursor.fetchone()
-    content += f"## Overview\n"
+    content += "## Overview\n"
     val = row[1] if row[1] else 0
     content += f"- Total Properties: {row[0]}\n"
     content += f"- Avg Value: ${val:,.0f}\n\n"
-    
+
     # Listings
     cursor.execute("SELECT COUNT(*), AVG(listed_price) FROM properties_market WHERE status='for_sale'")
     row = cursor.fetchone()
     price = row[1] if row[1] else 0
-    content += f"## Active Listings\n"
+    content += "## Active Listings\n"
     content += f"- Count: {row[0]}\n"
     content += f"- Avg List Price: ${price:,.0f}\n\n"
-    
+
     # Transactions
     try:
         cursor.execute("SELECT * FROM transactions")
@@ -225,7 +224,7 @@ def generate_wealth_distribution(results_dir):
     # Note: Property Value approximation using base_value or listed_price
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT a.agent_id, a.cash, 
+        SELECT a.agent_id, a.cash,
                COALESCE(SUM(pm.current_valuation), 0) as prop_wealth
         FROM agents a
         LEFT JOIN properties_market pm ON a.agent_id = pm.owner_id
@@ -233,20 +232,20 @@ def generate_wealth_distribution(results_dir):
     """)
     rows = cursor.fetchall()
     conn.close()
-    
+
     if not rows:
         print("No agents found for wealth chart.")
         return
-        
+
     net_worths = [(row[1] + row[2]) / 10000 for row in rows] # Convert to Wan (10k)
-    
+
     plt.figure(figsize=(10, 6))
     plt.hist(net_worths, bins=50, color='skyblue', edgecolor='black', alpha=0.7)
     plt.title('Agent Wealth Distribution')
     plt.xlabel('Net Worth (10k CNY)')
     plt.ylabel('Number of Agents')
     plt.grid(axis='y', alpha=0.5)
-    
+
     # Save
     chart_path = f"{results_dir}/wealth_distribution.png"
     plt.savefig(chart_path)
@@ -256,26 +255,24 @@ def generate_wealth_distribution(results_dir):
 def generate_all_reports():
     """Main entry point for report generation."""
     print("Generating Reports & Exports...")
-    
+
     # 1. Setup Timestamps
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     results_dir = f"results/result_{timestamp}"
     ensure_dir(results_dir)
     ensure_dir(REPORT_DIR)
-    
+
     # 2. Generate Reports
     generate_agent_personas(REPORT_DIR)
     generate_negotiations(REPORT_DIR)
     generate_decisions(REPORT_DIR)
     generate_market_report(REPORT_DIR)
     generate_wealth_distribution(results_dir)
-    
+
     # 3. Export CSVs
     export_legacy_csvs(results_dir)
-    
+
     print(f"Done! Reports saved in {REPORT_DIR}/ and Data in {results_dir}/")
 
 if __name__ == "__main__":
     generate_all_reports()
-
-

@@ -1,8 +1,9 @@
 import asyncio
 import unittest
-from unittest.mock import MagicMock, AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
+
 from transaction_engine import run_batch_bidding_async, run_flash_deal_async
-from models import Agent, AgentPreference
+
 
 # Mock Classes
 class MockAgent:
@@ -53,7 +54,7 @@ class TestNegotiationModes(unittest.TestCase):
     def test_flash_deal_accept(self, mock_llm):
         buyer = self.buyers[0]
         # Flash price will be 4.0M * 0.95 = 3.8M
-        
+
         mock_llm.return_value = {"action": "ACCEPT", "reason": "Good deal"}
 
         loop = asyncio.get_event_loop()
@@ -68,7 +69,7 @@ class TestNegotiationModes(unittest.TestCase):
     @patch('transaction_engine.safe_call_llm_async', new_callable=AsyncMock)
     def test_flash_deal_reject(self, mock_llm):
         buyer = self.buyers[0]
-        
+
         mock_llm.return_value = {"action": "REJECT", "reason": "Still too expensive"}
 
         loop = asyncio.get_event_loop()
@@ -80,4 +81,3 @@ class TestNegotiationModes(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

@@ -1,5 +1,5 @@
-import sqlite3
 import os
+import sqlite3
 import time
 
 # 等待新的模拟结果生成
@@ -14,7 +14,7 @@ while True:
             latest_folder = sorted(folders)[-1]
             db_path = os.path.join(results_dir, latest_folder, 'simulation.db')
             console_log = os.path.join(results_dir, latest_folder, 'console_log.txt')
-            
+
             # 检查console_log是否包含"Export Complete"
             if os.path.exists(console_log):
                 with open(console_log, 'r', encoding='utf-8') as f:
@@ -22,7 +22,7 @@ while True:
                     if '✅ Export Complete' in content:
                         print(f"✅ 模拟完成！数据库: {db_path}\n")
                         break
-    
+
     time.sleep(5)
 
 # 验证数据库
@@ -81,7 +81,7 @@ if tc > 0:
     for row in cursor.fetchall():
         month, pid, bid, sid, price, rounds = row
         print(f"  第{month}月: 房产#{pid} | 买家#{bid}→卖家#{sid} | ¥{price:,.0f} | {rounds}轮谈判")
-    
+
     # 统计谈判轮数分布
     cursor.execute("SELECT negotiation_rounds, COUNT(*) FROM transactions GROUP BY negotiation_rounds ORDER BY negotiation_rounds")
     print(f"\n  【谈判轮数分布】")
@@ -96,4 +96,3 @@ else:
 print("="*70)
 
 conn.close()
-

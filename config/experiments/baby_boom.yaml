@@ -9,7 +9,7 @@ agent_tiers:
     high: 20        # 高收入占比从10%提升到20%
     middle: 40      # 中产从30%提升到40%
     low: 40         # 低收入从60%降到40%
-  
+
   initial_wealth:
     middle:
       cash_ratio: [2, 8]  # 中产财富积累增加（父辈支持）

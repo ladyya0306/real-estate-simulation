@@ -1,8 +1,9 @@
-import os
-from dotenv import load_dotenv
-from openai import OpenAI, AsyncOpenAI
 import json
 import logging
+import os
+
+from dotenv import load_dotenv
+from openai import AsyncOpenAI, OpenAI
 
 # Load environment variables
 load_dotenv()
@@ -59,7 +60,7 @@ def call_llm(prompt: str, system_prompt: str = "You are a helpful assistant in a
     model_type: 'smart' (default) or 'fast'
     """
     current_client = get_client(model_type, is_async=False)
-    
+
     try:
         kwargs = {
             "model": get_model_id(model_type),
@@ -84,11 +85,11 @@ def safe_call_llm(prompt: str, default_return: dict, system_prompt: str = "", mo
     Call LLM and parse JSON response. Returns default if failure.
     """
     json_prompt = prompt + "\n\n请只输出JSON格式，不要包含Markdown代码块或其他文本。"
-    
+
     response_text = call_llm(json_prompt, system_prompt, json_mode=True, model_type=model_type)
-    
+
     clean_text = response_text.replace("```json", "").replace("```", "").strip()
-    
+
     try:
         return json.loads(clean_text)
     except json.JSONDecodeError:
@@ -132,11 +133,11 @@ async def safe_call_llm_async(prompt: str, default_return: dict, system_prompt: 
     Async wrapper for safe JSON LLM calls.
     """
     json_prompt = prompt + "\n\n请只输出JSON格式，不要包含Markdown代码块或其他文本。"
-    
+
     response_text = await call_llm_async(json_prompt, system_prompt, json_mode=True, model_type=model_type)
-    
+
     clean_text = response_text.replace("```json", "").replace("```", "").strip()
-    
+
     try:
         return json.loads(clean_text)
     except json.JSONDecodeError:
@@ -149,4 +150,3 @@ async def safe_call_llm_async(prompt: str, default_return: dict, system_prompt: 
         except:
             pass
         return default_return
-

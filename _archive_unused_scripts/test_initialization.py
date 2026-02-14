@@ -1,13 +1,14 @@
 
 import sys
+
 sys.stdout.reconfigure(encoding='utf-8')
 import logging
-import sqlite3
 import os
-import shutil
+import sqlite3
+
+from database import init_db
 from services.agent_service import AgentService
 from services.market_service import MarketService
-from database import init_db
 
 # Setup Logger
 logging.basicConfig(level=logging.INFO)
@@ -41,34 +42,34 @@ def test_initialization():
             pass
     init_db(TEST_DB)
     conn = sqlite3.connect(TEST_DB)
-    
+
     # Mock Config
     config = MockConfig()
-    
+
     # 2. Init Services
     market_service = MarketService(config, conn)
     properties = market_service.initialize_market()
-    
+
     agent_service = AgentService(config, conn)
-    
+
     # 3. Run Initialization
     logger.info("Initializing Agents...")
     agent_service.initialize_agents(20, properties)
-    
+
     # 4. Verify
     inconsistencies = 0
     checked = 0
-    
+
     print("\n--- Verification Results ---")
     for agent in agent_service.agents:
         props = len(agent.owned_properties)
         story = agent.story.background_story
         need = agent.story.housing_need
         cash = agent.cash
-        
+
         print(f"Agent {agent.id}: Props={props}, Cash={cash:,.0f}, Need={need}")
         print(f"Story: {story[:50]}...")
-        
+
         if props > 0:
             checked += 1
             # Check for forbidden keywords
@@ -77,12 +78,11 @@ def test_initialization():
                 inconsistencies += 1
             else:
                 print("  [PASS] Consistent.")
-        
+
     print(f"\nChecked {checked} property owners.")
     print(f"Inconsistencies found: {inconsistencies}")
-    
+
     conn.close()
-    
+
 if __name__ == "__main__":
     test_initialization()
-

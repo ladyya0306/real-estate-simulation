@@ -72,7 +72,7 @@ D. 撤牌观望 (转售为租，或等待明年)
 返回 JSON:
 {{
     "action": "A",  # 选择 A/B/C/D
-    "coefficient": 1.0, 
+    "coefficient": 1.0,
     "reason": "简述原因（必须引用竞品价或持有成本）"
 }}
 """

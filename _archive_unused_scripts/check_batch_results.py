@@ -1,6 +1,6 @@
 
-import sqlite3
 import os
+import sqlite3
 
 proj_name = "test_run_batch_match_v2"
 db_path = os.path.join("results", proj_name, "simulation.db")
@@ -41,4 +41,3 @@ buyer_count = cursor.fetchone()[0]
 print(f"\n✅ Active Buyers Remaining: {buyer_count}")
 
 conn.close()
-

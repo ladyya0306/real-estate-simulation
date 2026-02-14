@@ -1,8 +1,6 @@
 
-import sqlite3
 import logging
-import random
-from typing import List, Dict, Optional
+import sqlite3
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +17,7 @@ class RentalService:
         3. Deduct Rent Expense for Tenants.
         """
         logger.info(f"--- Processing Rental Market for Month {month} (Abstract Model) ---")
-        
+
         self._update_rental_valuations()
         self._process_abstract_rent_flows(month)
 
@@ -41,7 +39,7 @@ class RentalService:
         - Tenants: Pay average rent of their TARGET zone.
         """
         cursor = self.conn.cursor()
-        
+
         # 1. Landlord Income
         # Identify owners with > 1 property
         # Fetch all properties grouped by owner
@@ -52,16 +50,16 @@ class RentalService:
             ORDER BY owner_id, current_valuation DESC
         """)
         rows = cursor.fetchall()
-        
+
         from collections import defaultdict
         owner_props = defaultdict(list)
         for r in rows:
             owner_props[r[0]].append(r[1]) # List of rental_prices, sorted by value DESC
-            
+
         total_income = 0
         landlord_count = 0
         batch_income = []
-        
+
         for owner_id, rents in owner_props.items():
             if len(rents) > 1:
                 # Primary (first one) is free/lived-in. Rest are rented out.
@@ -70,7 +68,7 @@ class RentalService:
                     batch_income.append((income, income, owner_id))
                     total_income += income
                     landlord_count += 1
-                    
+
         if batch_income:
             cursor.executemany("UPDATE agents_finance SET cash = cash + ?, net_cashflow = net_cashflow + ? WHERE agent_id = ?", batch_income)
 
@@ -79,32 +77,32 @@ class RentalService:
         cursor.execute("SELECT AVG(rental_price) FROM properties_market JOIN properties_static ON properties_market.property_id = properties_static.property_id WHERE zone = 'A'")
         res_a = cursor.fetchone()
         rent_a = res_a[0] if res_a and res_a[0] else 5000
-        
+
         cursor.execute("SELECT AVG(rental_price) FROM properties_market JOIN properties_static ON properties_market.property_id = properties_static.property_id WHERE zone = 'B'")
         res_b = cursor.fetchone()
         rent_b = res_b[0] if res_b and res_b[0] else 2500
-        
+
         rents = {"A": rent_a, "B": rent_b}
-        
+
         # Identify Tenants: Active Non-Owners
         cursor.execute("""
-            SELECT ap.agent_id, ap.target_zone 
+            SELECT ap.agent_id, ap.target_zone
             FROM active_participants ap
             WHERE ap.agent_id NOT IN (SELECT DISTINCT owner_id FROM properties_market WHERE owner_id IS NOT NULL)
             AND ap.role != 'observer'
         """)
         tenants = cursor.fetchall()
-        
+
         total_expense = 0
         tenant_count = 0
         batch_expense = []
         batch_status_update = []
-        
+
         for agent_id, target_zone in tenants:
             # If target_zone is None, default to B
             zone = target_zone if target_zone in ['A', 'B'] else 'B'
             rent_to_pay = rents[zone]
-            
+
             batch_expense.append((rent_to_pay, rent_to_pay, agent_id))
             # Just mark them as renting, don't change role
             # But we might want to track rental status
@@ -112,17 +110,15 @@ class RentalService:
             # Or just assume.
             total_expense += rent_to_pay
             tenant_count += 1
-            
+
         if batch_expense:
             cursor.executemany("UPDATE agents_finance SET cash = cash - ?, net_cashflow = net_cashflow - ? WHERE agent_id = ?", batch_expense)
-            
+
         # Update Owners status
         if owner_props:
              owner_ids = list(owner_props.keys())
              # Batch update rental_status='owned' is tricky without column, but let's assume valid
              pass
-                
+
         self.conn.commit()
         logger.info(f"Rental Flow: {landlord_count} Landlords earned {total_income:,.0f}; {tenant_count} Tenants paid {total_expense:,.0f} (A:{rent_a:.0f}, B:{rent_b:.0f})")
-
-

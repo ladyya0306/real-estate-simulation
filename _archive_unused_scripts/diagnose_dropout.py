@@ -4,7 +4,6 @@
 诊断脚本：分析为什么 Agent 在 Month 1 激活后大量退出市场
 """
 import sqlite3
-import json
 
 db_path = r'd:\GitProj\oasis-main\results\run_20260209_205146\simulation.db'
 conn = sqlite3.connect(db_path)
@@ -18,9 +17,9 @@ print("=" * 80)
 # 1. 统计各月激活情况
 print("\n【1】激活情况统计")
 cursor.execute("""
-    SELECT activated_month, role, COUNT(*) as count 
-    FROM active_participants 
-    GROUP BY activated_month, role 
+    SELECT activated_month, role, COUNT(*) as count
+    FROM active_participants
+    GROUP BY activated_month, role
     ORDER BY activated_month, role
 """)
 for row in cursor.fetchall():
@@ -29,10 +28,10 @@ for row in cursor.fetchall():
 # 2. 查看 decision_logs 中的退出决策
 print("\n【2】退出决策统计 (EXIT_DECISION)")
 cursor.execute("""
-    SELECT month, decision, reason, COUNT(*) as count 
-    FROM decision_logs 
-    WHERE event_type = 'EXIT_DECISION' 
-    GROUP BY month, decision 
+    SELECT month, decision, reason, COUNT(*) as count
+    FROM decision_logs
+    WHERE event_type = 'EXIT_DECISION'
+    GROUP BY month, decision
     ORDER BY month
 """)
 exit_rows = cursor.fetchall()
@@ -41,9 +40,9 @@ if exit_rows:
         print(f"  Month {row['month']}: {row['decision']} ({row['count']} agents)")
         if row['count'] <= 5:  # 打印少数样本的理由
             cursor.execute("""
-                SELECT agent_id, reason 
-                FROM decision_logs 
-                WHERE event_type='EXIT_DECISION' AND month=? AND decision=? 
+                SELECT agent_id, reason
+                FROM decision_logs
+                WHERE event_type='EXIT_DECISION' AND month=? AND decision=?
                 LIMIT 3
             """, (row['month'], row['decision']))
             samples = cursor.fetchall()
@@ -55,9 +54,9 @@ else:
 # 3. 检查 active_participants 的 role_duration
 print("\n【3】Active Participants 的 role_duration 分析")
 cursor.execute("""
-    SELECT role, role_duration, COUNT(*) as count 
-    FROM active_participants 
-    GROUP BY role, role_duration 
+    SELECT role, role_duration, COUNT(*) as count
+    FROM active_participants
+    GROUP BY role, role_duration
     ORDER BY role, role_duration
 """)
 for row in cursor.fetchall():
@@ -66,8 +65,8 @@ for row in cursor.fetchall():
 # 4. 检查 Month 1 激活的 Agent 现在是否还在表中
 print("\n【4】Month 1 激活的 Agent 留存情况")
 cursor.execute("""
-    SELECT COUNT(*) as total 
-    FROM active_participants 
+    SELECT COUNT(*) as total
+    FROM active_participants
     WHERE activated_month = 1
 """)
 month1_remaining = cursor.fetchone()['total']
@@ -103,10 +102,10 @@ for row in cursor.fetchall():
 # 7. 检查是否有 Buyer 被意外删除的痕迹
 print("\n【7】检查 decision_logs 中所有与 BUYER 相关的事件")
 cursor.execute("""
-    SELECT month, event_type, COUNT(*) as count 
-    FROM decision_logs 
-    WHERE event_type NOT IN ('LIFE_EVENT', 'ROLE_DECISION') 
-    GROUP BY month, event_type 
+    SELECT month, event_type, COUNT(*) as count
+    FROM decision_logs
+    WHERE event_type NOT IN ('LIFE_EVENT', 'ROLE_DECISION')
+    GROUP BY month, event_type
     ORDER BY month, event_type
 """)
 for row in cursor.fetchall():
@@ -122,9 +121,9 @@ print("  ③ 交易完成后的 Agent 移除逻辑有误")
 # 9. 检查 Month 1 的 ROLE_ACTIVATION 日志
 print("\n【9】Month 1 的 ROLE_ACTIVATION 决策")
 cursor.execute("""
-    SELECT decision, COUNT(*) as count 
-    FROM decision_logs 
-    WHERE month = 1 AND event_type = 'ROLE_ACTIVATION' 
+    SELECT decision, COUNT(*) as count
+    FROM decision_logs
+    WHERE month = 1 AND event_type = 'ROLE_ACTIVATION'
     GROUP BY decision
 """)
 month1_activation = cursor.fetchall()
@@ -136,10 +135,10 @@ else:
 
 # Fallback: 查看 ROLE_DECISION
 cursor.execute("""
-    SELECT month, decision, COUNT(*) as count 
-    FROM decision_logs 
-    WHERE event_type = 'ROLE_DECISION' 
-    GROUP BY month, decision 
+    SELECT month, decision, COUNT(*) as count
+    FROM decision_logs
+    WHERE event_type = 'ROLE_DECISION'
+    GROUP BY month, decision
     ORDER BY month
 """)
 print("\n【10】ROLE_DECISION 统计")
@@ -151,4 +150,3 @@ conn.close()
 print("\n" + "=" * 80)
 print("诊断完成")
 print("=" * 80)
-

@@ -1,21 +1,21 @@
 
+import logging
 import os
 import shutil
-import sqlite3
+
 from config.config_loader import SimulationConfig
-from simulation_runner import SimulationRunner, init_db
-import logging
+from simulation_runner import SimulationRunner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 def run_verification():
     print("=== Starting Verification Simulation (Programmatic) ===")
-    
+
     # 1. Setup Project
     proj_name = "test_run_batch_match_v2"
     proj_dir = os.path.join("results", proj_name)
-    
+
     if os.path.exists(proj_dir):
         try:
             shutil.rmtree(proj_dir)
@@ -23,25 +23,25 @@ def run_verification():
             pass
     if not os.path.exists(proj_dir):
         os.makedirs(proj_dir)
-    
+
     # 2. Config
     config_path = "config/baseline.yaml"
     config = SimulationConfig(config_path)
-    
+
     # Override for testing
     agent_count = 50
     months = 2
-    
+
     config.update('simulation.agent_count', agent_count)
     config.update('simulation.months', months)
-    
+
     # Save user config
-    user_config_path = os.path.join(proj_dir, "user_config.yaml") 
+    user_config_path = os.path.join(proj_dir, "user_config.yaml")
     config.save(user_config_path)
-    
+
     # 3. DB Path
     db_path = os.path.join(proj_dir, "simulation.db")
-    
+
     # 4. Instantiate Runner (Correct Signature)
     # def __init__(self, agent_count=50, months=12, seed=42, resume=False, config=None, db_path=None):
     runner = SimulationRunner(
@@ -52,7 +52,7 @@ def run_verification():
         config=config,
         db_path=db_path
     )
-    
+
     # 5. Run
     try:
         runner.run()
@@ -64,4 +64,3 @@ def run_verification():
 
 if __name__ == "__main__":
     run_verification()
-

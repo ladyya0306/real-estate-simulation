@@ -85,4 +85,3 @@ def get_current_macro_sentiment(month: int) -> str:
     Future: Could query DB if we implement 'Set Macro State' intervention.
     """
     return "stable"
-

@@ -23,4 +23,3 @@ for table in tables:
         print(f"  {col[1]} ({col[2]})")
 
 conn.close()
-

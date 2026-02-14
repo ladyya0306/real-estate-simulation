@@ -32,4 +32,3 @@ for r in cursor.fetchall():
     print(f"Agent {r[0]}: Cash={r[1]:,.0f}, Income={r[2]:,.0f}")
 
 conn.close()
-

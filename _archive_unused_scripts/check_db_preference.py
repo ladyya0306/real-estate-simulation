@@ -26,7 +26,7 @@ for row in rows:
 
 # 统计
 cursor.execute("""
-    SELECT 
+    SELECT
         COUNT(*) as total,
         SUM(CASE WHEN target_zone IS NOT NULL THEN 1 ELSE 0 END) as with_zone,
         SUM(CASE WHEN max_price IS NOT NULL AND max_price > 0 THEN 1 ELSE 0 END) as with_price
@@ -35,7 +35,7 @@ cursor.execute("""
 """)
 
 total, with_zone, with_price = cursor.fetchone()
-print(f"\n统计:")
+print("\n统计:")
 print(f"  总buyers: {total}")
 print(f"  有target_zone: {with_zone} ({with_zone/total*100:.1f}%)")
 print(f"  有max_price: {with_price} ({with_price/total*100:.1f}%)")
@@ -47,4 +47,3 @@ else:
 
 conn.close()
 print("=" * 60)
-

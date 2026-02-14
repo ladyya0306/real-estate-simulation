@@ -11,7 +11,7 @@ AGENT_TIER_CONFIG = {
         "lower_middle": 100000,  # >= 10w
         "low": 0                 # < 10w
     },
-    
+
     "tier_distribution": {  # Ratio out of 100 (Population Structure)
         "ultra_high": 1,    # 1% - Elite
         "high": 9,          # 9% - Upper Class
@@ -19,7 +19,7 @@ AGENT_TIER_CONFIG = {
         "lower_middle": 40, # 40% - Working Class
         "low": 20           # 20% - Low Income
     },
-    
+
     # Financial Init Parameters (Random Range Multipliers based on Income)
     "init_params": {
         "ultra_high": {"cash_ratio": (5, 20), "property_count": (3, 6)},
@@ -38,4 +38,3 @@ def get_tier_by_income(income: float) -> str:
     if income >= bounds["middle"]: return "middle"
     if income >= bounds["lower_middle"]: return "lower_middle"
     return "low"
-

@@ -32,7 +32,7 @@ AGENT_PERSONA_TEMPLATES = [
             }
         ]
     },
-    
+
     # --- High Income ---
     {
         "tier_match": "high",
@@ -60,7 +60,7 @@ AGENT_PERSONA_TEMPLATES = [
             }
         ]
     },
-    
+
     # --- Middle Income ---
     {
         "tier_match": "middle",
@@ -76,7 +76,7 @@ AGENT_PERSONA_TEMPLATES = [
                 "occupation": "中小学教师",
                 "background": "重视教育，收入中等但稳定，为了孩子上学，准备卖掉郊区的小房子换一套老破小名校学区房。",
                 "housing_need": "学区",
-                "activation_weight": 0.85, 
+                "activation_weight": 0.85,
                 "age_range": (30, 40)
             },
             {
@@ -88,7 +88,7 @@ AGENT_PERSONA_TEMPLATES = [
             }
         ]
     },
-    
+
     # --- Lower Middle & Low Income ---
     {
         "tier_match": ["lower_middle", "low"],
@@ -127,7 +127,7 @@ def get_template_for_tier(tier: str, rng):
         if (isinstance(match, list) and tier in match) or match == tier:
             candidates = group["templates"]
             break
-            
+
     if not candidates:
         # Fallback
         return {
@@ -137,6 +137,5 @@ def get_template_for_tier(tier: str, rng):
             "activation_weight": 0.1,
             "age_range": (25, 50)
         }
-        
-    return rng.choice(candidates)
 
+    return rng.choice(candidates)

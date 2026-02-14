@@ -10,7 +10,7 @@ transaction_rules:
   purchase_qualification:
     require_local_hukou: true    # 需要本地户口
     min_social_security_months: 60  # 需缴纳5年社保
-  
+
   exemptions:
     first_time_buyer: true       # 首次购房不受限
     upgrade_allowed: true        # 允许"卖一买一"置换

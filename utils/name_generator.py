@@ -1,12 +1,13 @@
 
 import random
 
+
 class ChineseNameGenerator:
     """
     Generate unique Chinese names deterministically based on a seed.
     Supports generating millions of unique names by combining surnames and given names.
     """
-    
+
     # Top 100 Surnames (covering majority of population)
     SURNAMES = [
         "李", "王", "张", "刘", "陈", "杨", "赵", "黄", "周", "吴",
@@ -20,7 +21,7 @@ class ChineseNameGenerator:
         "顾", "侯", "邵", "孟", "龙", "万", "段", "漕", "钱", "汤",
         "尹", "黎", "易", "常", "武", "乔", "贺", "赖", "龚", "文"
     ]
-    
+
     # Common characters for given names
     GIVEN_CHARS = [
         "伟", "芳", "娜", "秀", "敏", "静", "丽", "强", "磊", "军",
@@ -33,7 +34,7 @@ class ChineseNameGenerator:
         "东", "南", "西", "北", "亚", "洲", "国", "家", "安", "定",
         "成", "功", "胜", "利", "兴", "旺", "发", "达", "智", "慧"
     ]
-    
+
     def __init__(self, seed=None):
         self.used_names = set()
         self.rng = random.Random(seed) if seed is not None else random
@@ -53,23 +54,22 @@ class ChineseNameGenerator:
                 given = self.rng.choice(self.GIVEN_CHARS) + self.rng.choice(self.GIVEN_CHARS)
             else:
                 given = self.rng.choice(self.GIVEN_CHARS)
-            
+
             name = surname + given
             if name not in self.used_names:
                 self.used_names.add(name)
                 return name
-        
+
         # Fallback: Deterministic generation using counter to guarantee uniqueness if random fails too often
         self.counter += 1
         # Use counter to pick characters to ensure determinism
         s_idx = (self.counter // 10000) % len(self.SURNAMES)
         g1_idx = (self.counter // 100) % len(self.GIVEN_CHARS)
         g2_idx = self.counter % len(self.GIVEN_CHARS)
-        
+
         name = f"{self.SURNAMES[s_idx]}{self.GIVEN_CHARS[g1_idx]}{self.GIVEN_CHARS[g2_idx]}"
         if name in self.used_names:
             name += str(self.counter) # Last resort
-            
+
         self.used_names.add(name)
         return name
-

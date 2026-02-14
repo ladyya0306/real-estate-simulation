@@ -1,10 +1,11 @@
 
+import logging
 import os
 import shutil
-import logging
-from simulation_runner import SimulationRunner
+
 from config.config_loader import SimulationConfig
 from database import init_db
+from simulation_runner import SimulationRunner
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -15,10 +16,10 @@ def run_auto():
     if os.path.exists(proj_dir):
         shutil.rmtree(proj_dir)
     os.makedirs(proj_dir)
-    
+
     config_path = os.path.join(proj_dir, "config.yaml")
     db_path = os.path.join(proj_dir, "simulation.db")
-    
+
     # Copy baseline config
     if os.path.exists("config/baseline.yaml"):
         shutil.copy("config/baseline.yaml", config_path)
@@ -29,10 +30,10 @@ def run_auto():
     # Initialize DB (This triggers migration)
     print(f"Initializing DB at {db_path}...")
     init_db(db_path)
-    
+
     # Load Config
     config = SimulationConfig(config_path)
-    
+
     # Initialize Runner
     runner = SimulationRunner(
         agent_count=50, # Small count for speed
@@ -42,7 +43,7 @@ def run_auto():
         config=config,
         db_path=db_path
     )
-    
+
     # Run
     print("Starting simulation run...")
     runner.run()

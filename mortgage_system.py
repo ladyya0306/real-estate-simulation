@@ -1,9 +1,10 @@
 """
 Mortgage System: Loan Calculation and Affordability Check
 """
-import math
-from typing import Dict, Tuple
+from typing import Tuple
+
 from config.settings import MORTGAGE_CONFIG
+
 
 def calculate_monthly_payment(loan_amount: float, annual_rate: float, years: int) -> float:
     """
@@ -12,13 +13,13 @@ def calculate_monthly_payment(loan_amount: float, annual_rate: float, years: int
     """
     if loan_amount <= 0:
         return 0.0
-    
+
     monthly_rate = annual_rate / 12
     num_payments = years * 12
-    
+
     if monthly_rate == 0:
         return loan_amount / num_payments
-        
+
     payment = loan_amount * (monthly_rate * (1 + monthly_rate) ** num_payments) / ((1 + monthly_rate) ** num_payments - 1)
     return payment
 
@@ -38,26 +39,26 @@ def check_affordability(agent, price: float, config=None) -> Tuple[bool, float, 
     min_down_payment = price * down_ratio
     if agent.cash < min_down_payment:
         return False, 0.0, 0.0
-        
+
     # 2. Loan Amount Needed
     down_payment = min_down_payment
     loan_amount = price - down_payment
-    
+
     # 3. DTI Check (Debt-to-Income)
     # Calculate new monthly payment
     new_monthly_payment = calculate_monthly_payment(
-        loan_amount, 
-        annual_rate, 
+        loan_amount,
+        annual_rate,
         loan_term
     )
-    
+
     total_monthly_payment = agent.mortgage_monthly_payment + new_monthly_payment
     max_payment = agent.monthly_income * max_dti
-    
+
     if total_monthly_payment > max_payment:
         # Cannot afford monthly payment
         return False, 0.0, 0.0
-        
+
     return True, down_payment, loan_amount
 
 def get_max_loan(agent) -> float:
@@ -66,18 +67,18 @@ def get_max_loan(agent) -> float:
     """
     max_payment = agent.monthly_income * MORTGAGE_CONFIG["max_dti_ratio"]
     available_payment = max(0, max_payment - agent.mortgage_monthly_payment)
-    
+
     # Inverse of monthly payment formula to get Principal
     # P = M * [ (1 + i)^n - 1 ] / [ i(1 + i)^n ]
-    
+
     annual_rate = MORTGAGE_CONFIG["annual_interest_rate"]
     years = MORTGAGE_CONFIG["loan_term_years"]
     monthly_rate = annual_rate / 12
     num_payments = years * 12
-    
+
     if monthly_rate == 0:
         return available_payment * num_payments
-        
+
     max_loan = available_payment * ((1 + monthly_rate) ** num_payments - 1) / (monthly_rate * (1 + monthly_rate) ** num_payments)
     return max_loan
 
@@ -91,48 +92,48 @@ def calculate_max_affordable(cash: float, monthly_income: float, existing_paymen
     max_dti = mortgage_cfg.get('max_dti_ratio', 0.5)
     annual_rate = mortgage_cfg.get('annual_interest_rate', 0.05)
     years = mortgage_cfg.get('loan_term_years', 30)
-    
+
     monthly_rate = annual_rate / 12
     num_payments = years * 12
-    
+
     # 方法1: 首付能撬动的总价
     max_by_down = cash / down_ratio
-    
+
     # 方法2: 贷款能力
     available_payment = max(0, monthly_income * max_dti - existing_payment)
-    
+
     if monthly_rate > 0:
         loan_capacity = available_payment * ((1 + monthly_rate) ** num_payments - 1) / (monthly_rate * (1 + monthly_rate) ** num_payments)
     else:
         loan_capacity = available_payment * num_payments
-    
+
     max_by_loan = cash + loan_capacity
-    
+
     return min(max_by_down, max_by_loan)
 
 
 def calculate_max_loan_from_payment(monthly_payment: float, annual_rate: float, years: int) -> float:
     """
     根据月供反推最大贷款额
-    
+
     公式推导：
     月供 P = L * [r*(1+r)^n] / [(1+r)^n - 1]
     => L = P * [(1+r)^n - 1] / [r*(1+r)^n]
-    
+
     Args:
         monthly_payment: 可用月供金额
         annual_rate: 年利率（例如 0.05 表示 5%）
         years: 贷款年限
-    
+
     Returns:
         float: 最大贷款额
     """
     monthly_rate = annual_rate / 12
     n = years * 12
-    
+
     if monthly_rate == 0:
         return monthly_payment * n
-    
+
     factor = (1 + monthly_rate) ** n
     return monthly_payment * (factor - 1) / (monthly_rate * factor)
 
@@ -141,11 +142,11 @@ def calculate_max_affordable_price(agent, config=None) -> float:
     """
     计算agent能负担的最高房价（基于现金和DTI限制）
     这是 calculate_max_affordable 的Agent对象包装版本，方便在交易引擎中调用
-    
+
     Args:
         agent: Agent对象，需要有 cash, monthly_income, monthly_payment 属性
         config: 配置对象（可选），包含 mortgage 配置
-    
+
     Returns:
         float: 最大可负担房价
     """
@@ -155,5 +156,3 @@ def calculate_max_affordable_price(agent, config=None) -> float:
         existing_payment=agent.mortgage_monthly_payment,
         config=config
     )
-
-

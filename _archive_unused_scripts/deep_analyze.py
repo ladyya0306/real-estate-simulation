@@ -2,6 +2,7 @@
 """深度分析新数据库 - 追踪为什么还是只有1笔成交"""
 import sqlite3
 import sys
+
 # Force UTF-8
 sys.stdout.reconfigure(encoding='utf-8')
 
@@ -33,13 +34,13 @@ print(f"  谈判分布: {dict(cursor.fetchall())}")
 # 2. Preference数据检查
 print("\n[2] Buyer Preference数据:")
 cursor.execute("""
-    SELECT agent_id, target_zone, max_price 
-    FROM active_participants 
+    SELECT agent_id, target_zone, max_price
+    FROM active_participants
     WHERE role IN ('BUYER', 'BUYER_SELLER')
     LIMIT 15
 """)
 rows = cursor.fetchall()
-print(f"  样本数据 (前15个):")
+print("  样本数据 (前15个):")
 for r in rows:
     zone = r[1] if r[1] else "NULL"
     price = f"{r[2]:,.0f}" if r[2] else "NULL"
@@ -47,7 +48,7 @@ for r in rows:
 
 # 统计
 cursor.execute("""
-    SELECT 
+    SELECT
         COUNT(*) as total,
         SUM(CASE WHEN target_zone IS NOT NULL THEN 1 ELSE 0 END) as with_zone,
         SUM(CASE WHEN max_price IS NOT NULL AND max_price > 0 THEN 1 ELSE 0 END) as with_price
@@ -76,7 +77,7 @@ for z in zone_prices:
 # 获取Buyer max_price分布
 cursor.execute("""
     SELECT target_zone, MIN(max_price), MAX(max_price), AVG(max_price)
-    FROM active_participants 
+    FROM active_participants
     WHERE role IN ('BUYER', 'BUYER_SELLER') AND max_price > 0
     GROUP BY target_zone
 """)
@@ -93,35 +94,35 @@ print("\n[4] 关键诊断: 买家预算是否足够?")
 for zone_data in zone_prices:
     zone = zone_data[0]
     min_listing_price = zone_data[1]
-    
+
     cursor.execute("""
-        SELECT COUNT(*) FROM active_participants 
-        WHERE role IN ('BUYER', 'BUYER_SELLER') 
+        SELECT COUNT(*) FROM active_participants
+        WHERE role IN ('BUYER', 'BUYER_SELLER')
         AND target_zone = ?
         AND max_price >= ?
     """, (zone, min_listing_price))
     can_afford = cursor.fetchone()[0]
-    
+
     cursor.execute("""
-        SELECT COUNT(*) FROM active_participants 
-        WHERE role IN ('BUYER', 'BUYER_SELLER') 
+        SELECT COUNT(*) FROM active_participants
+        WHERE role IN ('BUYER', 'BUYER_SELLER')
         AND target_zone = ?
     """, (zone,))
     total_zone = cursor.fetchone()[0]
-    
+
     print(f"  Zone {zone}: {can_afford}/{total_zone} buyers能买得起最便宜房 ({min_listing_price:,.0f})")
-    
+
     # 显示买不起的
     cursor.execute("""
-        SELECT agent_id, max_price FROM active_participants 
-        WHERE role IN ('BUYER', 'BUYER_SELLER') 
+        SELECT agent_id, max_price FROM active_participants
+        WHERE role IN ('BUYER', 'BUYER_SELLER')
         AND target_zone = ?
         AND max_price < ?
         LIMIT 5
     """, (zone, min_listing_price))
     cant = cursor.fetchall()
     if cant:
-        print(f"    买不起的buyers:")
+        print("    买不起的buyers:")
         for c in cant:
             print(f"      Agent #{c[0]}: max_price={c[1]:,.0f} < {min_listing_price:,.0f}")
 
@@ -159,8 +160,8 @@ if negs:
 # 7. Decision logs
 print("\n[7] Decision Logs:")
 cursor.execute("""
-    SELECT event_type, decision, COUNT(*) 
-    FROM decision_logs 
+    SELECT event_type, decision, COUNT(*)
+    FROM decision_logs
     GROUP BY event_type, decision
     ORDER BY event_type
 """)
@@ -170,4 +171,3 @@ for l in logs:
 
 conn.close()
 print("\n" + "=" * 80)
-

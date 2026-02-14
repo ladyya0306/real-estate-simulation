@@ -18,15 +18,15 @@
   - 点击 `Install`
 - 等待安装完成，点击 `Finish`
 
----
+______________________________________________________________________
 
 ## 第二步：验证安装
 
 ### 方式 1：使用 Anaconda Prompt（推荐）
 
 1. 按 `Win` 键，搜索 **"Anaconda Prompt (miniconda3)"**
-2. 点击打开，会看到黑色命令行窗口
-3. 输入以下命令验证：
+1. 点击打开，会看到黑色命令行窗口
+1. 输入以下命令验证：
 
 ```bash
 conda --version
@@ -37,8 +37,8 @@ conda --version
 ### 方式 2：使用 PowerShell
 
 1. 关闭之前的 PowerShell 窗口（如果有）
-2. 重新打开 PowerShell
-3. 输入：
+1. 重新打开 PowerShell
+1. 输入：
 
 ```powershell
 conda --version
@@ -46,7 +46,7 @@ conda --version
 
 如果显示版本号，说明安装成功！
 
----
+______________________________________________________________________
 
 ## 第三步：初始化 Conda（如果需要）
 
@@ -59,7 +59,7 @@ C:\Users\你的用户名\miniconda3\Scripts\conda.exe init powershell
 # 关闭并重新打开 PowerShell
 ```
 
----
+______________________________________________________________________
 
 ## 第四步：创建 Oasis 环境
 
@@ -73,6 +73,7 @@ conda create -n oasis python=3.10 -y
 ```
 
 会看到输出：
+
 ```
 Collecting package metadata...
 Solving environment...
@@ -90,6 +91,7 @@ conda activate oasis
 ```
 
 **成功标志**：命令提示符前面会出现 `(oasis)`，例如：
+
 ```
 (oasis) PS D:\GitProj\oasis-main>
 ```
@@ -101,7 +103,7 @@ python --version
 
 应该显示：`Python 3.10.x`（不再是 3.13）
 
----
+______________________________________________________________________
 
 ## 第五步：安装 Oasis 依赖
 
@@ -127,7 +129,7 @@ python -c "import camel; print('✅ camel-ai 安装成功')"
 python -c "import oasis; print('✅ oasis 可以导入')"
 ```
 
----
+______________________________________________________________________
 
 ## 第六步：设置 DeepSeek API Key 并运行
 
@@ -139,7 +141,7 @@ $env:DEEPSEEK_API_KEY = "sk-你的DeepSeek密钥"
 python quick_start_deepseek.py
 ```
 
----
+______________________________________________________________________
 
 ## 完整命令速查（复制粘贴）
 
@@ -165,7 +167,7 @@ $env:DEEPSEEK_API_KEY = "sk-你的密钥"
 python quick_start_deepseek.py
 ```
 
----
+______________________________________________________________________
 
 ## 常见问题
 
@@ -174,6 +176,7 @@ python quick_start_deepseek.py
 **方法 1**：按 `Win` 键，搜索 "Anaconda Prompt"
 
 **方法 2**：直接在普通 PowerShell 中：
+
 ```powershell
 C:\Users\你的用户名\miniconda3\Scripts\activate
 conda activate oasis
@@ -182,6 +185,7 @@ conda activate oasis
 ### Q2: `conda activate oasis` 报错？
 
 PowerShell 需要初始化：
+
 ```powershell
 # 运行初始化
 C:\Users\你的用户名\miniconda3\Scripts\conda.exe init powershell
@@ -195,6 +199,7 @@ conda activate oasis
 ### Q3: 每次运行都需要激活环境吗？
 
 **是的！** 每次打开新的终端窗口，都需要运行：
+
 ```bash
 conda activate oasis
 ```
@@ -214,6 +219,7 @@ conda env list
 ```
 
 会显示：
+
 ```
 # conda environments:
 #
@@ -223,21 +229,21 @@ oasis                 *  C:\Users\xxx\miniconda3\envs\oasis
 
 星号 `*` 表示当前激活的环境
 
----
+______________________________________________________________________
 
 ## 快速操作清单
 
-✅ 安装 Miniconda  
-✅ 打开 Anaconda Prompt 或 PowerShell  
-✅ 运行 `conda create -n oasis python=3.10 -y`  
-✅ 运行 `conda activate oasis`  
-✅ 确认提示符显示 `(oasis)`  
-✅ 运行 `cd d:\GitProj\oasis-main`  
-✅ 运行 `pip install camel-ai`  
-✅ 设置 `$env:DEEPSEEK_API_KEY = "sk-xxx"`  
-✅ 运行 `python quick_start_deepseek.py`  
+✅ 安装 Miniconda
+✅ 打开 Anaconda Prompt 或 PowerShell
+✅ 运行 `conda create -n oasis python=3.10 -y`
+✅ 运行 `conda activate oasis`
+✅ 确认提示符显示 `(oasis)`
+✅ 运行 `cd d:\GitProj\oasis-main`
+✅ 运行 `pip install camel-ai`
+✅ 设置 `$env:DEEPSEEK_API_KEY = "sk-xxx"`
+✅ 运行 `python quick_start_deepseek.py`
 
----
+______________________________________________________________________
 
 ## 下一次使用
 
@@ -258,6 +264,6 @@ $env:DEEPSEEK_API_KEY = "sk-你的密钥"
 python quick_start_deepseek.py
 ```
 
----
+______________________________________________________________________
 
 现在可以开始了！🚀

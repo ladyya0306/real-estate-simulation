@@ -1,6 +1,8 @@
 import random
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
+
 from config.settings import INITIAL_MARKET_CONFIG, PROPERTY_DISTRIBUTION
+
 
 def classify_property_type(area: float, unit_price: float, zone: str) -> str:
     """
@@ -29,7 +31,7 @@ def assign_school_district(zone: str, config=None) -> Tuple[bool, int]:
         ratio = INITIAL_MARKET_CONFIG[zone]["school_district_ratio"]
 
     is_district = random.random() < ratio
-    
+
     if is_district:
         # 30% Tier 1 (Key School), 70% Tier 2 (Normal School)
         tier = random.choices([1, 2], weights=[0.3, 0.7])[0]
@@ -39,7 +41,7 @@ def assign_school_district(zone: str, config=None) -> Tuple[bool, int]:
 
 def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     """Create a single property record with extended fields"""
-    
+
     # 1. Randomize Area and Bedrooms
     if quality == 1:   # Small/Low quality
         area = random.uniform(50, 80)
@@ -50,7 +52,7 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     else:              # High quality
         area = random.uniform(130, 250)
         bedrooms = random.choice([3, 4, 5])
-    
+
     # 🆕 2. Calculate Unit Price (price_per_sqm) - PRIORITY LOGIC
     # Use new price_per_sqm_range from config if available
     if config and hasattr(config, 'get_zone_price_range'):
@@ -63,21 +65,21 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
             base_price = config.market.get('zones', {}).get(zone, {}).get('base_price_per_sqm', 50000)
         else:
             base_price = INITIAL_MARKET_CONFIG[zone]["base_price_per_sqm"]
-        
+
         # Fluctuate based on quality factor (0.9, 1.0, 1.2)
         quality_factor = {1: 0.9, 2: 1.0, 3: 1.2}[quality]
         base_unit_price = base_price * quality_factor
         # Add random variation (+- 10%)
         base_unit_price = base_unit_price * random.uniform(0.9, 1.1)
-    
+
     unit_price = base_unit_price  # Store original unit price
-    
+
     # 3. Calculate Base Value (unit_price × area)
     base_value = area * unit_price
-    
+
     # 4. Classify Type
     prop_type = classify_property_type(area, unit_price, zone)
-    
+
     # 5. Assign School District
     is_district, school_tier = assign_school_district(zone)
     if is_district:
@@ -85,28 +87,28 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
         premium = random.uniform(1.15, 1.30)
         unit_price *= premium  # Update unit price with premium
         base_value *= premium
-    
+
     # 6. Listed Price (Base value + 10% premium initially)
     listed_price = base_value * random.uniform(1.05, 1.15)
-    
+
     # 🆕 7. Calculate Rental Price and Yield
     # Default rent per sqm
     rent_per_sqm_a = 100
     rent_per_sqm_b = 60
-    
+
     if config:
         rent_per_sqm_a = config.market.get('rental', {}).get('zone_a_rent_per_sqm', 100)
         rent_per_sqm_b = config.market.get('rental', {}).get('zone_b_rent_per_sqm', 60)
-    
+
     rent_unit_price = rent_per_sqm_a if zone == 'A' else rent_per_sqm_b
     rental_price = area * rent_unit_price
-    
+
     # Random fluctuation for rent (+- 5%)
     rental_price *= random.uniform(0.95, 1.05)
-    
+
     # Calculate Yield (Annual Rent / Listed Price)
     rental_yield = (rental_price * 12) / listed_price if listed_price > 0 else 0
-    
+
     return {
         "property_id": prop_id,
         "zone": zone,
@@ -147,7 +149,7 @@ def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
         "initial_value": prop_dict["base_value"], # Map base_value to initial_value
         "created_at": prop_dict.get("created_at", 0)
     }
-    
+
     market_data = {
         "property_id": prop_dict["property_id"],
         "owner_id": prop_dict.get("owner_id"),
@@ -171,7 +173,7 @@ def initialize_market_properties(target_total_count: int = None, config=None) ->
     """
     properties = []
     property_id = 1
-    
+
     # Use config distribution or fallback
     distribution_map = {}
     if config:
@@ -187,25 +189,25 @@ def initialize_market_properties(target_total_count: int = None, config=None) ->
         current_total = 0
         for zone_dist in distribution_map.values():
             current_total += sum(zone_dist.values())
-        
+
         if current_total > 0:
             scale_factor = target_total_count / current_total
-    
+
     for zone, distribution in distribution_map.items():
         for quality_level in [1, 2, 3]:
             # Scale count
             base_count = distribution.get(f"quality_{quality_level}", 0)
             count = int(base_count * scale_factor)
-            
+
             # Ensure at least 1 if base was > 0 and scaling made it 0 (optional safeguard)
             if base_count > 0 and count == 0:
                 count = 1
-                
+
             for _ in range(count):
                 prop = create_property(property_id, zone, quality_level, config)
                 properties.append(prop)
                 property_id += 1
-                
+
     # If we are slightly off due to rounding, add/remove random properties to match exactly
     if target_total_count and len(properties) != target_total_count:
         diff = target_total_count - len(properties)
@@ -221,6 +223,5 @@ def initialize_market_properties(target_total_count: int = None, config=None) ->
         elif diff < 0:
             # Trim properties (from the end or random? End is fine as order is mixed by zone loop)
             properties = properties[:target_total_count]
-                
-    return properties
 
+    return properties

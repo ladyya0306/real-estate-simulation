@@ -3,10 +3,11 @@
 Financial Calculator Service
 Provides investment metrics for Agent decision making.
 """
-from typing import Dict, Optional
+from typing import Dict
+
 
 class FinancialCalculator:
-    
+
     @staticmethod
     def calculate_rental_yield(property_price: float, monthly_rental_income: float) -> float:
         """
@@ -26,21 +27,21 @@ class FinancialCalculator:
         """
         maintenance_cost = property_data.get('base_value', 0) * 0.0003 # Approx 0.3% monthly maintenance/tax
         monthly_rent = property_data.get('rental_income', 0)
-        
-        # If agent lives in it, no rent income, but implicit benefit? 
+
+        # If agent lives in it, no rent income, but implicit benefit?
         # For simplicity, if 'status' is 'for_rent', deduct rent.
         if property_data.get('status') == 'for_rent':
             pass
         else:
             monthly_rent = 0
-            
+
         return mortgage_payment + maintenance_cost - monthly_rent
 
     @staticmethod
     def calculate_potential_roi(
-        down_payment: float, 
-        monthly_cash_flow: float, 
-        appreciation_rate: float, 
+        down_payment: float,
+        monthly_cash_flow: float,
+        appreciation_rate: float,
         property_value: float,
         years: int = 1
     ) -> float:
@@ -50,10 +51,10 @@ class FinancialCalculator:
         """
         if down_payment <= 0:
             return 0.0
-            
+
         annual_cash_flow = monthly_cash_flow * 12
         appreciation_gain = property_value * ((1 + appreciation_rate) ** years - 1)
-        
+
         total_gain = (annual_cash_flow * years) + appreciation_gain
         return total_gain / down_payment
 

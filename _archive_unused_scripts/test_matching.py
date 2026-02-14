@@ -1,12 +1,11 @@
 import sqlite3
-import os
 import sys
 
 # Add project root to path
 sys.path.append(r'd:\GitProj\oasis-main')
 
 # Mock models if needed or import
-from models import Agent, AgentPreference, Market
+from models import Agent, AgentPreference
 from transaction_engine import match_property_for_buyer
 
 db_path = r'd:\GitProj\oasis-main\results\run_20260208_171858\simulation.db'
@@ -14,7 +13,7 @@ db_path = r'd:\GitProj\oasis-main\results\run_20260208_171858\simulation.db'
 def verify_matching():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
-    
+
     # 1. Load Agent 27
     print("Loading Agent 27...")
     cursor.execute("SELECT * FROM active_participants WHERE agent_id = 27")
@@ -30,9 +29,9 @@ def verify_matching():
     role = row[1]
     target_zone = row[2]
     max_price = row[3]
-    
+
     print(f"Agent {agent_id} Preferences: Zone={target_zone}, MaxPrice={max_price:,.2f}")
-    
+
     agent = Agent(id=agent_id)
     agent.role = role
     agent.preference = AgentPreference(
@@ -43,20 +42,20 @@ def verify_matching():
         max_affordable_price=max_price,
         psychological_price=max_price
     )
-    
+
     # 2. Load Listings
     print("\nLoading Listed Properties...")
     cursor.execute("""
-        SELECT pm.property_id, pm.listed_price, ps.zone 
+        SELECT pm.property_id, pm.listed_price, ps.zone
         FROM properties_market pm
         JOIN properties_static ps ON pm.property_id = ps.property_id
         WHERE pm.status = 'for_sale'
     """)
     listings_rows = cursor.fetchall()
-    
+
     listings = []
     props_map = {}
-    
+
     for r in listings_rows:
         pid, price, zone = r
         # Simulate listing dict structure expected by match_property_for_buyer
@@ -78,14 +77,14 @@ def verify_matching():
     # 3. Run Matching
     print("\nRunning matching logic (Primary Zone)...")
     matched = match_property_for_buyer(agent, listings, props_map)
-    
+
     if matched:
         print(f"\n✅ MATCH FOUND: Property {matched['property_id']} (Price: {matched['listed_price']:,.2f})")
     else:
         print("\n❌ NO MATCH IN PRIMARY ZONE")
         print("Running fallback logic (Cross-Zone)...")
         matched = match_property_for_buyer(agent, listings, props_map, ignore_zone=True)
-        
+
         if matched:
              print(f"\n✅ CROSS-ZONE MATCH FOUND: Property {matched['property_id']} (Price: {matched['listed_price']:,.2f})")
         else:
@@ -95,4 +94,3 @@ def verify_matching():
 
 if __name__ == "__main__":
     verify_matching()
-

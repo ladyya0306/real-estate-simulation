@@ -8,20 +8,20 @@ month_overrides:
   3:  # 危机爆发
     macro_override: "pessimistic"
     # 模拟失业导致的Agent移除（需代码支持 month_overrides 处理逻辑）
-    system_event: "crisis_start" 
-  
+    system_event: "crisis_start"
+
   6:  # 深度衰退
     macro_override: "pessimistic"
-    
+
     # 收入下降
     income_adjustment: -0.15  # 在职者收入降15%
-    
+
     # 贷款极度收紧
     mortgage:
       down_payment_ratio: 0.5
       annual_interest_rate: 0.08
       max_dti_ratio: 0.3
-  
+
   12:  # 缓慢恢复期
     macro_override: "stable"
 

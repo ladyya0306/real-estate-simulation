@@ -1,6 +1,8 @@
-import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict
+
+import yaml
+
 
 # Fix for !!python/tuple in SafeLoader
 def tuple_constructor(loader, node):
@@ -15,7 +17,7 @@ class SimulationConfig:
     负责读取 config/baseline.yaml 及其覆盖配置
     提供属性访问方式 (如 config.simulation.agent_count)
     """
-    
+
     def __init__(self, config_path: str = "config/baseline.yaml"):
         # 兼容绝对路径和相对路径
         if Path(config_path).is_absolute():
@@ -27,7 +29,7 @@ class SimulationConfig:
 
         self._config: Dict[str, Any] = {}
         self.load()
-    
+
     def load(self):
         """加载YAML配置"""
         if not self.config_path.exists():
@@ -37,7 +39,7 @@ class SimulationConfig:
                 self.config_path = local_path
             else:
                 raise FileNotFoundError(f"配置文件不存在: {self.config_path}")
-        
+
         try:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 self._config = yaml.safe_load(f)
@@ -51,25 +53,25 @@ class SimulationConfig:
         """
         keys = key_path.split('.')
         value = self._config
-        
+
         for key in keys:
             if isinstance(value, dict) and key in value:
                 value = value[key]
             else:
                 return default
-        
+
         return value
-    
+
     def update(self, key_path: str, value: Any):
         """
         更新配置值 (用于参数覆盖)
         """
         keys = key_path.split('.')
         target = self._config
-        
+
         for key in keys[:-1]:
             target = target.setdefault(key, {})
-        
+
         target[keys[-1]] = value
 
 
@@ -85,22 +87,22 @@ class SimulationConfig:
     # ====== 便捷访问属性 ======
     @property
     def simulation(self) -> Dict: return self._config.get('simulation', {})
-    
+
     @property
     def market(self) -> Dict: return self._config.get('market', {})
-    
+
     @property
     def agent_tiers(self) -> Dict: return self._config.get('agent_tiers', {})
-    
+
     @property
     def property_allocation(self) -> Dict: return self._config.get('property_allocation', {})
 
     @property
     def decision_factors(self) -> Dict: return self._config.get('decision_factors', {})
-    
+
     @property
     def mortgage(self) -> Dict: return self._config.get('mortgage', {})
-    
+
     @property
     def macro_environment(self) -> Dict: return self._config.get('macro_environment', {})
 
@@ -128,7 +130,7 @@ class SimulationConfig:
             'min': 10000,  # 默认最低单价
             'max': 50000   # 默认最高单价
         })
-    
+
     def get_zone_price_tier(self, zone: str, tier: str) -> list:
         """
         获取区域价格档位
@@ -140,4 +142,3 @@ class SimulationConfig:
         zone_config = self.market.get('zones', {}).get(zone, {})
         tiers = zone_config.get('price_tiers', {})
         return tiers.get(tier, [10000, 50000])  # 默认区间
-

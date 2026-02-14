@@ -54,4 +54,3 @@ for neg in failed_negs:
     # print(f"  Log: {neg['log']}") # Too verbose maybe
 
 conn.close()
-
