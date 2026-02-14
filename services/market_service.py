@@ -8,12 +8,13 @@ from property_initializer import (convert_to_v2_tuples,
 
 logger = logging.getLogger(__name__)
 
+
 class MarketService:
     def __init__(self, config, db_conn: sqlite3.Connection):
         self.config = config
         self.conn = db_conn
         self.consecutive_trend = 0
-        self.market = None # Initialized later
+        self.market = None  # Initialized later
 
     def initialize_market(self):
         """Initialize market properties based on configuration."""
@@ -187,7 +188,8 @@ class MarketService:
         avg_unit_price = last_month_stats[3] if last_month_stats and last_month_stats[3] else 0
 
         # Handle case where no transactions occurred
-        if not avg_unit_price: avg_unit_price = 0
+        if not avg_unit_price:
+            avg_unit_price = 0
 
         # 2. Calculate price change (MoM for Unit Price)
         price_change_pct = 0.0
@@ -203,7 +205,7 @@ class MarketService:
 
             # Unit Price Change
             if prev_bulletin and len(prev_bulletin) > 1 and prev_bulletin[1] and prev_bulletin[1] > 0 and avg_unit_price > 0:
-                 unit_price_change_pct = ((avg_unit_price - prev_bulletin[1]) / prev_bulletin[1]) * 100
+                unit_price_change_pct = ((avg_unit_price - prev_bulletin[1]) / prev_bulletin[1]) * 100
 
         # 3. Calculate zone heat
         def calc_zone_heat(zone):
@@ -272,7 +274,7 @@ class MarketService:
             llm_analysis_text = await safe_call_llm_async(prompt, default_analysis, model_type="smart")
 
         if isinstance(llm_analysis_text, dict):
-             llm_analysis_text = str(llm_analysis_text)
+            llm_analysis_text = str(llm_analysis_text)
 
         # 6. Save to database
         policy_news_str = "\\n".join(extra_news) if extra_news else ""

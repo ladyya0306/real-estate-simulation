@@ -8,6 +8,7 @@ import logging
 import os
 import random
 import sys
+import subprocess
 
 import numpy as np
 
@@ -27,8 +28,8 @@ class LoggerWriter:
         if self.file_stream:
             try:
                 self.file_stream.write(message)
-                self.file_stream.flush() # Ensure it hits disk
-            except:
+                self.file_stream.flush()  # Ensure it hits disk
+            except BaseException:
                 pass
 
     def flush(self):
@@ -36,8 +37,9 @@ class LoggerWriter:
         if self.file_stream:
             try:
                 self.file_stream.flush()
-            except:
+            except BaseException:
                 pass
+
 
 # Configure logging first (via SimulationRunner import or explicit config check)
 # Since SimulationRunner import configures logging, we can inspect handlers
@@ -55,8 +57,8 @@ if not log_file_stream:
         format='%(asctime)s - %(levelname)s - %(message)s',
         encoding='utf-8',
         handlers=[
-             logging.FileHandler("simulation_run.log", encoding='utf-8', mode='w'),
-             logging.StreamHandler()
+            logging.FileHandler("simulation_run.log", encoding='utf-8', mode='w'),
+            logging.StreamHandler()
         ]
     )
     for h in logging.getLogger().handlers:
@@ -68,10 +70,12 @@ if not log_file_stream:
 sys.stdout = LoggerWriter(sys.stdout, log_file_stream)
 sys.stderr = LoggerWriter(sys.stderr, log_file_stream)
 
+
 def input_default(prompt, default_value):
     """Helper for input with default value"""
     val = input(f"{prompt} [default: {default_value}]: ").strip()
     return val if val else str(default_value)
+
 
 def validate_config(agent_config, property_count):
     """
@@ -107,8 +111,8 @@ def validate_config(agent_config, property_count):
     # 4. 估算可负担性（粗略）
     # 假设中高收入人群能买得起房
     potential_buyers = (agent_config['middle']['count'] +
-                       agent_config['high']['count'] +
-                       agent_config['ultra_high']['count'])
+                        agent_config['high']['count'] +
+                        agent_config['ultra_high']['count'])
     buyer_ratio = potential_buyers / total_agents
 
     if buyer_ratio < 0.3:
@@ -117,13 +121,14 @@ def validate_config(agent_config, property_count):
 
     return (len(errors) == 0, warnings, errors)
 
+
 def show_intervention_menu(runner):
     """
     显示研究员干预面板
     """
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("🔬 研究员干预面板 (Researcher Intervention Panel)")
-    print("="*50)
+    print("=" * 50)
     print("通过调整以下参数，模拟不同的宏观经济环境。")
     print("📉 消极影响: 降薪、失业、加息 -> 抑制需求")
     print("📈 积极影响: 人口流入、降息、增供 -> 刺激交易")
@@ -151,27 +156,30 @@ def show_intervention_menu(runner):
 
             elif choice == '1':
                 val = input("调整幅度 (e.g. -0.1 for -10%, 0.1 for +10%): ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 pct = float(val)
                 tier = input_default("覆盖阶层 (all/low/middle/high...)", "all")
                 count = runner.intervention_service.apply_wage_shock(runner.agent_service, pct, tier)
-                msg = f"Policy: Wage adjusted by {pct*100:+.1f}% for {tier} tier."
+                msg = f"Policy: Wage adjusted by {pct * 100:+.1f}% for {tier} tier."
                 interventions.append(msg)
                 print(f"✅ {msg}")
 
             elif choice == '2':
                 val = input("失业率 (e.g. 0.2 for 20%): ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 rate = float(val)
                 tier = input_default("目标阶层 (low/middle...)", "low")
                 count = runner.intervention_service.apply_unemployment_shock(runner.agent_service, rate, tier)
-                msg = f"Policy: Unemployment shock of {rate*100:.1f}% hit {tier} tier ({count} affected)."
+                msg = f"Policy: Unemployment shock of {rate * 100:.1f}% hit {tier} tier ({count} affected)."
                 interventions.append(msg)
                 print(f"✅ {msg}")
 
             elif choice == '3':
                 val = input("新增数量: ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 count = int(val)
                 tier = input_default("阶层 (low/middle/high...)", "middle")
                 added = runner.intervention_service.add_population(runner.agent_service, count, tier)
@@ -181,7 +189,8 @@ def show_intervention_menu(runner):
 
             elif choice == '4':
                 val = input("移除数量: ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 count = int(val)
                 tier = input_default("阶层 (low/middle/high...)", "low")
                 removed = runner.intervention_service.remove_population(runner.agent_service, count, tier)
@@ -191,7 +200,8 @@ def show_intervention_menu(runner):
 
             elif choice == '5':
                 val = input("新增房源数: ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 count = int(val)
                 zone = input_default("区域 (A/B)", "A")
                 runner.intervention_service.adjust_housing_supply(runner.market_service, count, zone)
@@ -201,7 +211,8 @@ def show_intervention_menu(runner):
 
             elif choice == '6':
                 val = input("下架房源数: ").strip()
-                if not val: continue
+                if not val:
+                    continue
                 count = int(val)
                 zone = input_default("区域 (A/B)", "A")
                 removed = runner.intervention_service.supply_cut(runner.market_service, count, zone)
@@ -217,13 +228,14 @@ def show_intervention_menu(runner):
             import traceback
             traceback.print_exc()
 
+
 def run_forensic_analysis_menu():
     """
     运行逻辑体检 (Forensic Analysis) 菜单
     """
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("🕵️  逻辑体检与法医分析 (Forensic Analysis)".center(60))
-    print("="*60)
+    print("=" * 60)
 
     # Select Project
     import project_manager
@@ -235,12 +247,14 @@ def run_forensic_analysis_menu():
         return
 
     for i, p in enumerate(projects):
-        print(f"  {i+1}. {os.path.basename(p)}")
+        print(f"  {i + 1}. {os.path.basename(p)}")
 
     idx_str = input_default("选择项目 (0返回)", "1")
-    if not idx_str.isdigit(): return
+    if not idx_str.isdigit():
+        return
     idx = int(idx_str) - 1
-    if idx < 0: return
+    if idx < 0:
+        return
 
     if 0 <= idx < len(projects):
         selected_proj = projects[idx]
@@ -260,7 +274,8 @@ def run_forensic_analysis_menu():
 
             mode = input("请选择模式 [A/B/0]: ").strip().upper()
 
-            if mode == '0': break
+            if mode == '0':
+                break
 
             cmd = [sys.executable, "generate_enhanced_diaries.py", "--db", db_path]
 
@@ -279,12 +294,13 @@ def run_forensic_analysis_menu():
     else:
         print("❌ 无效选择")
 
+
 def main():
     # UTF-8
     try:
         if sys.stdout.encoding != 'utf-8':
             sys.stdout.reconfigure(encoding='utf-8')
-    except:
+    except BaseException:
         pass
 
     while True:
@@ -335,13 +351,14 @@ def main():
 
             if not projects:
                 print("❌ No projects found to resume.")
-                continue # Loop back
+                continue  # Loop back
 
             for i, p in enumerate(projects):
-                print(f"  {i+1}. {os.path.basename(p)}")
+                print(f"  {i + 1}. {os.path.basename(p)}")
 
             idx = int(input_default("Select project (0 to cancel)", "1")) - 1
-            if idx < 0: continue
+            if idx < 0:
+                continue
 
             if 0 <= idx < len(projects):
                 selected_proj = projects[idx]
@@ -468,9 +485,9 @@ def main():
                 print("=" * 60)
 
                 min_properties = sum(tier['property_count'][0] * tier['count']
-                                   for tier in agent_config.values())
+                                     for tier in agent_config.values())
                 max_properties = sum(tier['property_count'][1] * tier['count']
-                                   for tier in agent_config.values())
+                                     for tier in agent_config.values())
 
                 print(f"\n根据配置，至少需要 {min_properties} 套房产")
                 print(f"最多需要 {max_properties} 套房产")
@@ -486,7 +503,6 @@ def main():
                 print("\n💰 区域单价配置 (¥/㎡)")
                 print("   说明: 配置后，房产价格 = 单价 × 建筑面积")
                 print("   参考: 一线城市核心区3-5万/㎡，非核心区1-2万/㎡\n")
-
 
                 zone_price_config = {}
                 # [Fix] Create temp config to read defaults (since project config doesn't exist yet)
@@ -533,7 +549,8 @@ def main():
 
                     # Store in config structure
                     # We need to structure this to push to config later
-                    if 'rental_config' not in locals(): rental_config = {}
+                    if 'rental_config' not in locals():
+                        rental_config = {}
                     rental_config[zone] = rent_val
                     print(f"  ✅ {zone}区 租金设置为: {rent_val} 元/㎡/月\n")
 
@@ -542,7 +559,6 @@ def main():
                     print("✅ 区域单价配置已暂存")
                 if 'rental_config' in locals() and rental_config:
                     print("✅ 租金配置已暂存\n")
-
 
                 # === 市场健康检查 ===
                 print("\n" + "=" * 60)
@@ -556,7 +572,7 @@ def main():
                     for err in errors:
                         print(f"  {err}")
                     print("\n请修正后重新运行。")
-                    continue # Loop back
+                    continue  # Loop back
 
                 if warnings:
                     print("\n⚠️  配置警告:")
@@ -566,7 +582,7 @@ def main():
                     confirm = input("\n是否继续? [Y/n]: ").strip().lower()
                     if confirm == 'n':
                         print("已取消模拟。")
-                        continue # Loop back
+                        continue  # Loop back
                 else:
                     print("\n✅ 配置检查通过！")
 
@@ -582,7 +598,7 @@ def main():
                 for tier_key, tier_data in agent_config.items():
                     tier_names = {'ultra_high': '超高', 'high': '高', 'middle': '中', 'low_mid': '中低', 'low': '低'}
                     print(f"      {tier_names[tier_key]}收入: {tier_data['count']}人, "
-                          f"收入{tier_data['income_range'][0]//1000}-{tier_data['income_range'][1]//1000}k, "
+                          f"收入{tier_data['income_range'][0] // 1000}-{tier_data['income_range'][1] // 1000}k, "
                           f"拥房{tier_data['property_count'][0]}-{tier_data['property_count'][1]}套")
                 print(f"  - 房产总数: {property_count}")
                 print(f"  - 模拟月数: {months}")
@@ -591,7 +607,7 @@ def main():
                 confirm = input("\n确认启动模拟? [Y/n]: ").strip().lower()
                 if confirm == 'n':
                     print("已取消模拟。")
-                    continue # Loop back
+                    continue  # Loop back
 
                 # === 创建项目文件夹 ===
                 import project_manager
@@ -613,7 +629,7 @@ def main():
 
                 # [Fix] Apply deferred zone price configuration
                 if 'zone_price_config' in locals() and zone_price_config:
-                     for zone, prices in zone_price_config.items():
+                    for zone, prices in zone_price_config.items():
                         config.update(f'market.zones.{zone}.price_per_sqm_range.min', prices['min'])
                         config.update(f'market.zones.{zone}.price_per_sqm_range.max', prices['max'])
 
@@ -656,7 +672,7 @@ def main():
                 subprocess.run([sys.executable, "scripts/export_results.py"])
 
             # === 5. Auto Forensic Check ===
-            print("\n" + "="*50)
+            print("\n" + "=" * 50)
             check_now = input("是否立即运行逻辑体检 (Forensic Analysis)? [y/N]: ").strip().lower()
             if check_now == 'y':
                 import subprocess
@@ -672,6 +688,7 @@ def main():
 
         print("\nPress Enter to return to main menu...")
         input()
+
 
 if __name__ == "__main__":
     main()

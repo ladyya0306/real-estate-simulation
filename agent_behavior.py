@@ -17,6 +17,7 @@ Core Logic for Agent Behavior (LLM Driven)
 """
 import json
 import random
+from enum import Enum
 from typing import Dict, List, Tuple
 
 from config.settings import MORTGAGE_CONFIG
@@ -31,12 +32,13 @@ from utils.llm_client import safe_call_llm, safe_call_llm_async
 
 # --- 1. Story Generation ---
 
+
 def generate_agent_story(agent: Agent, config=None, occupation_hint: str = None) -> AgentStory:
     """
     Generate background story and structured attributes for a new agent.
     """
     # 1. Investment Style (Personality) Selection
-    weights = {'balanced': 0.4} # default
+    weights = {'balanced': 0.4}  # default
     if config:
         weights = config.negotiation.get('personality_weights', {
             'aggressive': 0.30, 'conservative': 0.30,
@@ -109,6 +111,7 @@ def generate_agent_story(agent: Agent, config=None, occupation_hint: str = None)
         )
     return result
 
+
 def determine_psychological_price(agent: Agent, market_avg_price: float, market_trend: str) -> float:
     """
     Calculate psychological price based on agent personality and market trend.
@@ -124,9 +127,9 @@ def determine_psychological_price(agent: Agent, market_avg_price: float, market_
     # Bal      0.90    1.02    1.00
 
     coeffs = {
-        "aggressive":   {"UP": 1.10, "DOWN": 0.80, "PANIC": 0.70, "STABLE": 1.02},
+        "aggressive": {"UP": 1.10, "DOWN": 0.80, "PANIC": 0.70, "STABLE": 1.02},
         "conservative": {"UP": 1.05, "DOWN": 0.70, "PANIC": 0.60, "STABLE": 0.95},
-        "balanced":     {"UP": 1.02, "DOWN": 0.90, "PANIC": 0.80, "STABLE": 1.00}
+        "balanced": {"UP": 1.02, "DOWN": 0.90, "PANIC": 0.80, "STABLE": 1.00}
     }
 
     # Map trend string if needed (assuming "UP", "DOWN", "STABLE", "PANIC")
@@ -138,6 +141,7 @@ def determine_psychological_price(agent: Agent, market_avg_price: float, market_
     coeff = coeffs.get(style, coeffs["balanced"]).get(trend, 1.0)
 
     return market_avg_price * coeff
+
 
 def calculate_financial_limits(agent, market=None, market_trend="STABLE"):
     """
@@ -170,9 +174,9 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
                                  calculate_monthly_payment)
 
     # 1. Config & Attributes
-    risk_free_rate = 0.03 # Default
+    risk_free_rate = 0.03  # Default
     if hasattr(market, 'config') and market.config:
-         risk_free_rate = market.config.market.get('risk_free_rate', 0.03)
+        risk_free_rate = market.config.market.get('risk_free_rate', 0.03)
 
     # Zone Averages
     zone_a_avg = market.get_avg_price("A") if market else 100000
@@ -218,7 +222,7 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
     if target_zone_props:
         # Simple avg of rental_price if exists, else estimate
         # Assuming rental_price is populated Phase 7
-        total_rent = sum(p.get('rental_price', p['base_value'] * 0.0015) for p in target_zone_props) # Fallback 1.5% yield monthly? No 1.5/12%
+        total_rent = sum(p.get('rental_price', p['base_value'] * 0.0015) for p in target_zone_props)  # Fallback 1.5% yield monthly? No 1.5/12%
         avg_rent = total_rent / len(target_zone_props)
 
     # If no data, use rough 2% annual yield estimate
@@ -228,9 +232,9 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
     rental_yield = FinancialCalculator.calculate_rental_yield(avg_price, avg_rent)
 
     # Calculate estimated monthly payment for a max price purchase
-    est_loan = real_max_price * 0.7 # Assuming 30% down
+    est_loan = real_max_price * 0.7  # Assuming 30% down
     annual_rate = MORTGAGE_CONFIG.get('annual_interest_rate', 0.05)
-    est_monthly_payment = calculate_monthly_payment(est_loan, annual_rate, 30) # 30 years
+    est_monthly_payment = calculate_monthly_payment(est_loan, annual_rate, 30)  # 30 years
 
     dti = 0
     if agent.monthly_income > 0:
@@ -312,9 +316,9 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
         # Fallback
         # Determine school need from agent story/family (Safe check)
         try:
-             need_school = agent.story.education_need != "无" or agent.has_children_near_school_age()
-        except:
-             need_school = False
+            need_school = agent.story.education_need != "无" or agent.has_children_near_school_age()
+        except BaseException:
+            need_school = False
 
         pref = BuyerPreference(
             target_zone=default_zone,
@@ -327,6 +331,7 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
         pref.max_price = final_operational_max
         return pref, "Fallback decision", context_metrics
 
+
 def generate_real_thought(agent: Agent, trigger: str, market: Market) -> str:
     """
     Generate a human-readable thought process.
@@ -335,7 +340,7 @@ def generate_real_thought(agent: Agent, trigger: str, market: Market) -> str:
     try:
         zone_a_price = market.get_avg_price("A")
         zone_b_price = market.get_avg_price("B")
-    except:
+    except BaseException:
         zone_a_price = 0
         zone_b_price = 0
 
@@ -348,9 +353,10 @@ def generate_real_thought(agent: Agent, trigger: str, market: Market) -> str:
     请思考你的决策（简短一段话）：
     """
     # For now, return a formatted string. Real LLM would yield varied text.
-    return f"我是{agent.story.occupation}，看到{trigger}，考虑到当前A区均价{zone_a_price/10000:.0f}万，我决定..."
+    return f"我是{agent.story.occupation}，看到{trigger}，考虑到当前A区均价{zone_a_price / 10000:.0f}万，我决定..."
 
 # --- 2. Event System ---
+
 
 def select_monthly_event(agent: Agent, month: int, config=None) -> dict:
     """
@@ -373,6 +379,7 @@ def select_monthly_event(agent: Agent, month: int, config=None) -> dict:
     """
     return safe_call_llm(prompt, {"event": None, "reasoning": "No event"}, model_type="fast")
 
+
 def apply_event_effects(agent: Agent, event_data: dict, config=None):
     """
     Apply the financial effects of an event.
@@ -389,8 +396,9 @@ def apply_event_effects(agent: Agent, event_data: dict, config=None):
     if event_config:
         cash_change_pct = event_config["cash_change"]
         agent.cash *= (1 + cash_change_pct)
-        agent.set_life_event(0, event_name) # Using 0 as current month placeholder or pass actual month
+        agent.set_life_event(0, event_name)  # Using 0 as current month placeholder or pass actual month
         # print(f"Agent {agent.id} experienced {event_name}, cash changed by {cash_change_pct*100}%")
+
 
 def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float], market_bulletin: str = "", market_trend: str = "STABLE", config=None) -> tuple[dict, dict]:
     """
@@ -408,7 +416,7 @@ def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float],
         # Assuming existing mortgage info is stored or estimated
         # Simplified: estimate mortgage based on loan amount?
         # For now, let's use a standard estimate from FinancialCalculator
-        holding_cost = FinancialCalculator.calculate_holding_cost(agent, p, mortgage_payment=0) # Need real mortgage data validation in later phase
+        holding_cost = FinancialCalculator.calculate_holding_cost(agent, p, mortgage_payment=0)  # Need real mortgage data validation in later phase
         # Actually agent.mortgage_monthly_payment is total. We can amortize?
         # Let's simple check if property is rented.
 
@@ -430,7 +438,7 @@ def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float],
         ref_val = props_info[0]['est_market_value']
         psych_val = determine_psychological_price(agent, ref_val, market_trend)
         psych_advice = f"【参考心理价】基于你的风格({agent.story.investment_style})和市场({market_trend})，建议关注 {psych_val:,.0f} 附近的价位。"
-        comp_min_price = ref_val * 0.95 # Mock competitor price 5% lower
+        comp_min_price = ref_val * 0.95  # Mock competitor price 5% lower
 
     # Financial Context
     risk_free_rate = 0.03
@@ -477,6 +485,7 @@ def determine_listing_strategy(agent: Agent, market_price_map: Dict[str, float],
 
     decision = safe_call_llm(prompt, default_resp)
     return decision, context_metrics
+
 
 def decide_negotiation_format(seller: Agent, interested_buyers: List[Agent], market_info: str) -> str:
     """
@@ -542,7 +551,7 @@ async def decide_price_adjustment(
     mock_agent = Agent(id=agent_id)
     mock_agent.story = AgentStory(investment_style=investment_style)
     psych_price = determine_psychological_price(
-        mock_agent, # Mock agent wrapper for function
+        mock_agent,  # Mock agent wrapper for function
         current_price,
         market_trend
     )
@@ -550,9 +559,9 @@ async def decide_price_adjustment(
 
     # Mock Data for Comp & Holding Cost (Phase 8: To be real DB query)
     # For now, simulate:
-    accumulated_holding_cost = current_price * 0.005 * listing_duration # 0.5% per month holding cost
-    daily_views = max(0, int(30 - listing_duration * 2)) # Decay views
-    comp_min_price = current_price * 0.95 # Competitor is 5% cheaper
+    accumulated_holding_cost = current_price * 0.005 * listing_duration  # 0.5% per month holding cost
+    daily_views = max(0, int(30 - listing_duration * 2))  # Decay views
+    comp_min_price = current_price * 0.95  # Competitor is 5% cheaper
     price_diff = current_price - comp_min_price
 
     prompt = PRICE_ADJUSTMENT_TEMPLATE.format(
@@ -600,14 +609,13 @@ async def decide_price_adjustment(
 
 # --- 3. Role Determination ---
 
-from enum import Enum
-
 
 class AgentRole(Enum):
     BUYER = "buyer"
     SELLER = "seller"
     BUYER_SELLER = "buyer_seller"
     OBSERVER = "observer"
+
 
 def determine_role(agent: Agent, month: int, market: Market) -> Tuple[AgentRole, str]:
     """
@@ -653,11 +661,12 @@ def determine_role(agent: Agent, month: int, market: Market) -> Tuple[AgentRole,
 
 # --- 4. Batch Activation Logic (Million Agent Scale) ---
 
+
 def calculate_activation_probability(agent: Agent) -> float:
     """
     Calculate the probability (0.0 - 1.0) that an agent becomes active (Buyer/Seller) this month.
     """
-    base_prob = 0.003 # 0.3% base rate
+    base_prob = 0.003  # 0.3% base rate
 
     # Weights configuration
     weights = {
@@ -666,7 +675,7 @@ def calculate_activation_probability(agent: Agent) -> float:
         "high_income_growth": 0.08,
         "multi_property_holder": 0.10,
         "high_wealth_no_property": 0.20,
-        "low_cash_poor": -0.5 # Penalty
+        "low_cash_poor": -0.5  # Penalty
     }
 
     prob_score = base_prob
@@ -680,7 +689,7 @@ def calculate_activation_probability(agent: Agent) -> float:
         prob_score += weights["recently_married"]
 
     # 3. Income/Wealth Status
-    if agent.monthly_income > 50000: # High income
+    if agent.monthly_income > 50000:  # High income
         prob_score += weights["high_income_growth"]
 
     if len(agent.owned_properties) > 1:
@@ -693,6 +702,7 @@ def calculate_activation_probability(agent: Agent) -> float:
         prob_score += weights["low_cash_poor"]
 
     return max(0.0, min(1.0, prob_score))
+
 
 # --- Constant System Prompt for Caching ---
 BATCH_ROLE_SYSTEM_PROMPT = """你是一个房地产市场模拟引擎。
@@ -720,6 +730,7 @@ BATCH_ROLE_SYSTEM_PROMPT = """你是一个房地产市场模拟引擎。
     {"id": 101, "role": "BUYER", "trigger": "婚房刚需", "life_pressure": "urgent", "price_expectation": 1.1},
     {"id": 102, "role": "SELLER", "trigger": "资金周转", "life_pressure": "urgent", "price_expectation": 0.95}
 ]"""
+
 
 def batched_determine_role(agents: list[Agent], month: int, market: Market, macro_summary: str = "平稳") -> list[dict]:
     """
@@ -760,6 +771,7 @@ def batched_determine_role(agents: list[Agent], month: int, market: Market, macr
         return []
 
     return response
+
 
 async def batched_determine_role_async(
     agents: list[Agent],
@@ -867,6 +879,7 @@ def open_role_evaluation(agent: Agent, month: int, market: Market, history_conte
         supply_demand_desc = "供需平衡"
 
     return {"role": "OBSERVER", "reasoning": "Placeholder"}
+
 
 def should_agent_exit_market(agent: Agent, market: Market, duration_months: int) -> Tuple[bool, str]:
     """

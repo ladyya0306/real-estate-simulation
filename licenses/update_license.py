@@ -39,9 +39,16 @@ def update_license_in_file(
     start_line_start_with: str,
     end_line_start_with: str,
 ) -> bool:
-    with open(file_path, 'r',
-              encoding='utf-8') as f:  # for windows compatibility
-        content = f.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        try:
+            with open(file_path, 'r', encoding='gbk') as f:
+                content = f.read()
+        except Exception:
+            print(f"Skipping {file_path} due to encoding error")
+            return False
 
     with open(license_template_path, 'r', encoding='utf-8') as f:
         new_license = f.read().strip()

@@ -7,8 +7,9 @@ import sqlite3
 import pandas as pd
 
 # Configure logging
-logging.basicConfig(level=logging.WARNING, format='%(message)s') # Default silent
+logging.basicConfig(level=logging.WARNING, format='%(message)s')  # Default silent
 logger = logging.getLogger(__name__)
+
 
 class ForensicAnalyzer:
     def __init__(self, db_path):
@@ -23,14 +24,15 @@ class ForensicAnalyzer:
         try:
             df = pd.read_sql_query("SELECT * FROM market_bulletin", self.conn)
             return df.set_index('month').to_dict('index')
-        except:
+        except BaseException:
             return {}
 
     def get_agent_basic_info(self, agent_id):
         """Fetch static info."""
         try:
             row = self.cursor.execute("SELECT * FROM agents_static WHERE agent_id=?", (agent_id,)).fetchone()
-            if not row: return None
+            if not row:
+                return None
             # Get columns
             cols = [description[0] for description in self.cursor.description]
             return dict(zip(cols, row))
@@ -53,7 +55,7 @@ class ForensicAnalyzer:
         role_map = {}
         for _, l in logs.iterrows():
             if l['event_type'] == 'ROLE_DECISION':
-                role_map[l['month']] = l['decision'] # Effect is immediate in month M
+                role_map[l['month']] = l['decision']  # Effect is immediate in month M
 
         months = sorted(list(set(logs['month'].tolist() + txs['month'].tolist())))
 
@@ -73,7 +75,8 @@ class ForensicAnalyzer:
                 for _, b in bids.iterrows():
                     if b['listing_price'] and b['buyer_bid'] > b['listing_price'] * 1.5:
                         errors.append(f"Month {m}: Irrational Bid (Bid {b['buyer_bid']} > 1.5x Listing {b['listing_price']})")
-            except: pass
+            except BaseException:
+                pass
 
         return errors
 
@@ -84,9 +87,9 @@ class ForensicAnalyzer:
             print(f"❌ Agent {agent_id} not found.")
             return
 
-        print("\n" + "="*70)
+        print("\n" + "=" * 70)
         print(f"🕵️  法医体检报告 (FORENSIC REPORT): Agent {agent_id}  [{info['name']}]")
-        print("="*70)
+        print("=" * 70)
 
         # 1. Dossier
         print("📋 基础档案 (Dossier)")
@@ -118,17 +121,18 @@ class ForensicAnalyzer:
                 "json": "{}"
             })
 
-        events.sort(key=lambda x: (x['month'], 0 if x['type']=='DECISION' else 1))
+        events.sort(key=lambda x: (x['month'], 0 if x['type'] == 'DECISION' else 1))
 
         print("\n⏳ 全生命周期时序复盘 (Lifecycle Timeline)")
 
         months = sorted(list(set([e['month'] for e in events])))
-        if not months: print("   (No Activity Recorded)")
+        if not months:
+            print("   (No Activity Recorded)")
 
         for m in months:
             # Context
             bulletin = self.bulletins.get(m, {})
-            b_text = f"📢 市场: {bulletin.get('trend_signal','N/A')} (均价: {bulletin.get('avg_price',0)/10000:.1f}万)"
+            b_text = f"📢 市场: {bulletin.get('trend_signal', 'N/A')} (均价: {bulletin.get('avg_price', 0) / 10000:.1f}万)"
             print(f"\n[Month {m}] {b_text}")
 
             m_events = [e for e in events if e['month'] == m]
@@ -141,20 +145,21 @@ class ForensicAnalyzer:
                     tp = json.loads(e['json'])
                     if 'life_pressure' in tp:
                         print(f"      🧠 心态: {tp.get('life_pressure')} | 触发: {tp.get('trigger', 'N/A')}")
-                    if 'pricing_mode' in tp: # Seller strategy logic check
+                    if 'pricing_mode' in tp:  # Seller strategy logic check
                         print(f"      📉 策略: {(tp.get('pricing_mode') or '')} (系数: {tp.get('pricing_coefficient', 1.0)})")
-                except: pass
+                except BaseException:
+                    pass
 
         # 3. Validation Summary
         print("\n🏥 逻辑体检结果 (Logic Health Check)")
         errors = self.analyze_logic_flaws(agent_id)
         if not errors:
-             print("   ✅ 完美 (Perfect) - 行为逻辑自洽")
+            print("   ✅ 完美 (Perfect) - 行为逻辑自洽")
         else:
-             for err in errors:
-                 print(f"   🛑 {err}")
+            for err in errors:
+                print(f"   🛑 {err}")
 
-        print("\n" + "="*70 + "\n")
+        print("\n" + "=" * 70 + "\n")
 
     def run_batch_scan(self):
         """Scan all agents."""
@@ -175,8 +180,9 @@ class ForensicAnalyzer:
         else:
             print(f"⚠️ 发现 {len(flaws)} 个异常 Agent:")
             for aid, errs in flaws.items():
-                print(f"   - Agent {aid}: {errs[0]} (+{len(errs)-1} more)")
+                print(f"   - Agent {aid}: {errs[0]} (+{len(errs) - 1} more)")
             print("\n建议使用 'B. Single Profile' 模式深度查看上述 Agent.")
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -196,7 +202,8 @@ def main():
                 print(f"📂 Auto-detected DB: {db_path}")
             else:
                 db_path = "simulation.db"
-        except: pass
+        except BaseException:
+            pass
 
     if not db_path or not os.path.exists(db_path):
         print("❌ Database not found. Please run a simulation first.")
@@ -207,12 +214,15 @@ def main():
     if args.mode == 'single':
         if not args.agent_id:
             val = input("请输入 Agent ID: ").strip()
-            if val.isdigit(): args.agent_id = int(val)
+            if val.isdigit():
+                args.agent_id = int(val)
             else:
-                print("❌ Invalid ID"); return
+                print("❌ Invalid ID")
+                return
         analyzer.render_single_report(args.agent_id)
     else:
         analyzer.run_batch_scan()
+
 
 if __name__ == "__main__":
     main()

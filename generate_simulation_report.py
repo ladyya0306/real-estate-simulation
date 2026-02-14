@@ -10,11 +10,14 @@ import matplotlib.pyplot as plt
 DB_PATH = 'real_estate_stage2.db'
 REPORT_DIR = 'reports'
 
+
 def ensure_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
 # --- CSV Export Functions ---
+
+
 def export_legacy_csvs(results_dir):
     ensure_dir(results_dir)
     conn = sqlite3.connect(DB_PATH)
@@ -51,7 +54,7 @@ def export_legacy_csvs(results_dir):
                     tp = json.loads(row_dict.get('thought_process', '{}') or '{}')
                     urgency = tp.get('urgency', '')
                     price_exp = tp.get('price_expectation', '')
-                except:
+                except BaseException:
                     pass
 
                 writer.writerow({
@@ -108,6 +111,8 @@ def export_legacy_csvs(results_dir):
     print(f"Legacy CSVs exported to {results_dir}/")
 
 # --- Metric Reports (Markdown) ---
+
+
 def generate_agent_personas(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -126,6 +131,7 @@ def generate_agent_personas(report_dir=REPORT_DIR):
         f.write(content)
     print(f"Generated {report_dir}/agent_personas.md")
     conn.close()
+
 
 def generate_negotiations(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
@@ -149,8 +155,8 @@ def generate_negotiations(report_dir=REPORT_DIR):
                 reason = entry.get('content', '') or entry.get('reason', '')
 
                 content += f"- **{party}** ({action} @ ${price_call:,.0f}): {reason}\n"
-        except:
-             content += f"Raw Log: {row[5]}\n"
+        except BaseException:
+            content += f"Raw Log: {row[5]}\n"
 
         content += "\n---\n"
 
@@ -158,6 +164,7 @@ def generate_negotiations(report_dir=REPORT_DIR):
         f.write(content)
     print(f"Generated {report_dir}/negotiations.md")
     conn.close()
+
 
 def generate_decisions(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
@@ -179,6 +186,7 @@ def generate_decisions(report_dir=REPORT_DIR):
         f.write(content)
     print(f"Generated {report_dir}/decisions.md")
     conn.close()
+
 
 def generate_market_report(report_dir=REPORT_DIR):
     conn = sqlite3.connect(DB_PATH)
@@ -209,13 +217,14 @@ def generate_market_report(report_dir=REPORT_DIR):
         content += f"## Transactions ({len(txs)})\n"
         for tx in txs:
             content += f"- {tx}\n"
-    except:
+    except BaseException:
         content += "No transactions table found (or empty).\n"
 
     with open(f"{report_dir}/market_report.md", "w", encoding='utf-8') as f:
         f.write(content)
     print(f"Generated {report_dir}/market_report.md")
     conn.close()
+
 
 def generate_wealth_distribution(results_dir):
     """Generate wealth distribution chart (Histogram)"""
@@ -237,7 +246,7 @@ def generate_wealth_distribution(results_dir):
         print("No agents found for wealth chart.")
         return
 
-    net_worths = [(row[1] + row[2]) / 10000 for row in rows] # Convert to Wan (10k)
+    net_worths = [(row[1] + row[2]) / 10000 for row in rows]  # Convert to Wan (10k)
 
     plt.figure(figsize=(10, 6))
     plt.hist(net_worths, bins=50, color='skyblue', edgecolor='black', alpha=0.7)
@@ -251,6 +260,7 @@ def generate_wealth_distribution(results_dir):
     plt.savefig(chart_path)
     plt.close()
     print(f"Generated Wealth Chart: {chart_path}")
+
 
 def generate_all_reports():
     """Main entry point for report generation."""
@@ -273,6 +283,7 @@ def generate_all_reports():
     export_legacy_csvs(results_dir)
 
     print(f"Done! Reports saved in {REPORT_DIR}/ and Data in {results_dir}/")
+
 
 if __name__ == "__main__":
     generate_all_reports()

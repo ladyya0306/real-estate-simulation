@@ -9,15 +9,24 @@ def classify_property_type(area: float, unit_price: float, zone: str) -> str:
     Classify property type based on area and zone.
     """
     if zone == "A":
-        if area < 70: return "刚需小户型"
-        elif area < 120: return "普通住宅"
-        elif area < 180: return "改善型大户型"
-        else: return "豪宅"
+        if area < 70:
+            return "刚需小户型"
+        elif area < 120:
+            return "普通住宅"
+        elif area < 180:
+            return "改善型大户型"
+        else:
+            return "豪宅"
     else:
-        if area < 80: return "刚需小户型"
-        elif area < 120: return "普通住宅"
-        elif area < 180: return "改善型大户型"
-        else: return "豪宅"
+        if area < 80:
+            return "刚需小户型"
+        elif area < 120:
+            return "普通住宅"
+        elif area < 180:
+            return "改善型大户型"
+        else:
+            return "豪宅"
+
 
 def assign_school_district(zone: str, config=None) -> Tuple[bool, int]:
     """
@@ -39,6 +48,7 @@ def assign_school_district(zone: str, config=None) -> Tuple[bool, int]:
     else:
         return False, 3  # Tier 3 means no school district
 
+
 def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     """Create a single property record with extended fields"""
 
@@ -46,7 +56,7 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     if quality == 1:   # Small/Low quality
         area = random.uniform(50, 80)
         bedrooms = random.choice([1, 2])
-    elif quality == 2: # Medium
+    elif quality == 2:  # Medium
         area = random.uniform(80, 130)
         bedrooms = random.choice([2, 3])
     else:              # High quality
@@ -127,12 +137,13 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
         "owner_id": None,  # System owned initially
         "status": "off_market",  # Fixed: was "for_sale", but unowned properties shouldn't be listed
         "listed_price": round(listed_price, 0),
-        "min_price": round(base_value * 0.95, 0), # Added for V2
-        "current_valuation": base_value, # Added for V2
-        "listing_month": 0, # Added for V2
+        "min_price": round(base_value * 0.95, 0),  # Added for V2
+        "current_valuation": base_value,  # Added for V2
+        "listing_month": 0,  # Added for V2
         "last_transaction_month": None,
-        "created_at": 0 # Added for V2
+        "created_at": 0  # Added for V2
     }
+
 
 def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
     """Helper to split a property dict into Static and Market dicts for V2 DB insertion"""
@@ -146,7 +157,7 @@ def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
         "school_tier": prop_dict["school_tier"],
         "price_per_sqm": prop_dict.get("price_per_sqm", 0),  # 🆕
         "zone_price_tier": prop_dict.get("zone_price_tier", None),  # 🆕
-        "initial_value": prop_dict["base_value"], # Map base_value to initial_value
+        "initial_value": prop_dict["base_value"],  # Map base_value to initial_value
         "created_at": prop_dict.get("created_at", 0)
     }
 
@@ -157,12 +168,13 @@ def convert_to_v2_tuples(prop_dict: Dict) -> Tuple[Dict, Dict]:
         "current_valuation": prop_dict.get("current_valuation", prop_dict["base_value"]),
         "listed_price": prop_dict.get("listed_price"),
         "min_price": prop_dict.get("min_price"),
-        "rental_price": prop_dict.get("rental_price", 0), # Added rental_price
-        "rental_yield": prop_dict.get("rental_yield", 0), # Added rental_yield
+        "rental_price": prop_dict.get("rental_price", 0),  # Added rental_price
+        "rental_yield": prop_dict.get("rental_yield", 0),  # Added rental_yield
         "listing_month": prop_dict.get("listing_month"),
         "last_transaction_month": prop_dict.get("last_transaction_month")
     }
     return static_data, market_data
+
 
 def initialize_market_properties(target_total_count: int = None, config=None) -> List[Dict]:
     """

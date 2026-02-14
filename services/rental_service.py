@@ -4,6 +4,7 @@ import sqlite3
 
 logger = logging.getLogger(__name__)
 
+
 class RentalService:
     def __init__(self, config, db_conn: sqlite3.Connection):
         self.config = config
@@ -54,7 +55,7 @@ class RentalService:
         from collections import defaultdict
         owner_props = defaultdict(list)
         for r in rows:
-            owner_props[r[0]].append(r[1]) # List of rental_prices, sorted by value DESC
+            owner_props[r[0]].append(r[1])  # List of rental_prices, sorted by value DESC
 
         total_income = 0
         landlord_count = 0
@@ -116,9 +117,9 @@ class RentalService:
 
         # Update Owners status
         if owner_props:
-             owner_ids = list(owner_props.keys())
-             # Batch update rental_status='owned' is tricky without column, but let's assume valid
-             pass
+            owner_ids = list(owner_props.keys())
+            # Batch update rental_status='owned' is tricky without column, but let's assume valid
+            pass
 
         self.conn.commit()
         logger.info(f"Rental Flow: {landlord_count} Landlords earned {total_income:,.0f}; {tenant_count} Tenants paid {total_expense:,.0f} (A:{rent_a:.0f}, B:{rent_b:.0f})")

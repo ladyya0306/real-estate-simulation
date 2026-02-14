@@ -10,6 +10,7 @@ from simulation_runner import SimulationRunner
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
+
 def run_auto():
     # Setup paths
     proj_dir = "v2_project_auto_test"
@@ -25,7 +26,8 @@ def run_auto():
         shutil.copy("config/baseline.yaml", config_path)
     else:
         print("Warning: config/baseline.yaml not found, creating empty config")
-        with open(config_path, "w") as f: f.write("")
+        with open(config_path, "w") as f:
+            f.write("")
 
     # Initialize DB (This triggers migration)
     print(f"Initializing DB at {db_path}...")
@@ -36,7 +38,7 @@ def run_auto():
 
     # Initialize Runner
     runner = SimulationRunner(
-        agent_count=50, # Small count for speed
+        agent_count=50,  # Small count for speed
         months=2,
         seed=42,
         resume=False,
@@ -48,6 +50,7 @@ def run_auto():
     print("Starting simulation run...")
     runner.run()
     print("Simulation run complete.")
+
 
 if __name__ == "__main__":
     run_auto()

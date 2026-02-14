@@ -69,7 +69,7 @@ class ChineseNameGenerator:
 
         name = f"{self.SURNAMES[s_idx]}{self.GIVEN_CHARS[g1_idx]}{self.GIVEN_CHARS[g2_idx]}"
         if name in self.used_names:
-            name += str(self.counter) # Last resort
+            name += str(self.counter)  # Last resort
 
         self.used_names.add(name)
         return name

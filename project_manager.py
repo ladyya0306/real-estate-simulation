@@ -4,11 +4,13 @@ import shutil
 
 RESULTS_DIR = "results"
 
+
 def list_projects():
     if not os.path.exists(RESULTS_DIR):
         return []
     projects = [os.path.join(RESULTS_DIR, d) for d in os.listdir(RESULTS_DIR) if os.path.isdir(os.path.join(RESULTS_DIR, d))]
     return sorted(projects)
+
 
 def load_project_paths(project_dir):
     config_path = os.path.join(project_dir, "config.yaml")
@@ -19,6 +21,7 @@ def load_project_paths(project_dir):
     db_files = [f for f in os.listdir(project_dir) if f.endswith(".db")]
     db_path = os.path.join(project_dir, db_files[0]) if db_files else os.path.join(project_dir, "simulation.db")
     return config_path, db_path
+
 
 def create_new_project(template_config_path):
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -33,7 +36,7 @@ def create_new_project(template_config_path):
         # Try finding baseline in default location if template not found
         default_baseline = "config/baseline.yaml"
         if os.path.exists(default_baseline):
-             shutil.copy(default_baseline, new_config_path)
+            shutil.copy(default_baseline, new_config_path)
         else:
             with open(new_config_path, 'w') as f:
                 f.write("# Empty Config")

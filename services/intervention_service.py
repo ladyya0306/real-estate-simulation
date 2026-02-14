@@ -7,6 +7,7 @@ from utils.name_generator import ChineseNameGenerator
 
 logger = logging.getLogger(__name__)
 
+
 class InterventionService:
     def __init__(self, db_conn: sqlite3.Connection):
         self.conn = db_conn
@@ -15,11 +16,16 @@ class InterventionService:
     def _get_tier(self, income: float) -> str:
         """Helper to classify agent tier based on income."""
         # Simple heuristics based on default config boundaries (Adjust if needed)
-        if income < 5000: return "low"
-        if income < 12000: return "lower_middle"
-        if income < 25000: return "middle"
-        if income < 50000: return "upper_middle"
-        if income < 100000: return "high"
+        if income < 5000:
+            return "low"
+        if income < 12000:
+            return "lower_middle"
+        if income < 25000:
+            return "middle"
+        if income < 50000:
+            return "upper_middle"
+        if income < 100000:
+            return "high"
         return "ultra_high"
 
     def apply_wage_shock(self, agent_service, pct_change: float, target_tier: str = "all"):
@@ -32,7 +38,8 @@ class InterventionService:
 
         for agent in agent_service.agents:
             # Skip unemployed
-            if agent.monthly_income == 0: continue
+            if agent.monthly_income == 0:
+                continue
 
             tier = self._get_tier(agent.monthly_income)
             if target_tier != "all" and tier != target_tier:
@@ -51,7 +58,7 @@ class InterventionService:
             cursor.executemany("UPDATE agents_finance SET monthly_income=? WHERE agent_id=?", batch_updates)
             self.conn.commit()
 
-        logger.info(f"Intervention: Wage Shock {pct_change*100:.1f}% applied to {updated_count} agents.")
+        logger.info(f"Intervention: Wage Shock {pct_change * 100:.1f}% applied to {updated_count} agents.")
         return updated_count
 
     def apply_unemployment_shock(self, agent_service, rate: float, target_tier: str = "low"):
@@ -61,7 +68,8 @@ class InterventionService:
         """
         candidates = []
         for agent in agent_service.agents:
-            if agent.monthly_income == 0: continue # Already unemployed
+            if agent.monthly_income == 0:
+                continue  # Already unemployed
             tier = self._get_tier(agent.monthly_income)
             if target_tier == "all" or tier == target_tier:
                 candidates.append(agent)
@@ -89,7 +97,7 @@ class InterventionService:
             cursor.executemany("UPDATE agents_finance SET monthly_income=? WHERE agent_id=?", finance_updates)
             self.conn.commit()
 
-        logger.info(f"Intervention: Unemployment Shock ({rate*100}%) applied to {len(targets)} agents in {target_tier}.")
+        logger.info(f"Intervention: Unemployment Shock ({rate * 100}%) applied to {len(targets)} agents in {target_tier}.")
         return len(targets)
 
     def add_population(self, agent_service, count: int, tier: str):
@@ -115,13 +123,13 @@ class InterventionService:
         for i in range(count):
             current_id = start_id + i
             income = random.uniform(income_center * 0.8, income_center * 1.2)
-            cash = income * 12 * random.uniform(0.5, 3.0) # Variable savings
+            cash = income * 12 * random.uniform(0.5, 3.0)  # Variable savings
 
             name = self.name_gen.generate()
             age = random.randint(22, 55)
 
             agent = Agent(current_id, name, age, "single", cash, income)
-            agent.story.occupation = "Newcomer" # Marker
+            agent.story.occupation = "Newcomer"  # Marker
             agent.story.background_story = "Migrated to city recently."
 
             # Add to memory
@@ -166,7 +174,7 @@ class InterventionService:
         start_id = max_id + 1
 
         # Basic templates per zone
-        base_prices = {"A": 80000, "B": 45000} # Price per sqm
+        base_prices = {"A": 80000, "B": 45000}  # Price per sqm
         avg_area = 100
 
         new_props = []
@@ -182,11 +190,11 @@ class InterventionService:
                 "zone": zone,
                 "building_area": area,
                 "base_value": base_val,
-                "owner_id": None, # System
+                "owner_id": None,  # System
                 "status": "for_sale",
                 "listed_price": base_val * 1.05,
                 "min_price": base_val * 0.95,
-                "listing_month": 999 # Intervention month?
+                "listing_month": 999  # Intervention month?
             }
 
             # Add to memory
@@ -194,11 +202,12 @@ class InterventionService:
 
             # DB Insert
             cursor.execute("INSERT INTO properties_static (property_id, zone, building_area, initial_value) VALUES (?,?,?,?)",
-                          (pid, zone, area, base_val))
+                           (pid, zone, area, base_val))
             cursor.execute("INSERT INTO properties_market (property_id, status, listed_price, min_price, current_valuation) VALUES (?,?,?,?,?)",
-                          (pid, "for_sale", prop['listed_price'], prop['min_price'], base_val))
+                           (pid, "for_sale", prop['listed_price'], prop['min_price'], base_val))
 
         self.conn.commit()
+
     def remove_population(self, agent_service, count: int, tier: str):
         """
         Force exit agents.
@@ -222,13 +231,13 @@ class InterventionService:
 
         # 1. DB Updates
         # Remove from active_participants (stops them from buying/selling)
-        cursor.execute(f"DELETE FROM active_participants WHERE agent_id IN ({','.join(['?']*len(ids_to_remove))})", ids_to_remove)
+        cursor.execute(f"DELETE FROM active_participants WHERE agent_id IN ({','.join(['?'] * len(ids_to_remove))})", ids_to_remove)
 
         # Mark as 'Exited' in static?
-        cursor.execute(f"UPDATE agents_static SET occupation='Exited' WHERE agent_id IN ({','.join(['?']*len(ids_to_remove))})", ids_to_remove)
+        cursor.execute(f"UPDATE agents_static SET occupation='Exited' WHERE agent_id IN ({','.join(['?'] * len(ids_to_remove))})", ids_to_remove)
 
         # Set Income to 0?
-        cursor.execute(f"UPDATE agents_finance SET monthly_income=0 WHERE agent_id IN ({','.join(['?']*len(ids_to_remove))})", ids_to_remove)
+        cursor.execute(f"UPDATE agents_finance SET monthly_income=0 WHERE agent_id IN ({','.join(['?'] * len(ids_to_remove))})", ids_to_remove)
 
         self.conn.commit()
 
@@ -264,7 +273,7 @@ class InterventionService:
         ids = [p['property_id'] for p in targets]
 
         # DB Update
-        cursor.execute(f"UPDATE properties_market SET status='off_market' WHERE property_id IN ({','.join(['?']*len(ids))})", ids)
+        cursor.execute(f"UPDATE properties_market SET status='off_market' WHERE property_id IN ({','.join(['?'] * len(ids))})", ids)
         self.conn.commit()
 
         # Memory Update

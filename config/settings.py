@@ -36,14 +36,14 @@ MORTGAGE_CONFIG = {
 # 3. Life Event Pool
 # ---------------------------------------------------------
 LIFE_EVENT_POOL = [
-    {"event": "升职加薪", "cash_change": 0.2,  "buy_tendency": 0.3, "sell_tendency": 0.0},
-    {"event": "年终奖",   "cash_change": 0.15, "buy_tendency": 0.2, "sell_tendency": 0.0},
-    {"event": "结婚",     "cash_change": 0.0,  "buy_tendency": 0.5, "sell_tendency": 0.0},
-    {"event": "生子",     "cash_change": -0.1, "buy_tendency": 0.4, "sell_tendency": 0.0},
-    {"event": "降薪",     "cash_change": -0.15,"buy_tendency": -0.3,"sell_tendency": 0.2},
-    {"event": "失业",     "cash_change": -0.3, "buy_tendency": -0.5,"sell_tendency": 0.4},
-    {"event": "生病",     "cash_change": -0.2, "buy_tendency": -0.3,"sell_tendency": 0.3},
-    {"event": "离婚",     "cash_change": 0.0,  "buy_tendency": 0.0, "sell_tendency": 0.5},
+    {"event": "升职加薪", "cash_change": 0.2, "buy_tendency": 0.3, "sell_tendency": 0.0},
+    {"event": "年终奖", "cash_change": 0.15, "buy_tendency": 0.2, "sell_tendency": 0.0},
+    {"event": "结婚", "cash_change": 0.0, "buy_tendency": 0.5, "sell_tendency": 0.0},
+    {"event": "生子", "cash_change": -0.1, "buy_tendency": 0.4, "sell_tendency": 0.0},
+    {"event": "降薪", "cash_change": -0.15, "buy_tendency": -0.3, "sell_tendency": 0.2},
+    {"event": "失业", "cash_change": -0.3, "buy_tendency": -0.5, "sell_tendency": 0.4},
+    {"event": "生病", "cash_change": -0.2, "buy_tendency": -0.3, "sell_tendency": 0.3},
+    {"event": "离婚", "cash_change": 0.0, "buy_tendency": 0.0, "sell_tendency": 0.5},
 ]
 
 # ---------------------------------------------------------
@@ -77,6 +77,7 @@ MACRO_ENVIRONMENT = {
 
 # Macro-Economic Environment (Tier 2)
 # Removed fixed schedule in favor of Interactive Macro (v2.6)
+
 
 def get_current_macro_sentiment(month: int) -> str:
     """

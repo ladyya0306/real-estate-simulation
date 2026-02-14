@@ -23,6 +23,7 @@ def calculate_monthly_payment(loan_amount: float, annual_rate: float, years: int
     payment = loan_amount * (monthly_rate * (1 + monthly_rate) ** num_payments) / ((1 + monthly_rate) ** num_payments - 1)
     return payment
 
+
 def check_affordability(agent, price: float, config=None) -> Tuple[bool, float, float]:
     """
     Check if agent can afford the property with mortgage.
@@ -60,6 +61,7 @@ def check_affordability(agent, price: float, config=None) -> Tuple[bool, float, 
         return False, 0.0, 0.0
 
     return True, down_payment, loan_amount
+
 
 def get_max_loan(agent) -> float:
     """

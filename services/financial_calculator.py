@@ -25,7 +25,7 @@ class FinancialCalculator:
         Formula: Mortgage + Maintenance - Rent (if rented out)
         Note: If property is vacant, Rent is 0.
         """
-        maintenance_cost = property_data.get('base_value', 0) * 0.0003 # Approx 0.3% monthly maintenance/tax
+        maintenance_cost = property_data.get('base_value', 0) * 0.0003  # Approx 0.3% monthly maintenance/tax
         monthly_rent = property_data.get('rental_income', 0)
 
         # If agent lives in it, no rent income, but implicit benefit?

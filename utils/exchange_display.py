@@ -49,10 +49,10 @@ class ExchangeDisplay:
                 border_style="blue"
             ))
         else:
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"🏠 房产交易所 - 第 {month} 月")
             print(f"宏观环境: {macro_status}")
-            print(f"{'='*50}\n")
+            print(f"{'=' * 50}\n")
 
     def show_listings(self, listings: List[Dict], properties_map: Dict = None):
         """显示当前挂牌房产"""
@@ -143,12 +143,12 @@ class ExchangeDisplay:
         """显示谈判开始"""
         if self.use_rich:
             self.console.print(f"\n[bold yellow]💬 开始谈判[/bold yellow] "
-                              f"买家{buyer_id} ↔ 卖家{seller_id} | 房产{property_id} | ¥{listed_price:,.0f}")
+                               f"买家{buyer_id} ↔ 卖家{seller_id} | 房产{property_id} | ¥{listed_price:,.0f}")
         else:
             print(f"\n💬 开始谈判: 买家{buyer_id} vs 卖家{seller_id}, 房产{property_id}, ¥{listed_price:,.0f}")
 
     def show_negotiation_round(self, round_num: int, party: str, action: str,
-                                price: Optional[float], message: str, thought: str = ""):
+                               price: Optional[float], message: str, thought: str = ""):
         """显示谈判轮次"""
         icon = "🧑‍💼" if party == "buyer" else "🏠"
         party_name = "买方" if party == "buyer" else "卖方"
@@ -168,7 +168,7 @@ class ExchangeDisplay:
 
         if self.use_rich:
             self.console.print(f"  {icon} 第{round_num}轮 [{color}]{party_name}[/{color}]: "
-                              f"[bold]{action}[/bold] {price_str}")
+                               f"[bold]{action}[/bold] {price_str}")
             if message:
                 msg_short = message[:60] + "..." if len(message) > 60 else message
                 self.console.print(f"     [dim]💬 \"{msg_short}\"[/dim]")
@@ -196,12 +196,12 @@ class ExchangeDisplay:
         else:
             if self.use_rich:
                 self.console.print(f"[red]❌ 谈判失败: 买家{buyer_id} vs 卖家{seller_id}[/red]"
-                                  f"[dim] ({reason})[/dim]")
+                                   f"[dim] ({reason})[/dim]")
             else:
                 print(f"❌ 谈判失败: 买家{buyer_id} vs 卖家{seller_id} ({reason})")
 
     def show_monthly_summary(self, month: int, deals: int, total_volume: float,
-                              failed: int = 0, duration: float = 0):
+                             failed: int = 0, duration: float = 0):
         """月度汇总"""
         if self.use_rich:
             avg_price = total_volume / deals if deals > 0 else 0
@@ -214,11 +214,11 @@ class ExchangeDisplay:
                 border_style="cyan"
             ))
         else:
-            print(f"\n{'='*40}")
+            print(f"\n{'=' * 40}")
             print(f"📊 第 {month} 月交易汇总")
             print(f"成交: {deals}套 | 失败: {failed}次")
             print(f"总额: ¥{total_volume:,.0f}")
-            print(f"{'='*40}\n")
+            print(f"{'=' * 40}\n")
 
     def show_supply_demand(self, supply: int, demand: int):
         """显示供需状态"""

@@ -25,6 +25,7 @@ def check_encoding(file_path):
         # print(f"Skipping {file_path}: {e}")
         return True
 
+
 non_utf8_files = []
 for root, dirs, files in os.walk("."):
     if ".git" in root or ".venv" in root or "__pycache__" in root or ".pytest_cache" in root or "node_modules" in root:

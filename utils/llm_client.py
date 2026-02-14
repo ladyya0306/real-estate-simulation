@@ -29,30 +29,45 @@ logger = logging.getLogger(__name__)
 if not SMART_API_KEY:
     logger.warning("SMART_API_KEY (or DEEPSEEK_API_KEY) not found. Main LLM calls will fail.")
 
-# Initialize Clients
-# Smart Clients
-client_smart = OpenAI(api_key=SMART_API_KEY, base_url=SMART_BASE_URL)
-aclient_smart = AsyncOpenAI(api_key=SMART_API_KEY, base_url=SMART_BASE_URL)
+# Initialize Clients (Lazy Loading)
+client_smart = None
+aclient_smart = None
+client_fast = None
+aclient_fast = None
 
-# Fast Clients (Reuse Smart clients if config is identical to save resources)
-if FAST_API_KEY == SMART_API_KEY and FAST_BASE_URL == SMART_BASE_URL:
-    client_fast = client_smart
-    aclient_fast = aclient_smart
-else:
-    client_fast = OpenAI(api_key=FAST_API_KEY, base_url=FAST_BASE_URL)
-    aclient_fast = AsyncOpenAI(api_key=FAST_API_KEY, base_url=FAST_BASE_URL)
+
+def _ensure_clients_initialized():
+    global client_smart, aclient_smart, client_fast, aclient_fast
+    if client_smart is not None:
+        return
+
+    # Smart Clients
+    client_smart = OpenAI(api_key=SMART_API_KEY, base_url=SMART_BASE_URL)
+    aclient_smart = AsyncOpenAI(api_key=SMART_API_KEY, base_url=SMART_BASE_URL)
+
+    # Fast Clients
+    if FAST_API_KEY == SMART_API_KEY and FAST_BASE_URL == SMART_BASE_URL:
+        client_fast = client_smart
+        aclient_fast = aclient_smart
+    else:
+        client_fast = OpenAI(api_key=FAST_API_KEY, base_url=FAST_BASE_URL)
+        aclient_fast = AsyncOpenAI(api_key=FAST_API_KEY, base_url=FAST_BASE_URL)
+
 
 def get_client(model_type: str, is_async: bool = False):
     """Select appropriate client based on model type."""
+    _ensure_clients_initialized()
     if model_type.lower() == "fast":
         return aclient_fast if is_async else client_fast
     return aclient_smart if is_async else client_smart
+
 
 def get_model_id(model_type: str) -> str:
     """Select model ID based on type."""
     if model_type.lower() == "fast":
         return MODEL_FAST
     return MODEL_SMART
+
 
 def call_llm(prompt: str, system_prompt: str = "You are a helpful assistant in a real estate simulation.", json_mode: bool = False, model_type: str = "smart") -> str:
     """
@@ -80,6 +95,7 @@ def call_llm(prompt: str, system_prompt: str = "You are a helpful assistant in a
         logger.error(f"LLM Call Failed ({model_type}): {e}")
         return f"Error: {str(e)}"
 
+
 def safe_call_llm(prompt: str, default_return: dict, system_prompt: str = "", model_type: str = "smart") -> dict:
     """
     Call LLM and parse JSON response. Returns default if failure.
@@ -95,13 +111,14 @@ def safe_call_llm(prompt: str, default_return: dict, system_prompt: str = "", mo
     except json.JSONDecodeError:
         logger.error(f"Failed to parse JSON. Response: {response_text}")
         try:
-             start = clean_text.find('{')
-             end = clean_text.rfind('}')
-             if start != -1 and end != -1:
-                 return json.loads(clean_text[start:end+1])
-        except:
+            start = clean_text.find('{')
+            end = clean_text.rfind('}')
+            if start != -1 and end != -1:
+                return json.loads(clean_text[start:end + 1])
+        except BaseException:
             pass
         return default_return
+
 
 async def call_llm_async(prompt: str, system_prompt: str = "You are a helpful assistant in a real estate simulation.", json_mode: bool = False, model_type: str = "smart") -> str:
     """
@@ -128,6 +145,7 @@ async def call_llm_async(prompt: str, system_prompt: str = "You are a helpful as
         logger.error(f"Async LLM Call Failed ({model_type}): {e}")
         return f"Error: {str(e)}"
 
+
 async def safe_call_llm_async(prompt: str, default_return: dict, system_prompt: str = "", model_type: str = "smart") -> dict:
     """
     Async wrapper for safe JSON LLM calls.
@@ -143,10 +161,10 @@ async def safe_call_llm_async(prompt: str, default_return: dict, system_prompt: 
     except json.JSONDecodeError:
         logger.error(f"Failed to parse JSON (Async). Response: {response_text}")
         try:
-             start = clean_text.find('{')
-             end = clean_text.rfind('}')
-             if start != -1 and end != -1:
-                 return json.loads(clean_text[start:end+1])
-        except:
+            start = clean_text.find('{')
+            end = clean_text.rfind('}')
+            if start != -1 and end != -1:
+                return json.loads(clean_text[start:end + 1])
+        except BaseException:
             pass
         return default_return

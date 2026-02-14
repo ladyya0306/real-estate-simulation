@@ -13,6 +13,7 @@ from models import Agent
 
 logger = logging.getLogger(__name__)
 
+
 class TransactionService:
     def __init__(self, config, db_conn: sqlite3.Connection):
         self.config = config
@@ -64,12 +65,12 @@ class TransactionService:
             metrics = result_tuple[1]
 
             action = result.get("action", "B")
-            new_price = result.get("new_price", 0) # default?
+            new_price = result.get("new_price", 0)  # default?
             reason = result.get("reason", "LLM决策")
 
             # Defensive check
             if not new_price and action in ["B", "C"]:
-                 continue # Should not happen
+                continue  # Should not happen
 
             if action == "A":
                 # Maintain price
@@ -106,9 +107,9 @@ class TransactionService:
             self.conn.commit()
 
     async def process_monthly_transactions(self, month: int, buyers: List[Agent],
-                                         listings_by_zone: Dict, active_listings: List[Dict],
-                                         props_map: Dict, agent_map: Dict,
-                                         market, wf_logger, exchange_display):
+                                           listings_by_zone: Dict, active_listings: List[Dict],
+                                           props_map: Dict, agent_map: Dict,
+                                           market, wf_logger, exchange_display):
         """
         Orchestrate matching, negotiation, and execution.
         Returns: (transactions_count, failed_negotiations_count)
@@ -143,7 +144,7 @@ class TransactionService:
                 bid = l['listed_price']
                 match_records.append((
                     month, l['property_id'], b.id, l['listed_price'], bid,
-                    1, # is_valid_bid
+                    1,  # is_valid_bid
                     1  # proceeded_to_negotiation (All matches proceed in current logic)
                 ))
 
@@ -161,7 +162,8 @@ class TransactionService:
         interest_registry = {}
         for m in buyer_matches:
             pid = m['listing']['property_id']
-            if pid not in interest_registry: interest_registry[pid] = []
+            if pid not in interest_registry:
+                interest_registry[pid] = []
             interest_registry[pid].append(m['buyer'])
 
         # --- 2. Negotiation Phase ---
@@ -178,25 +180,27 @@ class TransactionService:
                                             run_negotiation_session_async)
 
             for pid, interested_buyers in interest_registry.items():
-                 listing = next((l for l in active_listings if l['property_id'] == pid), None)
-                 if not listing: continue
+                listing = next((l for l in active_listings if l['property_id'] == pid), None)
+                if not listing:
+                    continue
 
-                 seller_agent = agent_map.get(listing['seller_id'])
-                 if not seller_agent: continue
+                seller_agent = agent_map.get(listing['seller_id'])
+                if not seller_agent:
+                    continue
 
-                 # Determine Negotiation Mode
-                 market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
+                # Determine Negotiation Mode
+                market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
 
-                 mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
+                mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
 
-                 # ✅ Phase 3.3: Pass db_conn to enable bid recording
-                 tasks.append(run_negotiation_session_async(seller_agent, interested_buyers, listing, market, month, self.config, self.conn))
-                 session_metadata.append({
-                     "pid": pid,
-                     "seller": seller_agent,
-                     "buyers": interested_buyers,
-                     "listing": listing
-                 })
+                # ✅ Phase 3.3: Pass db_conn to enable bid recording
+                tasks.append(run_negotiation_session_async(seller_agent, interested_buyers, listing, market, month, self.config, self.conn))
+                session_metadata.append({
+                    "pid": pid,
+                    "seller": seller_agent,
+                    "buyers": interested_buyers,
+                    "listing": listing
+                })
 
             if tasks:
                 session_results = await asyncio.gather(*tasks)
@@ -226,66 +230,66 @@ class TransactionService:
                 # We can enhance it later. For now, we log history.
 
                 if outcome == 'success' and winner:
-                     # Display
-                     exchange_display.show_deal_result(True, winner.id, seller_agent.id, pid, session_result['final_price'])
+                    # Display
+                    exchange_display.show_deal_result(True, winner.id, seller_agent.id, pid, session_result['final_price'])
 
-                     # Check cash (double check)
-                     final_price = session_result['final_price']
-                     prop_data = props_map[pid]
+                    # Check cash (double check)
+                    final_price = session_result['final_price']
+                    prop_data = props_map[pid]
 
-                     tx_record = execute_transaction(winner, seller_agent, prop_data, final_price, market, config=self.config)
+                    tx_record = execute_transaction(winner, seller_agent, prop_data, final_price, market, config=self.config)
 
-                     if tx_record:
-                         transactions_count += 1
-                         batch_transactions.append((
-                             month,
-                             winner.id,
-                             seller_agent.id,
-                             pid,
-                             tx_record['price'],
-                             tx_record['down_payment'],
-                             tx_record['loan_amount'],
-                             len(history)
-                         ))
+                    if tx_record:
+                        transactions_count += 1
+                        batch_transactions.append((
+                            month,
+                            winner.id,
+                            seller_agent.id,
+                            pid,
+                            tx_record['price'],
+                            tx_record['down_payment'],
+                            tx_record['loan_amount'],
+                            len(history)
+                        ))
 
-                         batch_negotiations.append((winner.id, seller_agent.id, pid, len(history), final_price, True, "Deal Concluded", json.dumps(history)))
+                        batch_negotiations.append((winner.id, seller_agent.id, pid, len(history), final_price, True, "Deal Concluded", json.dumps(history)))
 
-                         # Update Listing / Properties (V2)
-                         # execute_transaction updates objects, but we need to update DB status
-                         cursor.execute("UPDATE properties_market SET status='off_market', owner_id=?, last_transaction_month=?, current_valuation=? WHERE property_id=?",
-                                      (winner.id, month, final_price, pid))
+                        # Update Listing / Properties (V2)
+                        # execute_transaction updates objects, but we need to update DB status
+                        cursor.execute("UPDATE properties_market SET status='off_market', owner_id=?, last_transaction_month=?, current_valuation=? WHERE property_id=?",
+                                       (winner.id, month, final_price, pid))
 
-                         # Update Buyer Financials (Persist Mortgage & Cash)
-                         # Use helper to ensure all fields (especially net_cashflow) are consistent
-                         w_fin = winner.to_v2_finance_dict()
-                         cursor.execute("UPDATE agents_finance SET mortgage_monthly_payment=?, cash=?, total_assets=?, total_debt=?, net_cashflow=? WHERE agent_id=?",
-                                      (w_fin['mortgage_monthly_payment'], w_fin['cash'], w_fin['total_assets'], w_fin['total_debt'], w_fin['net_cashflow'], winner.id))
+                        # Update Buyer Financials (Persist Mortgage & Cash)
+                        # Use helper to ensure all fields (especially net_cashflow) are consistent
+                        w_fin = winner.to_v2_finance_dict()
+                        cursor.execute("UPDATE agents_finance SET mortgage_monthly_payment=?, cash=?, total_assets=?, total_debt=?, net_cashflow=? WHERE agent_id=?",
+                                       (w_fin['mortgage_monthly_payment'], w_fin['cash'], w_fin['total_assets'], w_fin['total_debt'], w_fin['net_cashflow'], winner.id))
 
-                         # Reset winner role
-                         winner.role = "OBSERVER"
-                         # Clean up active_participants
-                         cursor.execute("DELETE FROM active_participants WHERE agent_id = ?", (winner.id,))
+                        # Reset winner role
+                        winner.role = "OBSERVER"
+                        # Clean up active_participants
+                        cursor.execute("DELETE FROM active_participants WHERE agent_id = ?", (winner.id,))
 
                 else:
-                     failed_negotiations += 1
-                     # Log failed
-                     for buyer in interested_buyers:
-                         batch_negotiations.append((
-                             buyer.id, seller_agent.id, pid, len(history),
-                             0, False,
-                             session_result.get('reason', 'Negotiation Failed'),
-                             json.dumps(history)
-                         ))
+                    failed_negotiations += 1
+                    # Log failed
+                    for buyer in interested_buyers:
+                        batch_negotiations.append((
+                            buyer.id, seller_agent.id, pid, len(history),
+                            0, False,
+                            session_result.get('reason', 'Negotiation Failed'),
+                            json.dumps(history)
+                        ))
 
-                     # Handle failed (Price Cut)
-                     potential_buyers_est = len(interested_buyers)
-                     try:
-                         adjusted = handle_failed_negotiation(seller_agent, listing, market, potential_buyers_count=potential_buyers_est)
-                         if adjusted:
-                             cursor.execute("UPDATE properties_market SET listed_price=?, min_price=? WHERE property_id=?",
+                    # Handle failed (Price Cut)
+                    potential_buyers_est = len(interested_buyers)
+                    try:
+                        adjusted = handle_failed_negotiation(seller_agent, listing, market, potential_buyers_count=potential_buyers_est)
+                        if adjusted:
+                            cursor.execute("UPDATE properties_market SET listed_price=?, min_price=? WHERE property_id=?",
                                            (listing['listed_price'], listing['min_price'], pid))
-                     except Exception as e:
-                         logger.warning(f"Failed to adjust price after failure: {e}")
+                    except Exception as e:
+                        logger.warning(f"Failed to adjust price after failure: {e}")
 
             # Batch Insert
             if batch_transactions:

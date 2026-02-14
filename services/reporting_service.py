@@ -8,6 +8,7 @@ from utils.llm_client import safe_call_llm_async
 
 logger = logging.getLogger(__name__)
 
+
 class ReportingService:
     def __init__(self, config, db_conn: sqlite3.Connection):
         self.config = config
@@ -34,7 +35,7 @@ class ReportingService:
         use_llm = getattr(self.config, 'enable_llm_portraits', True)
 
         for i in range(0, len(agent_ids), batch_size):
-            batch_ids = agent_ids[i : i + batch_size]
+            batch_ids = agent_ids[i: i + batch_size]
             tasks = [self._process_single_agent(aid, run_id, use_llm) for aid in batch_ids]
 
             # Run batch
@@ -115,7 +116,7 @@ class ReportingService:
         decisions = data['decisions']
 
         # Simplify data for prompt
-        tx_summary = ", ".join([f"Month {t['month']} {t['type']} 房产{t['property_id']} ({t['final_price']/10000:.0f}万)" for t in txs]) if txs else "无交易"
+        tx_summary = ", ".join([f"Month {t['month']} {t['type']} 房产{t['property_id']} ({t['final_price'] / 10000:.0f}万)" for t in txs]) if txs else "无交易"
 
         prompt = f"""
         你是一位犀利的房地产观察家。请为以下 Agent 撰写一段【人物画像/投资风格辣评】（100字左右）。
@@ -124,7 +125,7 @@ class ReportingService:
         - 姓名: {identity['name']} ({2024 - identity['birth_year']}岁)
         - 职业: {identity['occupation']}
         - 设定风格: {identity['investment_style']}
-        - 财务状况: 现金 {finance['cash']/10000:.0f}万, 净资产 {finance['total_assets']/10000:.0f}万, 负债 {finance['total_debt']/10000:.0f}万
+        - 财务状况: 现金 {finance['cash'] / 10000:.0f}万, 净资产 {finance['total_assets'] / 10000:.0f}万, 负债 {finance['total_debt'] / 10000:.0f}万
 
         **行为记录**:
         - 交易历史: {tx_summary}
@@ -150,8 +151,8 @@ class ReportingService:
         dec_json = json.dumps(data['decisions'], ensure_ascii=False)
         llm_text = data.get('llm_portrait', "")
 
-        if isinstance(llm_text, dict): # Handle if safe_call returned dict error
-             llm_text = str(llm_text)
+        if isinstance(llm_text, dict):  # Handle if safe_call returned dict error
+            llm_text = str(llm_text)
 
         cursor.execute("""
             INSERT INTO agent_end_reports

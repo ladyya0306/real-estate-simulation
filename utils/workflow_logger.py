@@ -35,9 +35,9 @@ class WorkflowLogger:
 
     def section_header(self, title: str):
         """打印主章节标题"""
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"  {title}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
     def subsection_header(self, title: str):
         """打印子章节标题"""
@@ -93,9 +93,9 @@ class WorkflowLogger:
         buyer_ids = [b.id for b in buyers]
         # sellers 可能是字典列表或对象列表，适配一下
         if sellers and isinstance(sellers[0], dict):
-             seller_ids = [s.get('owner_id', s.get('seller_id', 'N/A')) for s in sellers]
+            seller_ids = [s.get('owner_id', s.get('seller_id', 'N/A')) for s in sellers]
         else:
-             seller_ids = [s.id for s in sellers] if sellers else []
+            seller_ids = [s.id for s in sellers] if sellers else []
 
         print(f"\n🛒 买家 ({len(buyers)} 人): {buyer_ids[:limit]}")
         if len(buyers) > limit:
@@ -118,7 +118,7 @@ class WorkflowLogger:
     # ====== 阶段 5 & 6: 匹配与谈判 ======
 
     def log_negotiation(self, buyer_id: int, seller_id: int, property_id: int,
-                       listed_price: float, history: List[Dict], success: bool, final_price: float):
+                        listed_price: float, history: List[Dict], success: bool, final_price: float):
         """
         记录一次完整的谈判过程
         设计为：前 N 个完整显示，后面的仅显示结果摘要
@@ -146,7 +146,7 @@ class WorkflowLogger:
                 if price_val is not None:
                     try:
                         price_str = f"{float(price_val):,.0f}"
-                    except:
+                    except BaseException:
                         price_str = str(price_val)
                 else:
                     price_str = "-"
@@ -185,4 +185,4 @@ class WorkflowLogger:
     def get_progress_bar(self, iterable, desc="", total=None):
         """获取 tqdm 进度条"""
         return tqdm(iterable, desc=desc, total=total,
-                   bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]")
+                    bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]")

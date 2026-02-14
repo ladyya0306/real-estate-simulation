@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+
 def get_tracked_files():
     try:
         # Force utf-8 for git output to avoid decoding errors on file paths
@@ -9,6 +10,7 @@ def get_tracked_files():
     except Exception as e:
         print(f"Git error: {e}")
         return []
+
 
 def convert_to_utf8(filepath):
     if not os.path.exists(filepath):
@@ -40,14 +42,15 @@ def convert_to_utf8(filepath):
             print(f"Converting {filepath} from GB18030 to UTF-8")
             with open(filepath, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(content)
-        
+
     except Exception as e:
         print(f"Error processing {filepath}: {e}")
+
 
 if __name__ == "__main__":
     files = get_tracked_files()
     print(f"Scanning {len(files)} tracked files...")
     for f in files:
         if f.endswith('.py') or f.endswith('.md') or f.endswith('.txt') or f.endswith('.yaml') or f.endswith('.yml') or f.endswith('.csv'):
-             convert_to_utf8(f)
+            convert_to_utf8(f)
     print("Done.")
