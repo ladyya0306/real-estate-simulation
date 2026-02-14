@@ -23,4 +23,6 @@ exclude = [
     "build",
     "dist"
 ]
+
+[tool.ruff.lint]
 ignore = ["E203"]
