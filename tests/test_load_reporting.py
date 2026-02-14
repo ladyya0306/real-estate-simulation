@@ -47,7 +47,7 @@ class TestLoadReporting(unittest.TestCase):
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    @patch('services.reporting_service.call_llm')
+    @patch('services.reporting_service.safe_call_llm_async')
     def test_load_and_report(self, mock_llm):
         # Setup mock
         mock_llm.return_value = "This is a mock LLM portrait generated for testing purposes. It is long enough to pass validation."
