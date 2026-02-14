@@ -46,7 +46,11 @@ class TestLoadReporting(unittest.TestCase):
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    def test_load_and_report(self):
+    @unittest.mock.patch('services.reporting_service.call_llm')
+    def test_load_and_report(self, mock_llm):
+        # Setup mock
+        mock_llm.return_value = "This is a mock LLM portrait generated for testing purposes. It is long enough to pass validation."
+
         print("\n--- [Step 2] Resuming Simulation (Month 2) with Reporting ---")
 
         # 2. Resume Simulation
