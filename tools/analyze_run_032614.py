@@ -78,11 +78,7 @@ def analyze_run():
                     finance = cursor.fetchone()
                     if finance:
                         f.write(
-                            f"**Financials**: Cash: {
-                                finance['cash']:,.0f}, Net Worth: {
-                                finance['total_assets']:,.0f}, Debt: {
-                                finance['total_debt']:,.0f}, Cashflow: {
-                                finance['net_cashflow']:,.0f}\n")
+                            f"**Financials**: Cash: {finance['cash']:,.0f}, Net Worth: {finance['total_assets']:,.0f}, Debt: {finance['total_debt']:,.0f}, Cashflow: {finance['net_cashflow']:,.0f}\n")
 
                     # Transaction History
                     cursor.execute("SELECT * FROM transactions WHERE buyer_id=? OR seller_id=?", (agent_id, agent_id))
@@ -117,9 +113,9 @@ def analyze_run():
                         f.write(f"- [Month {first['month']} {first['event_type']}] {first['decision']}: {first['reason']}\n")
 
                         # Show any transaction related
-                        important_logs = [l for l in logs if l['event_type'] in ('BID', 'LIST_PROPERTY', 'NEGOTIATION', 'ACCEPT_OFFER')]
-                        for l in important_logs:
-                            f.write(f"- [Month {l['month']} {l['event_type']}] {l['decision']}: {l['reason']}\n")
+                        important_logs = [log_entry for log_entry in logs if log_entry['event_type'] in ('BID', 'LIST_PROPERTY', 'NEGOTIATION', 'ACCEPT_OFFER')]
+                        for log_entry in important_logs:
+                            f.write(f"- [Month {log_entry['month']} {log_entry['event_type']}] {log_entry['decision']}: {log_entry['reason']}\n")
 
                         # Show last if different
                         last = logs[-1]

@@ -97,7 +97,7 @@ class RentalService:
         total_expense = 0
         tenant_count = 0
         batch_expense = []
-        batch_status_update = []
+        # batch_status_update = []
 
         for agent_id, target_zone in tenants:
             # If target_zone is None, default to B
@@ -117,7 +117,7 @@ class RentalService:
 
         # Update Owners status
         if owner_props:
-            owner_ids = list(owner_props.keys())
+            # owner_ids = list(owner_props.keys())
             # Batch update rental_status='owned' is tricky without column, but let's assume valid
             pass
 

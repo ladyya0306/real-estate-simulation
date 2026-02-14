@@ -73,7 +73,7 @@ def update_license_in_file(
             try:
                 print(f'Replaced license in {file_path}')
             except UnicodeEncodeError:
-                pass # Silently continue if print fails
+                pass  # Silently continue if print fails
             return True
         else:
             return False
@@ -83,7 +83,7 @@ def update_license_in_file(
         try:
             print(f'Added license to {file_path}')
         except UnicodeEncodeError:
-            print(f'Added license to {file_path}'.encode('utf-8', errors='replace').decode('utf-8')) # Fallback
+            print(f'Added license to {file_path}'.encode('utf-8', errors='replace').decode('utf-8'))  # Fallback
         return True
 
 

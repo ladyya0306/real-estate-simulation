@@ -7,8 +7,8 @@ Oasis Real Estate Simulation Runner (v2.2 Scholar Edition)
 import logging
 import os
 import random
-import sys
 import subprocess
+import sys
 
 import numpy as np
 

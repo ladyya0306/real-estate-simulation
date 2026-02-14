@@ -8,8 +8,7 @@ import logging
 import random
 from typing import Dict, List, Optional
 
-from agent_behavior import (decide_negotiation_format, safe_call_llm,
-                            safe_call_llm_async)
+from agent_behavior import decide_negotiation_format, safe_call_llm, safe_call_llm_async
 from models import Agent, Market
 from mortgage_system import calculate_max_affordable_price, check_affordability
 
@@ -40,7 +39,7 @@ def build_macro_context(month: int, config=None) -> str:
 
 async def run_batch_bidding_async(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, month: int, config=None, db_conn=None) -> Dict:
     """Mode A: Batch Bidding (Blind Auction) - Async"""
-    history = []
+    # history = []
     min_price = listing['min_price']
 
     # 1. Buyers Submit Bids (Parallel)
@@ -146,7 +145,7 @@ async def run_batch_bidding_async(seller: Agent, buyers: List[Agent], listing: D
 
 def run_batch_bidding(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, config=None) -> Dict:
     """Mode A: Batch Bidding (Blind Auction)"""
-    history = []
+    # history = []
     min_price = listing['min_price']
 
     # 1. Buyers Submit Bids
@@ -479,13 +478,13 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
     shortlist = candidates[:5]
 
     # helper to format prop for prompt
-    def format_prop(l):
-        p = properties_map.get(l['property_id'])
+    def format_prop(listing_data):
+        p = properties_map.get(listing_data['property_id'])
         return {
-            "id": l['property_id'],
+            "id": listing_data['property_id'],
             "zone": p['zone'],
             "area": p['building_area'],
-            "price": l['listed_price'],
+            "price": listing_data['listed_price'],
             "school": "Yes" if p.get('is_school_district') else "No",
             "type": p.get('property_type', 'N/A')
         }
@@ -580,7 +579,7 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
     # Macro Environment Context
     macro_context = build_macro_context(1, config)  # Month is not passed effectively here, defaulting to 1 or need to pass in
 
-    history = []
+    # history = []
     rounds = random.randint(*rounds_range)
 
     # Starting offer based on configuration

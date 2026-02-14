@@ -174,10 +174,7 @@ class TransactionService:
             session_metadata = []
 
             # Local imports to avoid circular dependency
-            from transaction_engine import (decide_negotiation_format,
-                                            execute_transaction,
-                                            handle_failed_negotiation,
-                                            run_negotiation_session_async)
+            from transaction_engine import decide_negotiation_format, execute_transaction, handle_failed_negotiation, run_negotiation_session_async
 
             for pid, interested_buyers in interest_registry.items():
                 listing = next((l for l in active_listings if l['property_id'] == pid), None)
@@ -191,7 +188,7 @@ class TransactionService:
                 # Determine Negotiation Mode
                 market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
 
-                mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
+                # mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
 
                 # ✅ Phase 3.3: Pass db_conn to enable bid recording
                 tasks.append(run_negotiation_session_async(seller_agent, interested_buyers, listing, market, month, self.config, self.conn))

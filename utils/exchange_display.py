@@ -9,7 +9,6 @@ try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.table import Table
-    from rich.text import Text
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -69,22 +68,22 @@ class ExchangeDisplay:
             table.add_column("挂牌价", justify="right", style="bold", width=14)
             table.add_column("卖家ID", style="dim", width=8)
 
-            for l in listings[:10]:
-                prop_id = l.get('property_id', '?')
+            for listing in listings[:10]:
+                prop_id = listing.get('property_id', '?')
                 # 尝试从properties_map获取详细信息
                 prop_detail = properties_map.get(prop_id, {}) if properties_map else {}
 
-                zone = l.get('zone') or prop_detail.get('zone', '?')
+                zone = listing.get('zone') or prop_detail.get('zone', '?')
                 prop_type = prop_detail.get('property_type', '普通住宅')[:8]
-                area = prop_detail.get('building_area', l.get('building_area', 0))
+                area = prop_detail.get('building_area', listing.get('building_area', 0))
 
                 table.add_row(
                     str(prop_id),
                     zone,
                     prop_type,
                     f"{area:.0f}㎡",
-                    f"¥{l.get('listed_price', 0):,.0f}",
-                    str(l.get('seller_id', '?'))
+                    f"¥{listing.get('listed_price', 0):,.0f}",
+                    str(listing.get('seller_id', '?'))
                 )
             if len(listings) > 10:
                 table.add_row("...", f"共{len(listings)}套", "", "", "", "")
@@ -93,8 +92,8 @@ class ExchangeDisplay:
         else:
             print(f"📋 当前挂牌房产 ({len(listings)}套)")
             print("-" * 60)
-            for l in listings[:5]:
-                print(f"  房产{l.get('property_id')}: ¥{l.get('listed_price', 0):,.0f}")
+            for listing in listings[:5]:
+                print(f"  房产{listing.get('property_id')}: ¥{listing.get('listed_price', 0):,.0f}")
             if len(listings) > 5:
                 print(f"  ... 共 {len(listings)} 套")
             print()

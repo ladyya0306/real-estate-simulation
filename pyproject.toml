@@ -1,16 +1,3 @@
-[tool.flake8]
-max-line-length = 200
-exclude = [
-    ".git",
-    "__pycache__",
-    ".venv",
-    "node_modules",
-    "_archive_unused_scripts",
-    "build",
-    "dist"
-]
-extend-ignore = ["E203", "W503"]
-
 [tool.isort]
 profile = "black"
 line_length = 200

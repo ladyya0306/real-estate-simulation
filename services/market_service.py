@@ -3,8 +3,7 @@ import sqlite3
 from typing import Dict, List
 
 from models import Market
-from property_initializer import (convert_to_v2_tuples,
-                                  initialize_market_properties)
+from property_initializer import convert_to_v2_tuples, initialize_market_properties
 
 logger = logging.getLogger(__name__)
 

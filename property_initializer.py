@@ -61,7 +61,7 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
         bedrooms = random.choice([2, 3])
     else:              # High quality
         area = random.uniform(130, 250)
-        bedrooms = random.choice([3, 4, 5])
+        # bedrooms = random.choice([3, 4, 5])
 
     # 🆕 2. Calculate Unit Price (price_per_sqm) - PRIORITY LOGIC
     # Use new price_per_sqm_range from config if available
@@ -136,7 +136,6 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
         "school_tier": school_tier,
         "owner_id": None,  # System owned initially
         "status": "off_market",  # Fixed: was "for_sale", but unowned properties shouldn't be listed
-        "listed_price": round(listed_price, 0),
         "min_price": round(base_value * 0.95, 0),  # Added for V2
         "current_valuation": base_value,  # Added for V2
         "listing_month": 0,  # Added for V2

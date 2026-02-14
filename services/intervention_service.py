@@ -175,9 +175,9 @@ class InterventionService:
 
         # Basic templates per zone
         base_prices = {"A": 80000, "B": 45000}  # Price per sqm
-        avg_area = 100
+        # avg_area = 100
 
-        new_props = []
+        # new_props = []
 
         for i in range(count):
             pid = start_id + i
@@ -213,7 +213,7 @@ class InterventionService:
         Force exit agents.
         """
         cursor = self.conn.cursor()
-        removed_count = 0
+        # removed_count = 0
 
         candidates = []
         for agent in agent_service.agents:
@@ -287,7 +287,7 @@ class InterventionService:
         """
         Update global financial config.
         """
-        updates = []
+        # updates = []
         if down_payment_ratio is not None:
             # Try to update transaction_engine/config logic
             # config object is passed in.

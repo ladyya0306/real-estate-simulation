@@ -23,10 +23,11 @@ from typing import Dict, List, Tuple
 from config.settings import MORTGAGE_CONFIG
 from models import Agent, AgentStory, Market
 from prompts.buyer_prompts import BUYER_PREFERENCE_TEMPLATE
-from prompts.seller_prompts import (LISTING_STRATEGY_TEMPLATE,
-                                    PRICE_ADJUSTMENT_TEMPLATE)
+from prompts.seller_prompts import LISTING_STRATEGY_TEMPLATE, PRICE_ADJUSTMENT_TEMPLATE
+
 # --- Phase 8: Financial Calculator & New Prompts ---
 from services.financial_calculator import FinancialCalculator
+
 # --- LLM Integration ---
 from utils.llm_client import safe_call_llm, safe_call_llm_async
 
@@ -170,8 +171,7 @@ async def generate_buyer_preference(agent, market, current_month, macro_summary,
     Returns: (BuyerPreference, thought_process_str, context_metrics)
     """
     from models import BuyerPreference
-    from mortgage_system import (calculate_max_affordable,
-                                 calculate_monthly_payment)
+    from mortgage_system import calculate_max_affordable, calculate_monthly_payment
 
     # 1. Config & Attributes
     risk_free_rate = 0.03  # Default
@@ -339,19 +339,19 @@ def generate_real_thought(agent: Agent, trigger: str, market: Market) -> str:
     # Ensure market prices are accessible
     try:
         zone_a_price = market.get_avg_price("A")
-        zone_b_price = market.get_avg_price("B")
+        # zone_b_price = market.get_avg_price("B")
     except BaseException:
         zone_a_price = 0
-        zone_b_price = 0
+        # zone_b_price = 0
 
-    prompt = f"""
-    你是Agent {agent.id}。
-    【背景】{agent.story.background_story}
-    【触发】{trigger}
-    【市场】A区均价{zone_a_price:,.0f}，B区均价{zone_b_price:,.0f}
-
-    请思考你的决策（简短一段话）：
-    """
+    # prompt = f"""
+    # 你是Agent {agent.id}。
+    # 【背景】{agent.story.background_story}
+    # 【触发】{trigger}
+    # 【市场】A区均价{zone_a_price:,.0f}，B区均价{zone_b_price:,.0f}
+    #
+    # 请思考你的决策（简短一段话）：
+    # """
     # For now, return a formatted string. Real LLM would yield varied text.
     return f"我是{agent.story.occupation}，看到{trigger}，考虑到当前A区均价{zone_a_price / 10000:.0f}万，我决定..."
 
@@ -859,24 +859,24 @@ def open_role_evaluation(agent: Agent, month: int, market: Market, history_conte
         dict: {"role": str, "action_description": str, "target_zone": str|None,
                "price_expectation": float|None, "urgency": float, "reasoning": str}
     """
-    from mortgage_system import calculate_max_affordable
+    # from mortgage_system import calculate_max_affordable
 
     # 计算真实购买力
-    existing_payment = getattr(agent, 'monthly_payment', 0)
-    max_affordable = calculate_max_affordable(agent.cash, agent.monthly_income, existing_payment)
+    # existing_payment = getattr(agent, 'monthly_payment', 0)
+    # max_affordable = calculate_max_affordable(agent.cash, agent.monthly_income, existing_payment)
 
     # 获取市场状态
-    properties = getattr(market, 'properties', [])
-    supply = len([p for p in properties if p.get('status') == 'for_sale'])
-    total_props = len(properties)
-    demand_estimate = max(1, int(total_props * 0.08))  # 假设8%人口有购房意愿
+    # properties = getattr(market, 'properties', [])
+    # supply = len([p for p in properties if p.get('status') == 'for_sale'])
+    # total_props = len(properties)
+    # demand_estimate = max(1, int(total_props * 0.08))
 
-    if supply > demand_estimate * 1.2:
-        supply_demand_desc = "供过于求（买方市场）"
-    elif supply < demand_estimate * 0.8:
-        supply_demand_desc = "供不应求（卖方市场）"
-    else:
-        supply_demand_desc = "供需平衡"
+    # if supply > demand_estimate * 1.2:
+    #     supply_demand_desc = "供过于求（买方市场）"
+    # elif supply < demand_estimate * 0.8:
+    #     supply_demand_desc = "供不应求（卖方市场）"
+    # else:
+    #     supply_demand_desc = "供需平衡"
 
     return {"role": "OBSERVER", "reasoning": "Placeholder"}
 

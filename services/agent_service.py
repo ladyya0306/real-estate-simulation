@@ -8,10 +8,15 @@ import sqlite3
 import time
 from typing import Dict, List
 
-from agent_behavior import (apply_event_effects, batched_determine_role_async,
-                            determine_listing_strategy, generate_agent_story,
-                            generate_buyer_preference, select_monthly_event,
-                            should_agent_exit_market)
+from agent_behavior import (
+    apply_event_effects,
+    batched_determine_role_async,
+    determine_listing_strategy,
+    generate_agent_story,
+    generate_buyer_preference,
+    select_monthly_event,
+    should_agent_exit_market,
+)
 from config.agent_templates import get_template_for_tier
 from config.agent_tiers import AGENT_TIER_CONFIG
 from models import Agent
@@ -76,8 +81,8 @@ class AgentService:
             'aggressive': 0.30, 'conservative': 0.30,
             'balanced': 0.40
         })
-        p_styles = list(p_weights.keys())
-        p_probs = list(p_weights.values())
+        # p_styles = list(p_weights.keys())
+        # p_probs = list(p_weights.values())
 
         current_id = 1
 
@@ -146,7 +151,7 @@ class AgentService:
                         agent.owned_properties.append(prop)
                         property_updates.append((agent.id, 'off_market', prop['property_id']))
                         prop_idx += 1
-                        is_prop_allocated = True
+                        # is_prop_allocated = True
 
                 # Generate Story AFTER assets assigned
                 # Pass occupation hint from template to guide LLM
@@ -331,8 +336,7 @@ class AgentService:
                         # 🆕 ROOT CAUSE FIX: Load preference data from active_participants
                         # For BUYER or BUYER_SELLER roles, restore preference
                         if a.role in ['BUYER', 'BUYER_SELLER']:
-                            from agent_behavior import \
-                                calculate_financial_limits
+                            from agent_behavior import calculate_financial_limits
                             from models import AgentPreference
 
                             # Generate base preference constraints (Sync)
