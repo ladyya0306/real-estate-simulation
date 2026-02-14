@@ -240,3 +240,12 @@ def init_db(db_path):
 
     conn.commit()
     conn.close()
+
+
+def migrate_db_v2_7(db_path):
+    """
+    Migrate database to V2.7 (Ensure agent_end_reports exists and schema is up to date).
+    For now, we re-run init_db which handles CREATE TABLE IF NOT EXISTS.
+    """
+    init_db(db_path)
+
