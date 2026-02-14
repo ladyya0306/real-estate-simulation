@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import unittest
+from unittest.mock import patch
 
 from config.config_loader import SimulationConfig
 from simulation_runner import SimulationRunner
@@ -46,7 +47,7 @@ class TestLoadReporting(unittest.TestCase):
         if os.path.exists(self.db_path):
             os.remove(self.db_path)
 
-    @unittest.mock.patch('services.reporting_service.call_llm')
+    @patch('services.reporting_service.call_llm')
     def test_load_and_report(self, mock_llm):
         # Setup mock
         mock_llm.return_value = "This is a mock LLM portrait generated for testing purposes. It is long enough to pass validation."
