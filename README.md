@@ -49,7 +49,9 @@ ______________________________________________________________________
 1. **激活环境** (在终端输入):
 
    ```bash
+   ```bash
    conda activate oasis
+   pip install -r requirements.txt
    ```
 
    *(注：前提是您安装好了 Conda 环境)*
