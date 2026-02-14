@@ -970,17 +970,3 @@ def handle_failed_negotiation(seller: Agent, listing: Dict, market: Market, pote
         return True
 
     return False
-
-
-def decide_negotiation_format(seller: Agent, buyers: List[Agent], market_hint: str) -> str:
-    """
-    Decide negotiation format: 'batch' (Blind Auction) or 'flash' (1-on-1).
-    """
-    # Simple logic:
-    # If multiple buyers -> Batch
-    # If single buyer -> Flash? Or just Negotiation?
-    # Logic from Phase 3:
-    if len(buyers) > 1:
-        return "batch"
-    else:
-        return "flexible"  # standard negotiation

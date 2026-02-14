@@ -55,10 +55,10 @@ def create_property(prop_id: int, zone: str, quality: int, config=None) -> Dict:
     # 1. Randomize Area and Bedrooms
     if quality == 1:   # Small/Low quality
         area = random.uniform(50, 80)
-        bedrooms = random.choice([1, 2])
+        # bedrooms = random.choice([1, 2])
     elif quality == 2:  # Medium
         area = random.uniform(80, 130)
-        bedrooms = random.choice([2, 3])
+        # bedrooms = random.choice([2, 3])
     else:              # High quality
         area = random.uniform(130, 250)
         # bedrooms = random.choice([3, 4, 5])

@@ -76,11 +76,12 @@ class AgentService:
             tier_prop_ranges = {}
 
         # Prepare Personality Weights (Investment Style)
-        neg_cfg = getattr(self.config, 'negotiation', {})
-        p_weights = neg_cfg.get('personality_weights', {
-            'aggressive': 0.30, 'conservative': 0.30,
-            'balanced': 0.40
-        })
+        # Prepare Personality Weights (Investment Style)
+        # neg_cfg = getattr(self.config, 'negotiation', {})
+        # p_weights = neg_cfg.get('personality_weights', {
+        #     'aggressive': 0.30, 'conservative': 0.30,
+        #     'balanced': 0.40
+        # })
         # p_styles = list(p_weights.keys())
         # p_probs = list(p_weights.values())
 
@@ -142,7 +143,7 @@ class AgentService:
                     prop_count_range = default_prop_ownership[tier]["property_count"]
                     target_props = random.randint(*prop_count_range)
 
-                is_prop_allocated = False
+                # is_prop_allocated = False
                 for _ in range(target_props):
                     if prop_idx < len(market_properties):
                         prop = market_properties[prop_idx]
@@ -415,7 +416,7 @@ class AgentService:
         cursor = self.conn.cursor()
         batch_active_delete = []
         buyers = []
-        sellers = []  # Although sellers are persistent until sold usually
+        # sellers = []  # Although sellers are persistent until sold usually
 
         if self.is_v2:
             cursor.execute("SELECT * FROM active_participants")
@@ -526,7 +527,7 @@ class AgentService:
         # Process results
 
         new_buyers = []
-        new_sellers = []
+        # new_sellers = []
         batch_active_insert = []
         batch_finance_update = []  # New: Persist Tier 6 finance data
 

@@ -14,7 +14,8 @@ from services.market_service import MarketService
 from services.rental_service import RentalService
 from services.reporting_service import ReportingService
 from services.transaction_service import TransactionService
-from utils.behavior_logger import BehaviorLogger
+
+# from utils.behavior_logger import BehaviorLogger
 from utils.exchange_display import ExchangeDisplay
 from utils.workflow_logger import WorkflowLogger
 
@@ -140,7 +141,7 @@ class SimulationRunner:
         log_dir = os.path.dirname(self.db_path)
         if not log_dir:
             log_dir = "results"
-        behavior_logger = BehaviorLogger(results_dir=log_dir)
+        # behavior_logger = BehaviorLogger(results_dir=log_dir)
         exchange_display = ExchangeDisplay(use_rich=True)
         wf_logger = WorkflowLogger(self.config)
 

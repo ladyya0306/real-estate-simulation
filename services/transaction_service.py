@@ -138,12 +138,12 @@ class TransactionService:
             match_records = []
             for m in buyer_matches:
                 b = m['buyer']
-                l = m['listing']
+                listing_data = m['listing']
                 # Initial intent: Buyer is interested at listed price (or max budget)
                 # match_property_for_buyer checks affordability, so bid is roughly listed_price
-                bid = l['listed_price']
+                bid = listing_data['listed_price']
                 match_records.append((
-                    month, l['property_id'], b.id, l['listed_price'], bid,
+                    month, listing_data['property_id'], b.id, listing_data['listed_price'], bid,
                     1,  # is_valid_bid
                     1  # proceeded_to_negotiation (All matches proceed in current logic)
                 ))
@@ -174,10 +174,10 @@ class TransactionService:
             session_metadata = []
 
             # Local imports to avoid circular dependency
-            from transaction_engine import decide_negotiation_format, execute_transaction, handle_failed_negotiation, run_negotiation_session_async
+            from transaction_engine import execute_transaction, handle_failed_negotiation, run_negotiation_session_async
 
             for pid, interested_buyers in interest_registry.items():
-                listing = next((l for l in active_listings if l['property_id'] == pid), None)
+                listing = next((item for item in active_listings if item['property_id'] == pid), None)
                 if not listing:
                     continue
 
@@ -186,7 +186,7 @@ class TransactionService:
                     continue
 
                 # Determine Negotiation Mode
-                market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
+                # market_hint = "买家众多" if len(interested_buyers) > 1 else "单一买家"
 
                 # mode = decide_negotiation_format(seller_agent, interested_buyers, market_hint)
 
