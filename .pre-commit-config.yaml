@@ -6,16 +6,11 @@ repos:
     rev: v4.5.0
     hooks:
       - id: end-of-file-fixer
-        name: End-of-file fixer
       - id: mixed-line-ending
-        name: Mixed line ending fixer
         args: [--fix, lf]
       - id: trailing-whitespace
-        name: Remove trailing whitespaces
       - id: check-toml
-        name: Check toml
       - id: check-yaml
-        name: Check yaml
         exclude: |
           (?x)^(
               conda/pytorch-geometric/meta.yaml|
@@ -26,20 +21,17 @@ repos:
     rev: v1.35.1
     hooks:
       - id: yamllint
-        name: Lint yaml
         args: [-d, '{extends: default, rules: {line-length: disable, document-start: disable, truthy: {level: error}, braces: {max-spaces-inside: 1}}}']
 
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
       - id: isort
-        name: Sort imports
 
   - repo: https://github.com/PyCQA/flake8
     rev: 7.0.0
     hooks:
       - id: flake8
-        name: Check PEP8
         additional_dependencies: [Flake8-pyproject]
         exclude: ^_archive_unused_scripts/
 
@@ -47,7 +39,6 @@ repos:
     rev: v0.3.5
     hooks:
       - id: ruff
-        name: Ruff formatting
         args: [--fix, --exit-non-zero-on-fix]
         exclude: ^_archive_unused_scripts/
 
@@ -55,7 +46,6 @@ repos:
     rev: 0.7.17
     hooks:
       - id: mdformat
-        name: Format Markdown
         additional_dependencies:
           - mdformat-gfm
           - mdformat_frontmatter

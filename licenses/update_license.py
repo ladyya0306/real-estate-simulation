@@ -70,14 +70,20 @@ def update_license_in_file(
             replaced_content = content.replace(maybe_old_licenses, new_license)
             with open(file_path, 'w') as f:
                 f.write(replaced_content)
-            print(f'Replaced license in {file_path}')
+            try:
+                print(f'Replaced license in {file_path}')
+            except UnicodeEncodeError:
+                pass # Silently continue if print fails
             return True
         else:
             return False
     else:
         with open(file_path, 'w') as f:
             f.write(new_license + '\n' + content)
-        print(f'Added license to {file_path}')
+        try:
+            print(f'Added license to {file_path}')
+        except UnicodeEncodeError:
+            print(f'Added license to {file_path}'.encode('utf-8', errors='replace').decode('utf-8')) # Fallback
         return True
 
 
