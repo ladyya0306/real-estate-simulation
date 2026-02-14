@@ -67,4 +67,3 @@ if __name__ == "__main__":
         if f.endswith('.py') or f.endswith('.md') or f.endswith('.txt') or f.endswith('.yaml') or f.endswith('.yml') or f.endswith('.csv'):
             convert_to_utf8(f)
     print("Done.")
-
