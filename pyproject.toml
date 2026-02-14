@@ -26,3 +26,7 @@ exclude = [
 
 [tool.ruff.lint]
 ignore = ["E203"]
+
+[tool.pytest.ini_options]
+norecursedirs = ["_archive_unused_scripts", ".git", "node_modules"]
+testpaths = ["tests"]
