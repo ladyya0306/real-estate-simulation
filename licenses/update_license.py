@@ -39,6 +39,7 @@ def update_license_in_file(
     start_line_start_with: str,
     end_line_start_with: str,
 ) -> bool:
+    print(f"DEBUG: Checking {file_path}")
     with open(file_path, 'r',
               encoding='utf-8') as f:  # for windows compatibility
         content = f.read()
@@ -61,14 +62,14 @@ def update_license_in_file(
         maybe_old_licenses = '\n'.join(maybe_existing_licenses)
         if maybe_old_licenses.strip() != new_license.strip():
             replaced_content = content.replace(maybe_old_licenses, new_license)
-            with open(file_path, 'w') as f:
+            with open(file_path, 'w', encoding='utf-8') as f:
                 f.write(replaced_content)
             print(f'Replaced license in {file_path}')
             return True
         else:
             return False
     else:
-        with open(file_path, 'w') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(new_license + '\n' + content)
         print(f'Added license to {file_path}')
         return True

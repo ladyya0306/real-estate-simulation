@@ -1,3 +1,16 @@
+# =========== Copyright 2023 @ CAMEL-AI.org. All Rights Reserved. ===========
+# Licensed under the Apache License, Version 2.0 (the “License”);
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an “AS IS” BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# =========== Copyright 2023 @ CAMEL-AI.org. All Rights Reserved. ===========
 # Moved to local import to avoid circular dependency
 # from transaction_engine import generate_seller_listing
 import asyncio
@@ -426,7 +439,10 @@ class AgentService:
                     new_duration = current_duration + 1  # Add 1 for the current month
                     agent.role_duration = new_duration
 
-                    cursor.execute("UPDATE active_participants SET role_duration = ? WHERE agent_id = ?", (new_duration, aid))
+                    cursor.execute(
+                        "UPDATE active_participants SET role_duration = ? WHERE agent_id = ?",
+                        (new_duration, agent.agent_id)
+                    )
 
                     # 🆕 FIX: Ensure preference is loaded for existing buyers
                     if not hasattr(agent, 'preference') or not agent.preference.target_zone:
