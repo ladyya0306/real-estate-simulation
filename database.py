@@ -248,4 +248,3 @@ def migrate_db_v2_7(db_path):
     For now, we re-run init_db which handles CREATE TABLE IF NOT EXISTS.
     """
     init_db(db_path)
-
