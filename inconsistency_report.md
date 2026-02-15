@@ -1,6 +1,6 @@
 Total Agents: 100
 
-\[Logic Check 1\] 'First Time Buyer' narrative but OWNS property: 9 cases
+[Logic Check 1] 'First Time Buyer' narrative but OWNS property: 9 cases
 
 - Agent 18 (熊梅): Owns 1.0, Cash 3,094,559
   Story: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。
@@ -32,7 +32,7 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-\[Logic Check 2\] 'Poor' narrative but High Cash (>2M): 12 cases
+[Logic Check 2] 'Poor' narrative but High Cash (>2M): 12 cases
 
 - Agent 18: Cash 3,094,559
   Story: 在私企做行政工作，积蓄不多，父母资助了首付，正在看刚需上车盘，价格敏感度高。

@@ -105,7 +105,7 @@ ______________________________________________________________________
 - `❌ Agent XX failed to buy: No affordable property`
 - **原因**:
   1. 挂牌房源不足（仅 System 挂牌，Agent 很少主动 SELL）
-  1. 价格不匹配（Agent 现金 \< listed_price）
+  1. 价格不匹配（Agent 现金 < listed_price）
 
 **建议**:
 
