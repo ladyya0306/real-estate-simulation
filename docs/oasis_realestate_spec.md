@@ -19,7 +19,7 @@ ______________________________________________________________________
 
   - `id`: 唯一标识符
   - `quality`: 品质等级 (INT: 1=低, 2=中, 3=高)
-    - 价值锚点: 低 < 300w, 中 [300w, 500w], 高 > 500w
+    - 价值锚点: 低 \< 300w, 中 \[300w, 500w\], 高 > 500w
   - `zone`: 区域 (ENUM: 'A', 'B', 'C')
     - A=核心城区, B=核心镇街, C=普通镇街
   - `owner_id`: 当前持有者 ID (系统初始持有或 Agent 持有)
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS agent_metric (
      - Prompt: "你是买家，当前市场均价 X，这套房卖 Y，位于 A 区，你的收入是 Z。是否出价？"
      - Output: `Action: Bid(property_id, price)` or `Action: Wait`.
   1. **Rule Fallback (MVP Initial)**:
-     - 简单贪婪策略：如果 (Income > Mortgage) AND (Price < Undervalued_Threshold)，则买入。
+     - 简单贪婪策略：如果 (Income > Mortgage) AND (Price \< Undervalued_Threshold)，则买入。
 
 ### 3.4 平台撮合逻辑 (Platform.step)
 
@@ -210,4 +210,4 @@ ______________________________________________________________________
 
 ______________________________________________________________________
 
-**[文档结束]**
+**\[文档结束\]**

@@ -266,7 +266,7 @@ These commands will install all the necessary dependencies for running the packa
 
 To verify that everything is set up correctly, run `pytest .` This will ensure that all tests pass successfully. ✅
 
-> [!TIP]
+> \[!TIP\]
 > You need to config OPENAI API Keys as environment variables to pass all tests.
 
 ## Common Actions 🔄
