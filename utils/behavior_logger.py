@@ -189,7 +189,8 @@ class BehaviorLogger:
                     action = r.get('动作', '')
                     thought = r.get('内心想法', '')
                     # Truncate thought
-                    if len(thought) > 30: thought = thought[:30] + "..."
+                    if len(thought) > 30:
+                        thought = thought[:30] + "..."
                     history_lines.append(f"- [谈判记录] 第{r.get('月份', '?')}月: {action} (想法: {thought})")
             except Exception:
                 pass

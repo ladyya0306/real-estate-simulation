@@ -1,6 +1,7 @@
 import os
 import sqlite3
 import unittest
+from unittest.mock import patch
 
 from config.config_loader import SimulationConfig
 from simulation_runner import SimulationRunner
@@ -16,7 +17,7 @@ class TestLoadReporting(unittest.TestCase):
         # Create a dummy run with 5 agents for 1 month
         print("\n--- [Step 1] Initializing New Simulation (Month 1) ---")
         config = SimulationConfig()
-        config._config['enable_llm_portraits'] = False # Disable for phase 1 to save time
+        config._config['enable_llm_portraits'] = False  # Disable for phase 1 to save time
 
         runner = SimulationRunner(
             agent_count=5,
@@ -26,7 +27,7 @@ class TestLoadReporting(unittest.TestCase):
             db_path=self.db_path
         )
         runner.run()
-        runner.close() # Close DB connection
+        runner.close()  # Close DB connection
 
         # Verify initial state
         conn = sqlite3.connect(self.db_path)
@@ -44,18 +45,22 @@ class TestLoadReporting(unittest.TestCase):
     def tearDown(self):
         # pass
         if os.path.exists(self.db_path):
-             os.remove(self.db_path)
+            os.remove(self.db_path)
 
-    def test_load_and_report(self):
+    @patch('services.reporting_service.safe_call_llm_async')
+    def test_load_and_report(self, mock_llm):
+        # Setup mock
+        mock_llm.return_value = "This is a mock LLM portrait generated for testing purposes. It is long enough to pass validation."
+
         print("\n--- [Step 2] Resuming Simulation (Month 2) with Reporting ---")
 
         # 2. Resume Simulation
         config = SimulationConfig()
-        config._config['enable_llm_portraits'] = True # Enable for phase 2
+        config._config['enable_llm_portraits'] = True  # Enable for phase 2
 
         # Initialize in RESUME mode
         runner = SimulationRunner(
-            months=1, # Run 1 more month (Month 2)
+            months=1,  # Run 1 more month (Month 2)
             resume=True,
             config=config,
             db_path=self.db_path
@@ -84,6 +89,7 @@ class TestLoadReporting(unittest.TestCase):
         self.assertTrue(len(portrait) > 10, "Portrait should have content")
 
         conn.close()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -13,7 +13,7 @@ AGENT_PERSONA_TEMPLATES = [
                 "occupation": "上市公司高管",
                 "background": "拥有多年的企业管理经验，持有大量公司股票，现金流充裕，关注资产保值增值。",
                 "housing_need": "投资",
-                "activation_weight": 0.3, # 较低的主动交易意愿，除非市场变动
+                "activation_weight": 0.3,  # 较低的主动交易意愿，除非市场变动
                 "age_range": (45, 60)
             },
             {
@@ -41,7 +41,7 @@ AGENT_PERSONA_TEMPLATES = [
                 "occupation": "互联网大厂P8",
                 "background": "名校毕业，技术能力出众，薪资高但工作压力大，刚结婚，急需在公司附近置换一套品质好的大平层。",
                 "housing_need": "刚需",
-                "activation_weight": 0.8, # 高频交易群体
+                "activation_weight": 0.8,  # 高频交易群体
                 "age_range": (28, 35)
             },
             {
@@ -55,7 +55,7 @@ AGENT_PERSONA_TEMPLATES = [
                 "occupation": "三甲医院专家医生",
                 "background": "职业稳定社会地位高，收入逐年上升，考虑到子女教育，计划置换一套顶级学区房。",
                 "housing_need": "学区",
-                "activation_weight": 0.9, # 学区需求极强
+                "activation_weight": 0.9,  # 学区需求极强
                 "age_range": (35, 45)
             }
         ]
@@ -103,7 +103,7 @@ AGENT_PERSONA_TEMPLATES = [
             {
                 "occupation": "外卖配送员",
                 "background": "日夜奔波，通过高强度劳动积攒了一些积蓄，梦想是在老家县城买套房。",
-                "housing_need": "回乡置业", # 在本模型中可能体现为卖掉本地（如果有）或不买
+                "housing_need": "回乡置业",  # 在本模型中可能体现为卖掉本地（如果有）或不买
                 "activation_weight": 0.05,
                 "age_range": (20, 40)
             },
@@ -117,6 +117,7 @@ AGENT_PERSONA_TEMPLATES = [
         ]
     }
 ]
+
 
 def get_template_for_tier(tier: str, rng):
     """Retrieve a random template for the given tier"""

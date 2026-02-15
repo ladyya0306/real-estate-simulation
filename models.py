@@ -13,6 +13,7 @@ class AgentStory:
         self.background_story = background_story
         self.investment_style = investment_style
 
+
 class AgentPreference:
     def __init__(self, target_zone="", max_price=0.0, min_bedrooms=1, need_school_district=False,
                  max_affordable_price=0.0, psychological_price=0.0):
@@ -23,8 +24,9 @@ class AgentPreference:
         self.max_affordable_price = max_affordable_price
         self.psychological_price = psychological_price
 
+
 class BuyerPreference:
-    def __init__(self, target_zone="", target_price_range=(0,0), min_bedrooms=1, need_school_district=False, max_affordable_price=0.0, psychological_price=0.0):
+    def __init__(self, target_zone="", target_price_range=(0, 0), min_bedrooms=1, need_school_district=False, max_affordable_price=0.0, psychological_price=0.0):
         self.target_zone = target_zone
         self.target_price_range = target_price_range
         self.min_bedrooms = min_bedrooms
@@ -54,7 +56,7 @@ class Agent:
         self.preference = AgentPreference()
         self.monthly_event = None  # To store current month's event
         self.mortgage_monthly_payment = 0.0  # Monthly mortgage payment commitment
-        self.total_debt = 0.0 # Total mortgage debt
+        self.total_debt = 0.0  # Total mortgage debt
 
         # Backward compatibility properties (property routing)
         @property
@@ -100,8 +102,8 @@ class Agent:
 
     def get_profile_summary(self) -> str:
         return (f"Agent {self.id} | Age: {self.age} | {self.marital_status} | "
-                f"Cash: {self.cash/10000:.0f}w | Props: {len(self.owned_properties)} | "
-                f"Net Worth: {self.net_worth/10000:.0f}w")
+                f"Cash: {self.cash / 10000:.0f}w | Props: {len(self.owned_properties)} | "
+                f"Net Worth: {self.net_worth / 10000:.0f}w")
 
     def to_dict(self):
         # Legacy V1 dict
@@ -127,7 +129,7 @@ class Agent:
         return {
             "agent_id": self.id,
             "name": self.name,
-            "birth_year": 2024 - self.age, # Approx
+            "birth_year": 2024 - self.age,  # Approx
             "marital_status": self.marital_status,
             "children_ages": json.dumps(self.children_ages),
             "occupation": self.story.occupation,
@@ -151,7 +153,7 @@ class Agent:
             "net_cashflow": round(net_cf, 2),
             "max_affordable_price": round(getattr(self.preference, 'max_affordable_price', 0), 2),
             "psychological_price": round(getattr(self.preference, 'psychological_price', 0), 2),
-            "last_price_update_month": 0, # Default
+            "last_price_update_month": 0,  # Default
             "last_price_update_reason": ""
         }
 
@@ -161,12 +163,13 @@ class Agent:
             "role": role,
             "target_zone": self.preference.target_zone if role == "BUYER" else None,
             "max_price": self.preference.max_price if role == "BUYER" else None,
-            "selling_property_id": None, # Should be set by caller logic
-            "min_price": None, # Set by logic
-            "listed_price": None, # Set by logic
+            "selling_property_id": None,  # Should be set by caller logic
+            "min_price": None,  # Set by logic
+            "listed_price": None,  # Set by logic
             "life_pressure": getattr(self, 'life_pressure', 'patient'),
             "llm_intent_summary": str(self.monthly_event) if self.monthly_event else ""
         }
+
 
 class PropertyStatic:
     def __init__(self, property_id: int, zone: str, quality: int, building_area: float,
@@ -179,12 +182,12 @@ class PropertyStatic:
         self.property_type = property_type
         self.is_school_district = is_school_district
         self.school_tier = school_tier
-        self.base_value = base_value # Also acts as initial_value
+        self.base_value = base_value  # Also acts as initial_value
         self.unit_price = unit_price
         self.created_at = created_at
 
     def to_dict(self):
-         return {
+        return {
             "property_id": self.property_id,
             "zone": self.zone,
             "quality": self.quality,
@@ -197,6 +200,7 @@ class PropertyStatic:
             "created_at": self.created_at
         }
 
+
 class PropertyMarket:
     def __init__(self, property_id: int, owner_id: int = None, status: str = 'off_market',
                  listed_price: float = None, min_price: float = None,
@@ -204,7 +208,7 @@ class PropertyMarket:
                  listing_month: int = None, last_transaction_month: int = None):
         self.property_id = property_id
         self.owner_id = owner_id
-        self.status = status # 'off_market', 'for_sale'
+        self.status = status  # 'off_market', 'for_sale'
         self.listed_price = listed_price
         self.min_price = min_price
         self.current_valuation = current_valuation
@@ -223,10 +227,11 @@ class PropertyMarket:
             "last_transaction_month": self.last_transaction_month
         }
 
+
 class Market:
     def __init__(self, properties: List[Dict] = None):
         self.properties = properties or []
-        self.price_history: Dict[str, Dict[int, float]] = {'A': {}, 'B': {}} # zone -> {month: avg_price}
+        self.price_history: Dict[str, Dict[int, float]] = {'A': {}, 'B': {}}  # zone -> {month: avg_price}
 
     def get_price_change_rate(self, zone: str, month: int) -> float:
         """Calculate price change rate for a zone in a given month compared to previous month"""
@@ -245,9 +250,9 @@ class Market:
     def get_avg_price(self, zone: str, month: int = None) -> float:
         """Get average price for a zone. If month is provided, use historical data."""
         if month is not None:
-             # Look for recorded history first
-             if month in self.price_history[zone]:
-                 return self.price_history[zone][month]
+            # Look for recorded history first
+            if month in self.price_history[zone]:
+                return self.price_history[zone][month]
 
         # Fallback to current properties list
         zone_props = [p for p in self.properties if p['zone'] == zone]
@@ -262,13 +267,14 @@ class Market:
         """Mock method for testing price changes: sets price for current month based on prev * (1+rate)"""
         prev_price = self.get_avg_price(zone, month - 1)
         if prev_price == 0:
-             prev_price = 5000000 if zone == 'A' else 2500000 # Default
+            prev_price = 5000000 if zone == 'A' else 2500000  # Default
 
         new_price = prev_price * (1 + change_rate)
         self.price_history[zone][month] = new_price
 
     def add_property(self, property: Dict):
         self.properties.append(property)
+
 
 class DecisionLog:
     def __init__(self, agent_id: int, month: int, event_type: str, decision: str, reason: str, thought_process: str, context_metrics: Dict = None, llm_called: bool = False):

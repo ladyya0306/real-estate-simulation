@@ -14,7 +14,8 @@ from services.market_service import MarketService
 from services.rental_service import RentalService
 from services.reporting_service import ReportingService
 from services.transaction_service import TransactionService
-from utils.behavior_logger import BehaviorLogger
+
+# from utils.behavior_logger import BehaviorLogger
 from utils.exchange_display import ExchangeDisplay
 from utils.workflow_logger import WorkflowLogger
 
@@ -36,6 +37,7 @@ if sys.stdout.encoding != 'utf-8':
 
 logger = logging.getLogger(__name__)
 
+
 class SimulationRunner:
     def __init__(self, agent_count=50, months=12, seed=42, resume=False, config=None, db_path=None):
         self.agent_count = agent_count
@@ -47,12 +49,12 @@ class SimulationRunner:
 
         # Initialize Database connection
         if not self.db_path:
-             # Fallback if not provided (though main script usually provides it)
-             self.db_path = 'simulation.db'
+            # Fallback if not provided (though main script usually provides it)
+            self.db_path = 'simulation.db'
 
         # Initialize DB Schema if needed
         if not self.resume:
-             init_db(self.db_path)
+            init_db(self.db_path)
 
         self.conn = sqlite3.connect(self.db_path, timeout=60.0)
         self.conn.row_factory = sqlite3.Row
@@ -128,22 +130,22 @@ class SimulationRunner:
         start_month = 0
 
         if self.resume:
-             logger.info("Resuming simulation...")
-             self.load_from_db()
-             start_month = self.get_last_simulation_month()
-             logger.info(f"Resuming from Month {start_month}")
+            logger.info("Resuming simulation...")
+            self.load_from_db()
+            start_month = self.get_last_simulation_month()
+            logger.info(f"Resuming from Month {start_month}")
         else:
-             self.initialize()
+            self.initialize()
 
         # Initialize Loggers
         log_dir = os.path.dirname(self.db_path)
         if not log_dir:
             log_dir = "results"
-        behavior_logger = BehaviorLogger(results_dir=log_dir)
+        # behavior_logger = BehaviorLogger(results_dir=log_dir)
         exchange_display = ExchangeDisplay(use_rich=True)
         wf_logger = WorkflowLogger(self.config)
 
-        logger.info(f"Starting Simulation: {self.months} Months (From {start_month+1} to {start_month+self.months})")
+        logger.info(f"Starting Simulation: {self.months} Months (From {start_month + 1} to {start_month + self.months})")
 
         try:
             # Shifted Loop Range
@@ -197,7 +199,7 @@ class SimulationRunner:
                     self.agent_service.activate_new_agents(
                         month, self.market_service.market, macro_desc,
                         batch_decision_logs, market_trend, bulletin,
-                        recent_bulletins=recent_bulletins # 棣冨晭 Pass History
+                        recent_bulletins=recent_bulletins  # 棣冨晭 Pass History
                     )
                 )
 
@@ -259,7 +261,6 @@ class SimulationRunner:
                     wf_logger, exchange_display
                 ))
 
-
                 logger.info(f"Month {month} Complete. Transactions: {tx_count}, Failed Negs: {fail_count}")
 
             # --- Phase 10: End-of-Run Reporting ---
@@ -276,6 +277,7 @@ class SimulationRunner:
     def close(self):
         if self.conn:
             self.conn.close()
+
 
 if __name__ == "__main__":
     # Allow running directly for testing

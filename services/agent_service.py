@@ -8,10 +8,15 @@ import sqlite3
 import time
 from typing import Dict, List
 
-from agent_behavior import (apply_event_effects, batched_determine_role_async,
-                            determine_listing_strategy, generate_agent_story,
-                            generate_buyer_preference, select_monthly_event,
-                            should_agent_exit_market)
+from agent_behavior import (
+    apply_event_effects,
+    batched_determine_role_async,
+    determine_listing_strategy,
+    generate_agent_story,
+    generate_buyer_preference,
+    select_monthly_event,
+    should_agent_exit_market,
+)
 from config.agent_templates import get_template_for_tier
 from config.agent_tiers import AGENT_TIER_CONFIG
 from models import Agent
@@ -19,13 +24,14 @@ from utils.name_generator import ChineseNameGenerator
 
 logger = logging.getLogger(__name__)
 
+
 class AgentService:
     def __init__(self, config, db_conn: sqlite3.Connection):
         self.config = config
         self.conn = db_conn
         self.agents: List[Agent] = []
         self.agent_map: Dict[int, Agent] = {}
-        self.is_v2 = True # Default for new runs
+        self.is_v2 = True  # Default for new runs
 
     def initialize_agents(self, agent_count: int, market_properties: List[Dict]):
         """批量生成 Agent (V2 Schema)"""
@@ -64,18 +70,20 @@ class AgentService:
             tier_counts = {k: int((v / total_dist) * agent_count) for k, v in tier_dist.items()}
             current_sum = sum(tier_counts.values())
             diff = agent_count - current_sum
-            if diff > 0: tier_counts["middle"] += diff
+            if diff > 0:
+                tier_counts["middle"] += diff
             tier_income_ranges = {}
             tier_prop_ranges = {}
 
         # Prepare Personality Weights (Investment Style)
-        neg_cfg = getattr(self.config, 'negotiation', {})
-        p_weights = neg_cfg.get('personality_weights', {
-            'aggressive': 0.30, 'conservative': 0.30,
-            'balanced': 0.40
-        })
-        p_styles = list(p_weights.keys())
-        p_probs = list(p_weights.values())
+        # Prepare Personality Weights (Investment Style)
+        # neg_cfg = getattr(self.config, 'negotiation', {})
+        # p_weights = neg_cfg.get('personality_weights', {
+        #     'aggressive': 0.30, 'conservative': 0.30,
+        #     'balanced': 0.40
+        # })
+        # p_styles = list(p_weights.keys())
+        # p_probs = list(p_weights.values())
 
         current_id = 1
 
@@ -89,7 +97,8 @@ class AgentService:
 
         for tier in ordered_tiers:
             count = tier_counts.get(tier, 0)
-            if count == 0: continue
+            if count == 0:
+                continue
             logger.info(f"Generating {count} agents for tier: {tier}")
 
             for _ in range(count):
@@ -107,8 +116,10 @@ class AgentService:
                         income = random.randint(lower_bound, lower_bound * 5) // 12
                     else:
                         idx = ordered_tiers.index(tier)
-                        if idx > 0: upper = bounds[ordered_tiers[idx-1]]
-                        else: upper = lower_bound * 2
+                        if idx > 0:
+                            upper = bounds[ordered_tiers[idx - 1]]
+                        else:
+                            upper = lower_bound * 2
                         income = random.randint(lower_bound, upper) // 12
 
                 # Cash Logic
@@ -132,7 +143,7 @@ class AgentService:
                     prop_count_range = default_prop_ownership[tier]["property_count"]
                     target_props = random.randint(*prop_count_range)
 
-                is_prop_allocated = False
+                # is_prop_allocated = False
                 for _ in range(target_props):
                     if prop_idx < len(market_properties):
                         prop = market_properties[prop_idx]
@@ -141,7 +152,7 @@ class AgentService:
                         agent.owned_properties.append(prop)
                         property_updates.append((agent.id, 'off_market', prop['property_id']))
                         prop_idx += 1
-                        is_prop_allocated = True
+                        # is_prop_allocated = True
 
                 # Generate Story AFTER assets assigned
                 # Pass occupation hint from template to guide LLM
@@ -190,7 +201,7 @@ class AgentService:
                 # Update properties (V1 legacy - optional if we fully removed it)
                 # Ensure we only update if table exists? Or just try/except.
                 cursor.executemany("UPDATE properties SET owner_id = ?, status = ? WHERE property_id = ?", property_updates)
-            except:
+            except BaseException:
                 pass
 
             cursor.executemany("UPDATE properties_market SET owner_id = ?, status = ? WHERE property_id = ?", property_updates)
@@ -220,34 +231,36 @@ class AgentService:
                 self.conn.commit()
                 break
             except sqlite3.OperationalError as e:
-                if "locked" in str(e): time.sleep(0.1 * (_retry + 1))
-                else: raise
+                if "locked" in str(e):
+                    time.sleep(0.1 * (_retry + 1))
+                else:
+                    raise
 
     def _create_initial_listings(self, cursor):
         """Create initial listings for multi-property owners."""
         try:
-             initial_listings = []
-             multi_owners = [a for a in self.agents if len(a.owned_properties) > 1]
-             for agent in multi_owners[:max(3, len(multi_owners) // 5)]:
-                 props = sorted(agent.owned_properties, key=lambda x: x.get('base_value', 0))
-                 prop = props[0]
-                 listed_price = prop['base_value'] * random.uniform(1.05, 1.15)
-                 min_price = prop['base_value'] * 0.95
-                 prop['status'] = 'for_sale'
-                 prop['listed_price'] = listed_price
-                 # Tuple for UPDATE properties_market: listed_price, min_price, property_id
-                 initial_listings.append((listed_price, min_price, prop['property_id']))
+            initial_listings = []
+            multi_owners = [a for a in self.agents if len(a.owned_properties) > 1]
+            for agent in multi_owners[:max(3, len(multi_owners) // 5)]:
+                props = sorted(agent.owned_properties, key=lambda x: x.get('base_value', 0))
+                prop = props[0]
+                listed_price = prop['base_value'] * random.uniform(1.05, 1.15)
+                min_price = prop['base_value'] * 0.95
+                prop['status'] = 'for_sale'
+                prop['listed_price'] = listed_price
+                # Tuple for UPDATE properties_market: listed_price, min_price, property_id
+                initial_listings.append((listed_price, min_price, prop['property_id']))
 
-             if initial_listings:
-                 cursor.executemany("""
+            if initial_listings:
+                cursor.executemany("""
                      UPDATE properties_market
                      SET status = 'for_sale', listed_price = ?, min_price = ?, listing_month = 0
                      WHERE property_id = ? AND owner_id IS NOT NULL
                  """, initial_listings)
-                 self.conn.commit()
-                 logger.info(f"Created {len(initial_listings)} initial listings (V2 properties_market).")
+                self.conn.commit()
+                logger.info(f"Created {len(initial_listings)} initial listings (V2 properties_market).")
         except Exception as e:
-             logger.warning(f"Could not create initial listings: {e}")
+            logger.warning(f"Could not create initial listings: {e}")
 
     def load_agents_from_db(self):
         """Load agents from DB for resuming."""
@@ -260,7 +273,7 @@ class AgentService:
         try:
             cursor.execute("SELECT * FROM agents_static LIMIT 1")
             self.is_v2 = True
-        except:
+        except BaseException:
             self.is_v2 = False
 
         if self.is_v2:
@@ -294,9 +307,9 @@ class AgentService:
             a.story.background_story = row['background_story']
 
             if self.is_v2:
-               a.story.investment_style = row.get('investment_style', 'balanced')
+                a.story.investment_style = row.get('investment_style', 'balanced')
             else:
-               a.story.housing_need = row.get('housing_need', '')
+                a.story.housing_need = row.get('housing_need', '')
 
             self.agents.append(a)
             self.agent_map[a.id] = a
@@ -324,8 +337,7 @@ class AgentService:
                         # 🆕 ROOT CAUSE FIX: Load preference data from active_participants
                         # For BUYER or BUYER_SELLER roles, restore preference
                         if a.role in ['BUYER', 'BUYER_SELLER']:
-                            from agent_behavior import \
-                                calculate_financial_limits
+                            from agent_behavior import calculate_financial_limits
                             from models import AgentPreference
 
                             # Generate base preference constraints (Sync)
@@ -359,17 +371,17 @@ class AgentService:
         batch_update = []
 
         for agent in self.agents:
-              # ✅ Phase 3.2: Simplified Financial Update
-              # Net Cashflow = Income - Mortgage Payment (no living expense calculation)
-              net_cashflow = agent.monthly_income - agent.mortgage_monthly_payment
+            # ✅ Phase 3.2: Simplified Financial Update
+            # Net Cashflow = Income - Mortgage Payment (no living expense calculation)
+            net_cashflow = agent.monthly_income - agent.mortgage_monthly_payment
 
-              # Update Cash
-              agent.cash += net_cashflow
+            # Update Cash
+            agent.cash += net_cashflow
 
-              # Store net_cashflow in agent for reference (optional, but good for UI)
-              agent.net_cashflow = net_cashflow
+            # Store net_cashflow in agent for reference (optional, but good for UI)
+            agent.net_cashflow = net_cashflow
 
-              batch_update.append((round(agent.cash, 2), round(net_cashflow, 2), agent.id))
+            batch_update.append((round(agent.cash, 2), round(net_cashflow, 2), agent.id))
 
         # Bulk Update DB
         if batch_update:
@@ -404,7 +416,7 @@ class AgentService:
         cursor = self.conn.cursor()
         batch_active_delete = []
         buyers = []
-        sellers = [] # Although sellers are persistent until sold usually
+        # sellers = []  # Although sellers are persistent until sold usually
 
         if self.is_v2:
             cursor.execute("SELECT * FROM active_participants")
@@ -413,7 +425,8 @@ class AgentService:
             for row in active_rows:
                 aid = row['agent_id']
                 agent = self.agent_map.get(aid)
-                if not agent: continue
+                if not agent:
+                    continue
 
                 # Sync role info
                 agent.role = row['role']
@@ -426,11 +439,14 @@ class AgentService:
                     new_duration = current_duration + 1  # Add 1 for the current month
                     agent.role_duration = new_duration
 
-                    cursor.execute("UPDATE active_participants SET role_duration = ? WHERE agent_id = ?", (new_duration, aid))
+                    cursor.execute(
+                        "UPDATE active_participants SET role_duration = ? WHERE agent_id = ?",
+                        (new_duration, agent.id)
+                    )
 
                     # 🆕 FIX: Ensure preference is loaded for existing buyers
                     if not hasattr(agent, 'preference') or not agent.preference.target_zone:
-                        pass # Should have been loaded by load_agents_from_db logic
+                        pass  # Should have been loaded by load_agents_from_db logic
 
                     if agent.role_duration > 2:
                         should_exit, exit_reason = should_agent_exit_market(agent, market, agent.role_duration)
@@ -446,8 +462,8 @@ class AgentService:
                         buyers.append(agent)
 
                 elif agent.role == "SELLER":
-                     # Sellers handled by listing status mostly, but they are active agents
-                     pass
+                    # Sellers handled by listing status mostly, but they are active agents
+                    pass
 
         if batch_active_delete:
             cursor.executemany("DELETE FROM active_participants WHERE agent_id = ?", batch_active_delete)
@@ -487,11 +503,13 @@ class AgentService:
 
             for aid in selected_ids:
                 agent = self.agent_map.get(aid)
-                if agent: candidates.append(agent)
+                if agent:
+                    candidates.append(agent)
 
         logger.info(f"Activation Candidates: {len(candidates)}")
 
-        if not candidates: return [], []
+        if not candidates:
+            return [], []
 
         # Async Batch Processing
         BATCH_SIZE = 50
@@ -509,9 +527,9 @@ class AgentService:
         # Process results
 
         new_buyers = []
-        new_sellers = []
+        # new_sellers = []
         batch_active_insert = []
-        batch_finance_update = [] # New: Persist Tier 6 finance data
+        batch_finance_update = []  # New: Persist Tier 6 finance data
 
         # Pre-calc property map for fast lookup
         props_map = {p['property_id']: p for p in market.properties}
@@ -527,7 +545,8 @@ class AgentService:
                 continue
 
             agent = self.agent_map.get(a_id)
-            if not agent: continue
+            if not agent:
+                continue
 
             agent.role = role_str
             agent.role_duration = 1
@@ -538,7 +557,7 @@ class AgentService:
             is_seller = role_str in ["SELLER", "BUYER_SELLER"]
             is_buyer = role_str in ["BUYER", "BUYER_SELLER"]
 
-            metrics = None # Init metrics
+            metrics = None  # Init metrics
 
             # Seller Logic
             if is_seller:
@@ -558,19 +577,19 @@ class AgentService:
             if not is_seller:
                 # Check if agent has active listings
                 for prop in agent.owned_properties:
-                     # FIX: market.properties is a list, use pre-calced map
-                     p_obj = props_map.get(prop['property_id'])
-                     if p_obj and p_obj.get('status') == 'for_sale':
-                         logger.info(f"Agent {agent.id} (Role: {role_str}) withdrawing Property {p_obj['property_id']} from market.")
-                         p_obj['status'] = 'off_market'
-                         # Update DB
-                         cursor.execute("UPDATE properties_market SET status='off_market' WHERE property_id=?", (p_obj['property_id'],))
-                         # Log
-                         batch_decision_logs.append((
-                             agent.id, month, "LISTING_ACTION", "WITHDRAW",
-                             f"Role changed to {role_str}", "Auto-withdraw due to role change",
-                             None, False
-                         ))
+                    # FIX: market.properties is a list, use pre-calced map
+                    p_obj = props_map.get(prop['property_id'])
+                    if p_obj and p_obj.get('status') == 'for_sale':
+                        logger.info(f"Agent {agent.id} (Role: {role_str}) withdrawing Property {p_obj['property_id']} from market.")
+                        p_obj['status'] = 'off_market'
+                        # Update DB
+                        cursor.execute("UPDATE properties_market SET status='off_market' WHERE property_id=?", (p_obj['property_id'],))
+                        # Log
+                        batch_decision_logs.append((
+                            agent.id, month, "LISTING_ACTION", "WITHDRAW",
+                            f"Role changed to {role_str}", "Auto-withdraw due to role change",
+                            None, False
+                        ))
 
             # Buyer Logic
             if is_buyer:
@@ -597,9 +616,9 @@ class AgentService:
                 # Add to finance update batch
                 f_dict = agent.to_v2_finance_dict()
                 batch_finance_update.append((
-                   f_dict['max_affordable_price'],
-                   f_dict['psychological_price'],
-                   agent.id
+                    f_dict['max_affordable_price'],
+                    f_dict['psychological_price'],
+                    agent.id
                 ))
 
             # Normalize metrics for JSON storage
@@ -618,12 +637,12 @@ class AgentService:
                 max_price = agent.preference.max_price if is_buyer and agent.preference else None
 
                 batch_active_insert.append((
-                   agent.id, role_str, target_zone, max_price, selling_pid,
-                   agent.listing.get('min_price') if hasattr(agent, 'listing') and agent.listing else None,
-                   agent.listing.get('listed_price') if hasattr(agent, 'listing') and agent.listing else None,
-                   agent.life_pressure,
-                   d.get('reason', ''),
-                   month, 1
+                    agent.id, role_str, target_zone, max_price, selling_pid,
+                    agent.listing.get('min_price') if hasattr(agent, 'listing') and agent.listing else None,
+                    agent.listing.get('listed_price') if hasattr(agent, 'listing') and agent.listing else None,
+                    agent.life_pressure,
+                    d.get('reason', ''),
+                    month, 1
                 ))
 
         if batch_active_insert:
@@ -645,7 +664,6 @@ class AgentService:
         self.conn.commit()
 
         return new_buyers, decisions_flat
-
 
     def _create_seller_listing(self, agent, market, month, market_trend="STABLE", market_bulletin=""):
         """Creates listing and returns (listing_dict, context_metrics)."""
@@ -669,17 +687,19 @@ class AgentService:
 
         for pid in target_ids:
             p_data = next((p for p in agent.owned_properties if p['property_id'] == pid), None)
-            if p_data: properties_to_list.append((p_data, pricing_coefficient))
+            if p_data:
+                properties_to_list.append((p_data, pricing_coefficient))
 
         # Import internally to avoid circular dependency
         from transaction_engine import generate_seller_listing
 
         for p_data, coeff in properties_to_list:
             listing = generate_seller_listing(agent, p_data, market, strategy_hint, pricing_coefficient=coeff)
-            if not hasattr(agent, 'listing'): agent.listing = listing # Store first for active_participants
+            if not hasattr(agent, 'listing'):
+                agent.listing = listing  # Store first for active_participants
 
             # V2 Update
             cursor.execute("UPDATE properties_market SET status='for_sale', listed_price=?, min_price=?, listing_month=?, last_price_update_month=?, last_price_update_reason=? WHERE property_id=?",
-                          (listing['listed_price'], listing['min_price'], month, month, "Initial Listing", listing['property_id']))
+                           (listing['listed_price'], listing['min_price'], month, month, "Initial Listing", listing['property_id']))
 
         return decision, metrics

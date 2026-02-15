@@ -8,6 +8,7 @@ import yaml
 def tuple_constructor(loader, node):
     return tuple(loader.construct_sequence(node))
 
+
 yaml.SafeLoader.add_constructor('tag:yaml.org,2002:python/tuple', tuple_constructor)
 
 
@@ -23,7 +24,7 @@ class SimulationConfig:
         if Path(config_path).is_absolute():
             self.config_path = Path(config_path)
         else:
-             # 假设相对路径是相对于项目根目录 (此处简单处理，可根据需要增强)
+            # 假设相对路径是相对于项目根目录 (此处简单处理，可根据需要增强)
             # 在实际运行中，通常CWD就是项目根目录
             self.config_path = Path(config_path)
 
@@ -73,7 +74,6 @@ class SimulationConfig:
             target = target.setdefault(key, {})
 
         target[keys[-1]] = value
-
 
     def save(self, path: str = None):
         """保存配置到YAML文件"""

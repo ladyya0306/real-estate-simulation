@@ -39,9 +39,16 @@ def update_license_in_file(
     start_line_start_with: str,
     end_line_start_with: str,
 ) -> bool:
-    with open(file_path, 'r',
-              encoding='utf-8') as f:  # for windows compatibility
-        content = f.read()
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        try:
+            with open(file_path, 'r', encoding='gbk') as f:
+                content = f.read()
+        except Exception:
+            print(f"Skipping {file_path} due to encoding error")
+            return False
 
     with open(license_template_path, 'r', encoding='utf-8') as f:
         new_license = f.read().strip()
@@ -63,14 +70,20 @@ def update_license_in_file(
             replaced_content = content.replace(maybe_old_licenses, new_license)
             with open(file_path, 'w') as f:
                 f.write(replaced_content)
-            print(f'Replaced license in {file_path}')
+            try:
+                print(f'Replaced license in {file_path}')
+            except UnicodeEncodeError:
+                pass  # Silently continue if print fails
             return True
         else:
             return False
     else:
         with open(file_path, 'w') as f:
             f.write(new_license + '\n' + content)
-        print(f'Added license to {file_path}')
+        try:
+            print(f'Added license to {file_path}')
+        except UnicodeEncodeError:
+            print(f'Added license to {file_path}'.encode('utf-8', errors='replace').decode('utf-8'))  # Fallback
         return True
 
 

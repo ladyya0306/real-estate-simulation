@@ -8,14 +8,15 @@ import logging
 import random
 from typing import Dict, List, Optional
 
-from agent_behavior import (decide_negotiation_format, safe_call_llm,
-                            safe_call_llm_async)
+from agent_behavior import decide_negotiation_format, safe_call_llm, safe_call_llm_async
 from models import Agent, Market
 from mortgage_system import calculate_max_affordable_price, check_affordability
 
 logger = logging.getLogger(__name__)
 
 # --- Helper: Build Macro Context (Moved from agent_behavior if circular dep, or reimplement) ---
+
+
 def build_macro_context(month: int, config=None) -> str:
     """Builds macro-economic context string."""
     # This might need to be imported or reconstructed if agent_behavior usage causes circular import.
@@ -31,13 +32,14 @@ def build_macro_context(month: int, config=None) -> str:
         risk_free_rate = config.market.get('risk_free_rate', 0.03)
         ltv = config.mortgage.get('max_ltv', 0.7)
 
-    return f"【宏观环境】无风险利率: {risk_free_rate*100:.1f}%, 首付比例: {(1-ltv)*100:.0f}%"
+    return f"【宏观环境】无风险利率: {risk_free_rate * 100:.1f}%, 首付比例: {(1 - ltv) * 100:.0f}%"
 
 # --- New Negotiation Modes (Phase 5) ---
 
+
 async def run_batch_bidding_async(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, month: int, config=None, db_conn=None) -> Dict:
     """Mode A: Batch Bidding (Blind Auction) - Async"""
-    history = []
+    # history = []
     min_price = listing['min_price']
 
     # 1. Buyers Submit Bids (Parallel)
@@ -140,9 +142,10 @@ async def run_batch_bidding_async(seller: Agent, buyers: List[Agent], listing: D
     else:
         return {"outcome": "failed", "reason": "Highest bid below min_price"}
 
+
 def run_batch_bidding(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, config=None) -> Dict:
     """Mode A: Batch Bidding (Blind Auction)"""
-    history = []
+    # history = []
     min_price = listing['min_price']
 
     # 1. Buyers Submit Bids
@@ -185,10 +188,11 @@ def run_batch_bidding(seller: Agent, buyers: List[Agent], listing: Dict, market:
     else:
         return {"outcome": "failed", "reason": "Highest bid below min_price"}
 
+
 async def run_flash_deal_async(seller: Agent, buyer: Agent, listing: Dict, market: Market) -> Dict:
     """Mode B: Flash Deal (Take it or Leave it) - Async"""
     # 1. Seller sets Flash Price (usually discounted)
-    flash_price = listing['listed_price'] * 0.95 # Auto-discount for speed
+    flash_price = listing['listed_price'] * 0.95  # Auto-discount for speed
     if flash_price < listing['min_price']:
         flash_price = listing['min_price']
 
@@ -213,10 +217,11 @@ async def run_flash_deal_async(seller: Agent, buyer: Agent, listing: Dict, marke
         }
     return {"outcome": "failed", "reason": "Buyer rejected flash deal"}
 
+
 def run_flash_deal(seller: Agent, buyer: Agent, listing: Dict, market: Market) -> Dict:
     """Mode B: Flash Deal (Take it or Leave it)"""
     # 1. Seller sets Flash Price (usually discounted)
-    flash_price = listing['listed_price'] * 0.95 # Auto-discount for speed
+    flash_price = listing['listed_price'] * 0.95  # Auto-discount for speed
     if flash_price < listing['min_price']:
         flash_price = listing['min_price']
 
@@ -241,6 +246,7 @@ def run_flash_deal(seller: Agent, buyer: Agent, listing: Dict, market: Market) -
         }
     return {"outcome": "failed", "reason": "Buyer rejected flash deal"}
 
+
 def run_negotiation_session(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, config=None) -> Dict:
     """Main Entry Point for Negotiation Phase"""
     if not buyers:
@@ -259,7 +265,7 @@ def run_negotiation_session(seller: Agent, buyers: List[Agent], listing: Dict, m
         target_buyer = buyers[0]
         return run_flash_deal(seller, target_buyer, listing, market)
 
-    else: # CLASSIC
+    else:  # CLASSIC
         # Iterate buyers until one succeeds or all fail
         for buyer in buyers:
             result = negotiate(buyer, seller, listing, market, len(buyers), config)
@@ -269,6 +275,7 @@ def run_negotiation_session(seller: Agent, buyers: List[Agent], listing: Dict, m
                 return result
 
     return {"outcome": "failed", "reason": "All negotiations failed"}
+
 
 async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], listing: Dict, market: Market, month: int, config=None, db_conn=None) -> Dict:
     """Async Main Entry Point for Negotiation Phase"""
@@ -282,7 +289,6 @@ async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], list
     # (Batch and Flash can be added later or reuse sync logic if no LLM calls inside those specific functions yet,
     # but run_batch_bidding DOES use LLM, so they should be async too. For urgency, we map everything to classic async or implement others)
 
-
     consolidated_log = []
 
     if mode == "BATCH":
@@ -295,7 +301,7 @@ async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], list
         return await run_flash_deal_async(seller, target_buyer, listing, market)
 
     elif mode == "CLASSIC":
-         for buyer in buyers:
+        for buyer in buyers:
             # Await the async negotiate
             result = await negotiate_async(buyer, seller, listing, market, len(buyers), config)
             consolidated_log.extend(result.get('history', []))
@@ -303,7 +309,7 @@ async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], list
             if result['outcome'] == 'success':
                 result['buyer_id'] = buyer.id
                 result['mode'] = 'classic'
-                result['history'] = consolidated_log # Preserve prior failed attempts log too
+                result['history'] = consolidated_log  # Preserve prior failed attempts log too
                 return result
     else:
         # Fallback to sync for unimplemented modes or implement them
@@ -324,13 +330,14 @@ async def run_negotiation_session_async(seller: Agent, buyers: List[Agent], list
 
 # --- 1. Seller Listing Logic ---
 
+
 def generate_seller_listing(seller: Agent, property_data: Dict, market: Market, strategy_hint: str = "balanced", pricing_coefficient: float = None) -> Dict:
     """
     Generate seller listing.
     """
 
     # Get Market Info
-    zone = property_data.get('zone', 'A') # Default to A if missing
+    zone = property_data.get('zone', 'A')  # Default to A if missing
     avg_price = market.get_avg_price(zone)
     if avg_price == 0:
         avg_price = property_data['base_value']
@@ -404,7 +411,7 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market, 
     try:
         listed_price = float(result.get("listed_price", default_listing["listed_price"]))
         min_price = float(result.get("min_price", default_listing["min_price"]))
-    except:
+    except BaseException:
         listed_price = default_listing["listed_price"]
         min_price = default_listing["min_price"]
 
@@ -413,13 +420,14 @@ def generate_seller_listing(seller: Agent, property_data: Dict, market: Market, 
         "seller_id": seller.id,
         "zone": zone,  # 添加zone字段，negotiate需要用它判断市场供需
         "listed_price": listed_price,
-        "min_price": max(min_price, 1.0), # Ensure positive
+        "min_price": max(min_price, 1.0),  # Ensure positive
         "urgency": result.get("urgency", 0.5),
         "status": "active",
         "reasoning": result.get("reasoning", "")
     }
 
 # --- 2. Buyer Matching Logic ---
+
 
 def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map: Dict[int, Dict], ignore_zone: bool = False) -> Optional[Dict]:
     """
@@ -470,13 +478,13 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
     shortlist = candidates[:5]
 
     # helper to format prop for prompt
-    def format_prop(l):
-        p = properties_map.get(l['property_id'])
+    def format_prop(listing_data):
+        p = properties_map.get(listing_data['property_id'])
         return {
-            "id": l['property_id'],
+            "id": listing_data['property_id'],
             "zone": p['zone'],
             "area": p['building_area'],
-            "price": l['listed_price'],
+            "price": listing_data['listed_price'],
             "school": "Yes" if p.get('is_school_district') else "No",
             "type": p.get('property_type', 'N/A')
         }
@@ -486,7 +494,7 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
     prompt = f"""
     你是买家 {buyer.name}。
     【需求】{buyer.story.housing_need}
-    【预算上限】{pref.max_price/10000:.0f}万
+    【预算上限】{pref.max_price / 10000:.0f}万
     【偏好】区域: {pref.target_zone}, 学区: {"需要" if pref.need_school_district else "无所谓"}
 
     现有以下候选房源（已按价格排序）：
@@ -515,6 +523,7 @@ def match_property_for_buyer(buyer: Agent, listings: List[Dict], properties_map:
 
 # --- 3. Negotiation Logic (Phase 2.2 & P3) ---
 
+
 def get_market_condition(market: Market, zone: str, potential_buyers_count: int) -> str:
     """
     Determine market condition based on Supply/Demand Ratio.
@@ -535,6 +544,7 @@ def get_market_condition(market: Market, zone: str, potential_buyers_count: int)
         return "undersupply"     # 供不应求 (卖方市场)
     else:
         return "balanced"        # 供需平衡
+
 
 def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potential_buyers_count: int = 10, config=None) -> Dict:
     """
@@ -557,7 +567,7 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
 
     # Also check min_price vs buyer_max
     if min_price > buyer_max * (1 + gap_threshold):
-         return {"outcome": "failed", "reason": f"Pre-check: Price gap {price_gap:.1%} too large", "history": [], "final_price": 0}
+        return {"outcome": "failed", "reason": f"Pre-check: Price gap {price_gap:.1%} too large", "history": [], "final_price": 0}
 
     # 3. Market Condition & Strategy
     market_condition = get_market_condition(market, listing['zone'], potential_buyers_count)
@@ -567,9 +577,9 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
     market_hint = cond_cfg.get('llm_hint', "【市场供需平衡】供需相当，价格理性。")
 
     # Macro Environment Context
-    macro_context = build_macro_context(1, config) # Month is not passed effectively here, defaulting to 1 or need to pass in
+    macro_context = build_macro_context(1, config)  # Month is not passed effectively here, defaulting to 1 or need to pass in
 
-    history = []
+    # history = []
     rounds = random.randint(*rounds_range)
 
     # Starting offer based on configuration
@@ -606,7 +616,7 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
         {json.dumps(negotiation_log, ensure_ascii=False)}
 
         决定行动 (请遵循你的风格):
-        - OFFER: 出价 (必须低于报价，可参考建议: {current_price*lowball_ratio:,.0f} ~ {current_price:,.0f})
+        - OFFER: 出价 (必须低于报价，可参考建议: {current_price * lowball_ratio:,.0f} ~ {current_price:,.0f})
         - ACCEPT: 接受报价
         - WITHDRAW: 放弃 (如果价格太高或对方太顽固)
 
@@ -623,7 +633,7 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
                 buyer_action = "ACCEPT"
                 buyer_offer_price = current_price
             if buyer_offer_price > buyer.preference.max_price:
-                 buyer_action = "WITHDRAW"
+                buyer_action = "WITHDRAW"
 
         negotiation_log.append({
             "round": r,
@@ -636,7 +646,7 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
         if buyer_action == "WITHDRAW":
             return {"outcome": "failed", "reason": "Buyer withdrew", "history": negotiation_log, "final_price": 0}
         if buyer_action == "ACCEPT":
-             return {"outcome": "success", "final_price": current_price, "history": negotiation_log}
+            return {"outcome": "success", "final_price": current_price, "history": negotiation_log}
 
     # --- Seller Turn ---
         seller_prompt = f"""
@@ -667,11 +677,11 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
         seller_action = seller_resp.get("action", "REJECT")
 
         if seller_action == "COUNTER":
-             current_price = float(seller_resp.get("counter_price", current_price))
-             # Validation
-             if current_price <= buyer_offer_price:
-                 seller_action = "ACCEPT"
-                 current_price = buyer_offer_price
+            current_price = float(seller_resp.get("counter_price", current_price))
+            # Validation
+            if current_price <= buyer_offer_price:
+                seller_action = "ACCEPT"
+                current_price = buyer_offer_price
 
         negotiation_log.append({
             "round": r,
@@ -682,11 +692,12 @@ def negotiate(buyer: Agent, seller: Agent, listing: Dict, market: Market, potent
         })
 
         if seller_action == "ACCEPT":
-             return {"outcome": "success", "final_price": buyer_offer_price, "history": negotiation_log}
+            return {"outcome": "success", "final_price": buyer_offer_price, "history": negotiation_log}
         if seller_action == "REJECT":
-             return {"outcome": "failed", "reason": "Seller rejected", "history": negotiation_log, "final_price": 0}
+            return {"outcome": "failed", "reason": "Seller rejected", "history": negotiation_log, "final_price": 0}
 
     return {"outcome": "failed", "reason": "Max rounds reached", "history": negotiation_log, "final_price": 0}
+
 
 async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Market, potential_buyers_count: int = 10, config=None) -> Dict:
     """
@@ -706,7 +717,7 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
     price_gap = (current_price - buyer_max) / current_price
 
     if min_price > buyer_max * (1 + gap_threshold):
-         return {"outcome": "failed", "reason": f"Pre-check: Price gap {price_gap:.1%} too large", "history": [], "final_price": 0}
+        return {"outcome": "failed", "reason": f"Pre-check: Price gap {price_gap:.1%} too large", "history": [], "final_price": 0}
 
     # 3. Market Condition & Strategy
     market_condition = get_market_condition(market, listing['zone'], potential_buyers_count)
@@ -751,7 +762,7 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         {json.dumps(negotiation_log, ensure_ascii=False)}
 
         决定行动 (请遵循你的风格):
-        - OFFER: 出价 (必须低于报价，可参考建议: {current_price*lowball_ratio:,.0f} ~ {current_price:,.0f})
+        - OFFER: 出价 (必须低于报价，可参考建议: {current_price * lowball_ratio:,.0f} ~ {current_price:,.0f})
         - ACCEPT: 接受报价
         - WITHDRAW: 放弃 (如果价格太高或对方太顽固)
 
@@ -766,7 +777,7 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
                 buyer_action = "ACCEPT"
                 buyer_offer_price = current_price
             if buyer_offer_price > buyer.preference.max_price:
-                 buyer_action = "WITHDRAW"
+                buyer_action = "WITHDRAW"
 
         negotiation_log.append({
             "round": r, "party": "buyer", "action": buyer_action, "price": buyer_offer_price, "content": buyer_resp.get("reason", "")
@@ -775,7 +786,7 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         if buyer_action == "WITHDRAW":
             return {"outcome": "failed", "reason": "Buyer withdrew", "history": negotiation_log, "final_price": 0}
         if buyer_action == "ACCEPT":
-             return {"outcome": "success", "final_price": current_price, "history": negotiation_log}
+            return {"outcome": "success", "final_price": current_price, "history": negotiation_log}
 
         # --- Seller Turn ---
         seller_final_hint = "\n        ⚡️【最后通牒】这是买家的最终出价。必须决定：接受(ACCEPT) 或 拒绝(REJECT 导致交易失败)。不建议再还价。" if is_final_round else ""
@@ -808,23 +819,24 @@ async def negotiate_async(buyer: Agent, seller: Agent, listing: Dict, market: Ma
         seller_action = seller_resp.get("action", "REJECT")
 
         if seller_action == "COUNTER":
-             current_price = float(seller_resp.get("counter_price", current_price))
-             if current_price <= buyer_offer_price:
-                 seller_action = "ACCEPT"
-                 current_price = buyer_offer_price
+            current_price = float(seller_resp.get("counter_price", current_price))
+            if current_price <= buyer_offer_price:
+                seller_action = "ACCEPT"
+                current_price = buyer_offer_price
 
         negotiation_log.append({
             "round": r, "party": "seller", "action": seller_action, "price": current_price, "content": seller_resp.get("reason", "")
         })
 
         if seller_action == "ACCEPT":
-             return {"outcome": "success", "final_price": buyer_offer_price, "history": negotiation_log}
+            return {"outcome": "success", "final_price": buyer_offer_price, "history": negotiation_log}
         if seller_action == "REJECT":
-             return {"outcome": "failed", "reason": "Seller rejected", "history": negotiation_log, "final_price": 0}
+            return {"outcome": "failed", "reason": "Seller rejected", "history": negotiation_log, "final_price": 0}
 
     return {"outcome": "failed", "reason": "Max rounds reached", "history": negotiation_log, "final_price": 0}
 
 # --- 4. Transaction Execution Logic ---
+
 
 def execute_transaction(buyer: Agent, seller: Agent, property_data: Dict, final_price: float, market: Market = None, config=None) -> Optional[Dict]:
     """
@@ -858,7 +870,7 @@ def execute_transaction(buyer: Agent, seller: Agent, property_data: Dict, final_
 
     # Calculate monthly payment
     # Assume 30 years, interest rate from macro or config
-    interest_rate = 0.045 # Default 4.5%
+    interest_rate = 0.045  # Default 4.5%
     if market and hasattr(market, "average_mortgage_rate"):
         interest_rate = market.average_mortgage_rate
 
@@ -912,6 +924,7 @@ def execute_transaction(buyer: Agent, seller: Agent, property_data: Dict, final_
         "property_id": pid
     }
 
+
 def handle_failed_negotiation(seller: Agent, listing: Dict, market: Market, potential_buyers_count: int = 0) -> bool:
     """
     Handle failed negotiation.
@@ -933,15 +946,17 @@ def handle_failed_negotiation(seller: Agent, listing: Dict, market: Market, pote
 
     if potential_buyers_count == 0:
         # No interest: Cut price
-        price_cut = 0.05 # 5% cut
-        if is_desperate: price_cut = 0.10
+        price_cut = 0.05  # 5% cut
+        if is_desperate:
+            price_cut = 0.10
 
     else:
         # Had interest but failed
         # Maybe price too high?
         # Cut smaller
         price_cut = 0.02
-        if is_desperate: price_cut = 0.05
+        if is_desperate:
+            price_cut = 0.05
 
     if price_cut > 0:
         old_price = listing['listed_price']
@@ -955,16 +970,3 @@ def handle_failed_negotiation(seller: Agent, listing: Dict, market: Market, pote
         return True
 
     return False
-
-def decide_negotiation_format(seller: Agent, buyers: List[Agent], market_hint: str) -> str:
-    """
-    Decide negotiation format: 'batch' (Blind Auction) or 'flash' (1-on-1).
-    """
-    # Simple logic:
-    # If multiple buyers -> Batch
-    # If single buyer -> Flash? Or just Negotiation?
-    # Logic from Phase 3:
-    if len(buyers) > 1:
-        return "batch"
-    else:
-        return "flexible" # standard negotiation

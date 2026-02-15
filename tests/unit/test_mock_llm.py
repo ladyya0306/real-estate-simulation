@@ -4,11 +4,11 @@ import sys
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Add project root to path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
-
 from agent_behavior import AgentRole, batched_determine_role, determine_role
 from models import Agent, AgentStory
+
+# Add project root to path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 
 
 class TestMockLLM(unittest.TestCase):
@@ -67,7 +67,7 @@ class TestMockLLM(unittest.TestCase):
         # Setup mock return
         mock_llm.return_value = self.fixtures['batch_roles']
 
-        agents = [self.agent, self.agent] # Dummy list
+        agents = [self.agent, self.agent]  # Dummy list
 
         # Call function
         results = batched_determine_role(agents, 1, self.market)
@@ -76,6 +76,7 @@ class TestMockLLM(unittest.TestCase):
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0]['role'], "BUYER")
         mock_llm.assert_called_once()
+
 
 if __name__ == '__main__':
     unittest.main()

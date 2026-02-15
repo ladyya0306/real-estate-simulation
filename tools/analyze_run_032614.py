@@ -5,6 +5,7 @@ import sqlite3
 DB_PATH = r"d:\GitProj\oasis-main\results\run_20260214_032614\simulation.db"
 REPORT_PATH = r"d:\GitProj\oasis-main\analysis_report_032614.md"
 
+
 def analyze_run():
     if not os.path.exists(DB_PATH):
         print(f"Error: DB not found at {DB_PATH}")
@@ -76,7 +77,8 @@ def analyze_run():
                     cursor.execute("SELECT * FROM agents_finance WHERE agent_id=?", (agent_id,))
                     finance = cursor.fetchone()
                     if finance:
-                        f.write(f"**Financials**: Cash: {finance['cash']:,.0f}, Net Worth: {finance['total_assets']:,.0f}, Debt: {finance['total_debt']:,.0f}, Cashflow: {finance['net_cashflow']:,.0f}\n")
+                        f.write(
+                            f"**Financials**: Cash: {finance['cash']:,.0f}, Net Worth: {finance['total_assets']:,.0f}, Debt: {finance['total_debt']:,.0f}, Cashflow: {finance['net_cashflow']:,.0f}\n")
 
                     # Transaction History
                     cursor.execute("SELECT * FROM transactions WHERE buyer_id=? OR seller_id=?", (agent_id, agent_id))
@@ -95,7 +97,7 @@ def analyze_run():
                         bids = cursor.fetchall()
                         if bids:
                             f.write(f"**Bidding Activity**: Matched {len(bids)} times.\n")
-                    except:
+                    except BaseException:
                         f.write("**Bidding Activity**: table not found (check DB version)\n")
 
                     # Thought Process (First, Transaction-related, Last)
@@ -111,9 +113,9 @@ def analyze_run():
                         f.write(f"- [Month {first['month']} {first['event_type']}] {first['decision']}: {first['reason']}\n")
 
                         # Show any transaction related
-                        important_logs = [l for l in logs if l['event_type'] in ('BID', 'LIST_PROPERTY', 'NEGOTIATION', 'ACCEPT_OFFER')]
-                        for l in important_logs:
-                            f.write(f"- [Month {l['month']} {l['event_type']}] {l['decision']}: {l['reason']}\n")
+                        important_logs = [log_entry for log_entry in logs if log_entry['event_type'] in ('BID', 'LIST_PROPERTY', 'NEGOTIATION', 'ACCEPT_OFFER')]
+                        for log_entry in important_logs:
+                            f.write(f"- [Month {log_entry['month']} {log_entry['event_type']}] {log_entry['decision']}: {log_entry['reason']}\n")
 
                         # Show last if different
                         last = logs[-1]
@@ -139,6 +141,7 @@ def analyze_run():
 
     conn.close()
     print(f"Report written to {REPORT_PATH}")
+
 
 if __name__ == "__main__":
     analyze_run()

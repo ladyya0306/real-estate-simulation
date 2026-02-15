@@ -9,7 +9,6 @@ try:
     from rich.console import Console
     from rich.panel import Panel
     from rich.table import Table
-    from rich.text import Text
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -49,10 +48,10 @@ class ExchangeDisplay:
                 border_style="blue"
             ))
         else:
-            print(f"\n{'='*50}")
+            print(f"\n{'=' * 50}")
             print(f"🏠 房产交易所 - 第 {month} 月")
             print(f"宏观环境: {macro_status}")
-            print(f"{'='*50}\n")
+            print(f"{'=' * 50}\n")
 
     def show_listings(self, listings: List[Dict], properties_map: Dict = None):
         """显示当前挂牌房产"""
@@ -69,22 +68,22 @@ class ExchangeDisplay:
             table.add_column("挂牌价", justify="right", style="bold", width=14)
             table.add_column("卖家ID", style="dim", width=8)
 
-            for l in listings[:10]:
-                prop_id = l.get('property_id', '?')
+            for listing in listings[:10]:
+                prop_id = listing.get('property_id', '?')
                 # 尝试从properties_map获取详细信息
                 prop_detail = properties_map.get(prop_id, {}) if properties_map else {}
 
-                zone = l.get('zone') or prop_detail.get('zone', '?')
+                zone = listing.get('zone') or prop_detail.get('zone', '?')
                 prop_type = prop_detail.get('property_type', '普通住宅')[:8]
-                area = prop_detail.get('building_area', l.get('building_area', 0))
+                area = prop_detail.get('building_area', listing.get('building_area', 0))
 
                 table.add_row(
                     str(prop_id),
                     zone,
                     prop_type,
                     f"{area:.0f}㎡",
-                    f"¥{l.get('listed_price', 0):,.0f}",
-                    str(l.get('seller_id', '?'))
+                    f"¥{listing.get('listed_price', 0):,.0f}",
+                    str(listing.get('seller_id', '?'))
                 )
             if len(listings) > 10:
                 table.add_row("...", f"共{len(listings)}套", "", "", "", "")
@@ -93,8 +92,8 @@ class ExchangeDisplay:
         else:
             print(f"📋 当前挂牌房产 ({len(listings)}套)")
             print("-" * 60)
-            for l in listings[:5]:
-                print(f"  房产{l.get('property_id')}: ¥{l.get('listed_price', 0):,.0f}")
+            for listing in listings[:5]:
+                print(f"  房产{listing.get('property_id')}: ¥{listing.get('listed_price', 0):,.0f}")
             if len(listings) > 5:
                 print(f"  ... 共 {len(listings)} 套")
             print()
@@ -143,12 +142,12 @@ class ExchangeDisplay:
         """显示谈判开始"""
         if self.use_rich:
             self.console.print(f"\n[bold yellow]💬 开始谈判[/bold yellow] "
-                              f"买家{buyer_id} ↔ 卖家{seller_id} | 房产{property_id} | ¥{listed_price:,.0f}")
+                               f"买家{buyer_id} ↔ 卖家{seller_id} | 房产{property_id} | ¥{listed_price:,.0f}")
         else:
             print(f"\n💬 开始谈判: 买家{buyer_id} vs 卖家{seller_id}, 房产{property_id}, ¥{listed_price:,.0f}")
 
     def show_negotiation_round(self, round_num: int, party: str, action: str,
-                                price: Optional[float], message: str, thought: str = ""):
+                               price: Optional[float], message: str, thought: str = ""):
         """显示谈判轮次"""
         icon = "🧑‍💼" if party == "buyer" else "🏠"
         party_name = "买方" if party == "buyer" else "卖方"
@@ -168,7 +167,7 @@ class ExchangeDisplay:
 
         if self.use_rich:
             self.console.print(f"  {icon} 第{round_num}轮 [{color}]{party_name}[/{color}]: "
-                              f"[bold]{action}[/bold] {price_str}")
+                               f"[bold]{action}[/bold] {price_str}")
             if message:
                 msg_short = message[:60] + "..." if len(message) > 60 else message
                 self.console.print(f"     [dim]💬 \"{msg_short}\"[/dim]")
@@ -196,12 +195,12 @@ class ExchangeDisplay:
         else:
             if self.use_rich:
                 self.console.print(f"[red]❌ 谈判失败: 买家{buyer_id} vs 卖家{seller_id}[/red]"
-                                  f"[dim] ({reason})[/dim]")
+                                   f"[dim] ({reason})[/dim]")
             else:
                 print(f"❌ 谈判失败: 买家{buyer_id} vs 卖家{seller_id} ({reason})")
 
     def show_monthly_summary(self, month: int, deals: int, total_volume: float,
-                              failed: int = 0, duration: float = 0):
+                             failed: int = 0, duration: float = 0):
         """月度汇总"""
         if self.use_rich:
             avg_price = total_volume / deals if deals > 0 else 0
@@ -214,11 +213,11 @@ class ExchangeDisplay:
                 border_style="cyan"
             ))
         else:
-            print(f"\n{'='*40}")
+            print(f"\n{'=' * 40}")
             print(f"📊 第 {month} 月交易汇总")
             print(f"成交: {deals}套 | 失败: {failed}次")
             print(f"总额: ¥{total_volume:,.0f}")
-            print(f"{'='*40}\n")
+            print(f"{'=' * 40}\n")
 
     def show_supply_demand(self, supply: int, demand: int):
         """显示供需状态"""

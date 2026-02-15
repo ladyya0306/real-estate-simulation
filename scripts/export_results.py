@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 # Default Paths (V1)
 DEFAULT_DB_PATH = 'real_estate_stage2.db'
-LOG_FILE = 'simulation_run.log' # This is often local to CWD
+LOG_FILE = 'simulation_run.log'  # This is often local to CWD
+
 
 def find_latest_result_dir(base_dir="results"):
     """Find the most recently created result directory"""
@@ -30,6 +31,7 @@ def find_latest_result_dir(base_dir="results"):
     # Sort by creation time (or name which has timestamp)
     dirs.sort(key=os.path.getmtime, reverse=True)
     return dirs[0]
+
 
 def export_data(db_path=None, output_dir=None):
     # Determine DB Path
@@ -75,6 +77,7 @@ def export_data(db_path=None, output_dir=None):
     cursor = conn.cursor()
     """
     return
+
 
 if __name__ == "__main__":
     export_data()

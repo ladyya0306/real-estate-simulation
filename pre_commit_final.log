@@ -1,0 +1,1141 @@
+End-of-file fixer........................................................Passed
+Mixed line ending fixer..................................................Passed
+Remove trailing whitespaces..............................................Passed
+Check toml...........................................(no files to check)Skipped
+Check yaml...............................................................Passed
+Lint yaml................................................................Failed
+- hook id: yamllint
+- exit code: 1
+
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Scripts\yamllint.EXE\__main__.py", line 6, in <module>
+    sys.exit(run())
+             ~~~^^
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\cli.py", line 223, in run
+    problems = linter.run(f, conf, filepath)
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\linter.py", line 232, in run
+    content = input.read()
+UnicodeDecodeError: 'gbk' codec can't decode byte 0xa4 in position 8: illegal multibyte sequence
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Scripts\yamllint.EXE\__main__.py", line 6, in <module>
+    sys.exit(run())
+             ~~~^^
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\cli.py", line 223, in run
+    problems = linter.run(f, conf, filepath)
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\linter.py", line 232, in run
+    content = input.read()
+UnicodeDecodeError: 'gbk' codec can't decode byte 0xad in position 71: illegal multibyte sequence
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Scripts\yamllint.EXE\__main__.py", line 6, in <module>
+    sys.exit(run())
+             ~~~^^
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\cli.py", line 223, in run
+    problems = linter.run(f, conf, filepath)
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\linter.py", line 232, in run
+    content = input.read()
+UnicodeDecodeError: 'gbk' codec can't decode byte 0xa8 in position 8: illegal multibyte sequence
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Scripts\yamllint.EXE\__main__.py", line 6, in <module>
+    sys.exit(run())
+             ~~~^^
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\cli.py", line 223, in run
+    problems = linter.run(f, conf, filepath)
+  File "C:\Users\wyl\.cache\pre-commit\repodzls5hjr\py_env-python3\Lib\site-packages\yamllint\linter.py", line 232, in run
+    content = input.read()
+UnicodeDecodeError: 'gbk' codec can't decode byte 0x9a in position 69: illegal multibyte sequence
+
+Sort imports.............................................................Passed
+Check PEP8...............................................................Failed
+- hook id: flake8
+- exit code: 1
+
+_archive_unused_scripts/analyze_logs.py:48:121: E501 line too long (128 > 120 characters)
+_archive_unused_scripts/auto_verify.py:75:22: E999 SyntaxError: unexpected character after line continuation character
+_archive_unused_scripts/auto_verify_fix.py:10:1: E402 module level import not at top of file
+_archive_unused_scripts/auto_verify_fix.py:12:1: E402 module level import not at top of file
+_archive_unused_scripts/auto_verify_fix.py:13:1: E402 module level import not at top of file
+_archive_unused_scripts/auto_verify_fix.py:14:1: E402 module level import not at top of file
+_archive_unused_scripts/auto_verify_fix.py:39:17: E261 at least two spaces before inline comment
+_archive_unused_scripts/auto_verify_fix.py:112:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/check_batch_results.py:26:121: E501 line too long (159 > 120 characters)
+_archive_unused_scripts/check_matching.py:15:121: E501 line too long (131 > 120 characters)
+_archive_unused_scripts/debug_agent_logic.py:63:29: E261 at least two spaces before inline comment
+_archive_unused_scripts/debug_agent_logic.py:71:14: E111 indentation is not a multiple of 4
+_archive_unused_scripts/debug_agent_logic.py:71:14: E117 over-indented
+_archive_unused_scripts/debug_agent_logic.py:75:13: E122 continuation line missing indentation or outdented
+_archive_unused_scripts/debug_agent_logic.py:82:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/debug_matching.py:41:10: E111 indentation is not a multiple of 4
+_archive_unused_scripts/debug_matching.py:41:10: E117 over-indented
+_archive_unused_scripts/deep_analyze.py:140:5: E741 ambiguous variable name 'l'
+_archive_unused_scripts/deep_analyze.py:169:5: E741 ambiguous variable name 'l'
+_archive_unused_scripts/diagnose_dropout.py:89:121: E501 line too long (130 > 120 characters)
+_archive_unused_scripts/diagnose_dropout.py:100:121: E501 line too long (171 > 120 characters)
+_archive_unused_scripts/run_verify_sim.py:12:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/run_verify_sim.py:22:9: E722 do not use bare 'except'
+_archive_unused_scripts/run_verify_sim.py:65:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_initialization.py:5:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:6:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:7:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:9:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:10:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:11:1: E402 module level import not at top of file
+_archive_unused_scripts/test_initialization.py:19:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_initialization.py:33:9: F841 local variable 'self_user_config' is assigned to but never used
+_archive_unused_scripts/test_initialization.py:33:32: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_initialization.py:36:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_initialization.py:41:9: E722 do not use bare 'except'
+_archive_unused_scripts/test_initialization.py:87:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_matching.py:8:1: E402 module level import not at top of file
+_archive_unused_scripts/test_matching.py:9:1: E402 module level import not at top of file
+_archive_unused_scripts/test_matching.py:13:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_matching.py:66:25: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_matching.py:72:33: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_matching.py:73:33: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_matching.py:89:14: E111 indentation is not a multiple of 4
+_archive_unused_scripts/test_matching.py:89:14: E117 over-indented
+_archive_unused_scripts/test_matching.py:89:121: E501 line too long (124 > 120 characters)
+_archive_unused_scripts/test_matching.py:91:14: E111 indentation is not a multiple of 4
+_archive_unused_scripts/test_matching.py:91:14: E117 over-indented
+_archive_unused_scripts/test_matching.py:95:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_negotiation_modes.py:15:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_negotiation_modes.py:18:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_negotiation_modes.py:67:59: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_negotiation_modes.py:82:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_negotiation_rounds.py:9:1: E402 module level import not at top of file
+_archive_unused_scripts/test_negotiation_rounds.py:18:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_negotiation_rounds.py:18:1: E402 module level import not at top of file
+_archive_unused_scripts/test_negotiation_rounds.py:89:18: E111 indentation is not a multiple of 4
+_archive_unused_scripts/test_negotiation_rounds.py:89:18: E117 over-indented
+_archive_unused_scripts/test_negotiation_rounds.py:91:18: E111 indentation is not a multiple of 4
+_archive_unused_scripts/test_negotiation_rounds.py:91:18: E117 over-indented
+_archive_unused_scripts/test_negotiation_rounds.py:92:18: E111 indentation is not a multiple of 4
+_archive_unused_scripts/test_negotiation_rounds.py:94:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/test_preference_fix.py:9:1: E402 module level import not at top of file
+_archive_unused_scripts/test_preference_fix.py:10:1: E402 module level import not at top of file
+_archive_unused_scripts/test_preference_fix.py:46:121: E501 line too long (121 > 120 characters)
+_archive_unused_scripts/test_tier6_logic.py:9:1: E402 module level import not at top of file
+_archive_unused_scripts/test_tier6_logic.py:12:1: E402 module level import not at top of file
+_archive_unused_scripts/test_tier6_logic.py:13:1: E402 module level import not at top of file
+_archive_unused_scripts/test_tier6_logic.py:18:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_tier6_logic.py:20:23: E701 multiple statements on one line (colon)
+_archive_unused_scripts/test_tier6_logic.py:21:23: E701 multiple statements on one line (colon)
+_archive_unused_scripts/test_tier6_logic.py:24:1: E302 expected 2 blank lines, found 1
+_archive_unused_scripts/test_tier6_logic.py:37:121: E501 line too long (130 > 120 characters)
+_archive_unused_scripts/test_tier6_logic.py:52:121: E501 line too long (121 > 120 characters)
+_archive_unused_scripts/test_tier6_logic.py:56:25: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_tier6_logic.py:57:33: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_tier6_logic.py:70:70: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_tier6_logic.py:78:5: E306 expected 1 blank line before a nested definition, found 0
+_archive_unused_scripts/test_tier6_logic.py:79:21: F821 undefined name 'decide_price_adjustment'
+_archive_unused_scripts/test_tier6_logic.py:82:46: E261 at least two spaces before inline comment
+_archive_unused_scripts/test_tier6_logic.py:103:31: F821 undefined name 'decide_price_adjustment'
+_archive_unused_scripts/test_tier6_logic.py:115:1: E305 expected 2 blank lines after class or function definition, found 1
+_archive_unused_scripts/transaction_engine_batch_functions.py:13:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:34:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:39:32: E261 at least two spaces before inline comment
+agent_behavior.py:53:121: E501 line too long (128 > 120 characters)
+agent_behavior.py:74:121: E501 line too long (158 > 120 characters)
+agent_behavior.py:112:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:142:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:163:121: E501 line too long (132 > 120 characters)
+agent_behavior.py:173:26: E261 at least two spaces before inline comment
+agent_behavior.py:175:10: E111 indentation is not a multiple of 4
+agent_behavior.py:175:10: E117 over-indented
+agent_behavior.py:221:101: E261 at least two spaces before inline comment
+agent_behavior.py:221:121: E501 line too long (142 > 120 characters)
+agent_behavior.py:231:36: E261 at least two spaces before inline comment
+agent_behavior.py:233:79: E261 at least two spaces before inline comment
+agent_behavior.py:315:14: E111 indentation is not a multiple of 4
+agent_behavior.py:315:14: E117 over-indented
+agent_behavior.py:316:9: E722 do not use bare 'except'
+agent_behavior.py:317:14: E111 indentation is not a multiple of 4
+agent_behavior.py:317:14: E117 over-indented
+agent_behavior.py:330:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:338:5: E722 do not use bare 'except'
+agent_behavior.py:342:5: F841 local variable 'prompt' is assigned to but never used
+agent_behavior.py:355:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:376:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:392:44: E261 at least two spaces before inline comment
+agent_behavior.py:395:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:395:121: E501 line too long (172 > 120 characters)
+agent_behavior.py:411:96: E261 at least two spaces before inline comment
+agent_behavior.py:411:121: E501 line too long (147 > 120 characters)
+agent_behavior.py:433:40: E261 at least two spaces before inline comment
+agent_behavior.py:481:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:545:20: E261 at least two spaces before inline comment
+agent_behavior.py:553:72: E261 at least two spaces before inline comment
+agent_behavior.py:554:57: E261 at least two spaces before inline comment
+agent_behavior.py:555:42: E261 at least two spaces before inline comment
+agent_behavior.py:603:1: E402 module level import not at top of file
+agent_behavior.py:612:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:656:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:660:22: E261 at least two spaces before inline comment
+agent_behavior.py:669:30: E261 at least two spaces before inline comment
+agent_behavior.py:683:37: E261 at least two spaces before inline comment
+agent_behavior.py:698:1: E305 expected 2 blank lines after class or function definition, found 1
+agent_behavior.py:724:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:764:1: E302 expected 2 blank lines, found 1
+agent_behavior.py:816:121: E501 line too long (129 > 120 characters)
+agent_behavior.py:854:5: F841 local variable 'max_affordable' is assigned to but never used
+agent_behavior.py:867:9: F841 local variable 'supply_demand_desc' is assigned to but never used
+agent_behavior.py:871:1: E302 expected 2 blank lines, found 1
+config/agent_templates.py:16:42: E261 at least two spaces before inline comment
+config/agent_templates.py:44:42: E261 at least two spaces before inline comment
+config/agent_templates.py:58:42: E261 at least two spaces before inline comment
+config/agent_templates.py:106:40: E261 at least two spaces before inline comment
+config/agent_templates.py:121:1: E302 expected 2 blank lines, found 1
+config/agent_tiers.py:19:28: E261 at least two spaces before inline comment
+config/agent_tiers.py:28:23: E231 missing whitespace after ':'
+config/agent_tiers.py:28:47: E231 missing whitespace after ','
+config/agent_tiers.py:33:1: E302 expected 2 blank lines, found 1
+config/agent_tiers.py:36:38: E701 multiple statements on one line (colon)
+config/agent_tiers.py:37:32: E701 multiple statements on one line (colon)
+config/agent_tiers.py:38:34: E701 multiple statements on one line (colon)
+config/agent_tiers.py:39:40: E701 multiple statements on one line (colon)
+config/config_loader.py:11:1: E305 expected 2 blank lines after class or function definition, found 1
+config/config_loader.py:26:14: E114 indentation is not a multiple of 4 (comment)
+config/config_loader.py:26:14: E117 over-indented (comment)
+config/config_loader.py:78:5: E303 too many blank lines (2)
+config/settings.py:43:45: E231 missing whitespace after ','
+config/settings.py:43:66: E231 missing whitespace after ','
+config/settings.py:44:66: E231 missing whitespace after ','
+config/settings.py:45:66: E231 missing whitespace after ','
+config/settings.py:81:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:13:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:18:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:54:17: E722 do not use bare 'except'
+generate_simulation_report.py:111:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:114:121: E501 line too long (124 > 120 characters)
+generate_simulation_report.py:130:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:133:121: E501 line too long (122 > 120 characters)
+generate_simulation_report.py:152:9: E722 do not use bare 'except'
+generate_simulation_report.py:153:14: E111 indentation is not a multiple of 4
+generate_simulation_report.py:153:14: E117 over-indented
+generate_simulation_report.py:162:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:165:121: E501 line too long (123 > 120 characters)
+generate_simulation_report.py:183:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:212:5: E722 do not use bare 'except'
+generate_simulation_report.py:220:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:240:61: E261 at least two spaces before inline comment
+generate_simulation_report.py:255:1: E302 expected 2 blank lines, found 1
+generate_simulation_report.py:277:1: E305 expected 2 blank lines after class or function definition, found 1
+models.py:6:121: E501 line too long (182 > 120 characters)
+models.py:16:1: E302 expected 2 blank lines, found 1
+models.py:26:1: E302 expected 2 blank lines, found 1
+models.py:27:61: E231 missing whitespace after ','
+models.py:27:121: E501 line too long (160 > 120 characters)
+models.py:38:121: E501 line too long (143 > 120 characters)
+models.py:57:30: E261 at least two spaces before inline comment
+models.py:130:43: E261 at least two spaces before inline comment
+models.py:154:42: E261 at least two spaces before inline comment
+models.py:164:41: E261 at least two spaces before inline comment
+models.py:165:31: E261 at least two spaces before inline comment
+models.py:166:34: E261 at least two spaces before inline comment
+models.py:171:1: E302 expected 2 blank lines, found 1
+models.py:182:37: E261 at least two spaces before inline comment
+models.py:187:10: E111 indentation is not a multiple of 4
+models.py:187:10: E117 over-indented
+models.py:198:9: E122 continuation line missing indentation or outdented
+models.py:200:1: E302 expected 2 blank lines, found 1
+models.py:207:29: E261 at least two spaces before inline comment
+models.py:226:1: E302 expected 2 blank lines, found 1
+models.py:229:77: E261 at least two spaces before inline comment
+models.py:248:14: E114 indentation is not a multiple of 4 (comment)
+models.py:248:14: E117 over-indented (comment)
+models.py:249:14: E111 indentation is not a multiple of 4
+models.py:249:14: E117 over-indented
+models.py:250:18: E111 indentation is not a multiple of 4
+models.py:265:14: E111 indentation is not a multiple of 4
+models.py:265:14: E117 over-indented
+models.py:265:62: E261 at least two spaces before inline comment
+models.py:273:1: E302 expected 2 blank lines, found 1
+models.py:274:121: E501 line too long (173 > 120 characters)
+mortgage_system.py:23:121: E501 line too long (122 > 120 characters)
+mortgage_system.py:26:1: E302 expected 2 blank lines, found 1
+mortgage_system.py:64:1: E302 expected 2 blank lines, found 1
+mortgage_system.py:82:121: E501 line too long (129 > 120 characters)
+mortgage_system.py:106:121: E501 line too long (138 > 120 characters)
+project_manager.py:7:1: E302 expected 2 blank lines, found 1
+project_manager.py:10:121: E501 line too long (125 > 120 characters)
+project_manager.py:13:1: E302 expected 2 blank lines, found 1
+project_manager.py:23:1: E302 expected 2 blank lines, found 1
+project_manager.py:36:14: E111 indentation is not a multiple of 4
+project_manager.py:36:14: E117 over-indented
+property_initializer.py:12:21: E701 multiple statements on one line (colon)
+property_initializer.py:13:24: E701 multiple statements on one line (colon)
+property_initializer.py:14:24: E701 multiple statements on one line (colon)
+property_initializer.py:15:13: E701 multiple statements on one line (colon)
+property_initializer.py:17:21: E701 multiple statements on one line (colon)
+property_initializer.py:18:24: E701 multiple statements on one line (colon)
+property_initializer.py:19:24: E701 multiple statements on one line (colon)
+property_initializer.py:20:13: E701 multiple statements on one line (colon)
+property_initializer.py:22:1: E302 expected 2 blank lines, found 1
+property_initializer.py:42:1: E302 expected 2 blank lines, found 1
+property_initializer.py:49:23: E261 at least two spaces before inline comment
+property_initializer.py:54:9: F841 local variable 'bedrooms' is assigned to but never used
+property_initializer.py:121:9: F601 dictionary key 'listed_price' repeated with different values
+property_initializer.py:129:9: F601 dictionary key 'listed_price' repeated with different values
+property_initializer.py:130:50: E261 at least two spaces before inline comment
+property_initializer.py:131:41: E261 at least two spaces before inline comment
+property_initializer.py:132:28: E261 at least two spaces before inline comment
+property_initializer.py:134:24: E261 at least two spaces before inline comment
+property_initializer.py:137:1: E302 expected 2 blank lines, found 1
+property_initializer.py:149:50: E261 at least two spaces before inline comment
+property_initializer.py:160:58: E261 at least two spaces before inline comment
+property_initializer.py:161:58: E261 at least two spaces before inline comment
+property_initializer.py:167:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:30:41: E261 at least two spaces before inline comment
+real_estate_demo_v2_1.py:31:13: E722 do not use bare 'except'
+real_estate_demo_v2_1.py:39:13: E722 do not use bare 'except'
+real_estate_demo_v2_1.py:44:1: E305 expected 2 blank lines after class or function definition, found 1
+real_estate_demo_v2_1.py:71:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:76:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:110:24: E128 continuation line under-indented for visual indent
+real_estate_demo_v2_1.py:111:24: E128 continuation line under-indented for visual indent
+real_estate_demo_v2_1.py:120:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:154:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:164:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:174:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:184:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:194:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:204:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:220:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:241:29: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:243:15: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:263:27: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:269:17: F821 undefined name 'subprocess'
+real_estate_demo_v2_1.py:276:21: F821 undefined name 'subprocess'
+real_estate_demo_v2_1.py:282:1: E302 expected 2 blank lines, found 1
+real_estate_demo_v2_1.py:287:5: E722 do not use bare 'except'
+real_estate_demo_v2_1.py:338:25: E261 at least two spaces before inline comment
+real_estate_demo_v2_1.py:344:23: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:471:36: E128 continuation line under-indented for visual indent
+real_estate_demo_v2_1.py:473:36: E128 continuation line under-indented for visual indent
+real_estate_demo_v2_1.py:491:17: E303 too many blank lines (2)
+real_estate_demo_v2_1.py:536:55: E701 multiple statements on one line (colon)
+real_estate_demo_v2_1.py:547:17: E303 too many blank lines (2)
+real_estate_demo_v2_1.py:559:29: E261 at least two spaces before inline comment
+real_estate_demo_v2_1.py:569:33: E261 at least two spaces before inline comment
+real_estate_demo_v2_1.py:594:29: E261 at least two spaces before inline comment
+real_estate_demo_v2_1.py:616:22: E111 indentation is not a multiple of 4
+real_estate_demo_v2_1.py:616:22: E117 over-indented
+real_estate_demo_v2_1.py:676:1: E305 expected 2 blank lines after class or function definition, found 1
+run_sim_auto.py:13:1: E302 expected 2 blank lines, found 1
+run_sim_auto.py:28:41: E701 multiple statements on one line (colon)
+run_sim_auto.py:39:24: E261 at least two spaces before inline comment
+run_sim_auto.py:52:1: E305 expected 2 blank lines after class or function definition, found 1
+scripts/export_results.py:19:32: E261 at least two spaces before inline comment
+scripts/export_results.py:21:1: E302 expected 2 blank lines, found 1
+scripts/export_results.py:34:1: E302 expected 2 blank lines, found 1
+scripts/export_results.py:79:1: E305 expected 2 blank lines after class or function definition, found 1
+services/agent_service.py:429:37: E999 SyntaxError: unterminated string literal (detected at line 429)
+services/financial_calculator.py:28:71: E261 at least two spaces before inline comment
+services/intervention_service.py:10:1: E302 expected 2 blank lines, found 1
+services/intervention_service.py:18:25: E701 multiple statements on one line (colon)
+services/intervention_service.py:19:26: E701 multiple statements on one line (colon)
+services/intervention_service.py:20:26: E701 multiple statements on one line (colon)
+services/intervention_service.py:21:26: E701 multiple statements on one line (colon)
+services/intervention_service.py:22:27: E701 multiple statements on one line (colon)
+services/intervention_service.py:35:41: E701 multiple statements on one line (colon)
+services/intervention_service.py:64:41: E701 multiple statements on one line (colon)
+services/intervention_service.py:64:51: E261 at least two spaces before inline comment
+services/intervention_service.py:92:121: E501 line too long (121 > 120 characters)
+services/intervention_service.py:118:58: E261 at least two spaces before inline comment
+services/intervention_service.py:124:48: E261 at least two spaces before inline comment
+services/intervention_service.py:133:121: E501 line too long (134 > 120 characters)
+services/intervention_service.py:139:121: E501 line too long (149 > 120 characters)
+services/intervention_service.py:141:121: E501 line too long (133 > 120 characters)
+services/intervention_service.py:143:121: E501 line too long (130 > 120 characters)
+services/intervention_service.py:147:121: E501 line too long (141 > 120 characters)
+services/intervention_service.py:169:47: E261 at least two spaces before inline comment
+services/intervention_service.py:170:9: F841 local variable 'avg_area' is assigned to but never used
+services/intervention_service.py:172:9: F841 local variable 'new_props' is assigned to but never used
+services/intervention_service.py:185:34: E261 at least two spaces before inline comment
+services/intervention_service.py:189:37: E261 at least two spaces before inline comment
+services/intervention_service.py:196:121: E501 line too long (126 > 120 characters)
+services/intervention_service.py:197:27: E128 continuation line under-indented for visual indent
+services/intervention_service.py:198:121: E501 line too long (144 > 120 characters)
+services/intervention_service.py:199:27: E128 continuation line under-indented for visual indent
+services/intervention_service.py:202:5: E301 expected 1 blank line, found 0
+services/intervention_service.py:207:9: F841 local variable 'removed_count' is assigned to but never used
+services/intervention_service.py:225:121: E501 line too long (130 > 120 characters)
+services/intervention_service.py:228:121: E501 line too long (143 > 120 characters)
+services/intervention_service.py:231:121: E501 line too long (141 > 120 characters)
+services/intervention_service.py:267:121: E501 line too long (130 > 120 characters)
+services/intervention_service.py:281:9: F841 local variable 'updates' is assigned to but never used
+services/market_service.py:11:1: E302 expected 2 blank lines, found 1
+services/market_service.py:16:27: E261 at least two spaces before inline comment
+services/market_service.py:52:121: E501 line too long (162 > 120 characters)
+services/market_service.py:58:121: E501 line too long (154 > 120 characters)
+services/market_service.py:105:121: E501 line too long (192 > 120 characters)
+services/market_service.py:190:30: E701 multiple statements on one line (colon)
+services/market_service.py:205:121: E501 line too long (125 > 120 characters)
+services/market_service.py:206:18: E111 indentation is not a multiple of 4
+services/market_service.py:206:18: E117 over-indented
+services/market_service.py:210:121: E501 line too long (181 > 120 characters)
+services/market_service.py:214:121: E501 line too long (139 > 120 characters)
+services/market_service.py:275:14: E111 indentation is not a multiple of 4
+services/market_service.py:275:14: E117 over-indented
+services/market_service.py:283:121: E501 line too long (137 > 120 characters)
+services/market_service.py:285:121: E501 line too long (147 > 120 characters)
+services/rental_service.py:7:1: E302 expected 2 blank lines, found 1
+services/rental_service.py:57:43: E261 at least two spaces before inline comment
+services/rental_service.py:73:121: E501 line too long (141 > 120 characters)
+services/rental_service.py:77:121: E501 line too long (178 > 120 characters)
+services/rental_service.py:81:121: E501 line too long (178 > 120 characters)
+services/rental_service.py:99:9: F841 local variable 'batch_status_update' is assigned to but never used
+services/rental_service.py:115:121: E501 line too long (142 > 120 characters)
+services/rental_service.py:119:14: F841 local variable 'owner_ids' is assigned to but never used
+services/rental_service.py:119:14: E111 indentation is not a multiple of 4
+services/rental_service.py:119:14: E117 over-indented
+services/rental_service.py:120:14: E114 indentation is not a multiple of 4 (comment)
+services/rental_service.py:121:14: E111 indentation is not a multiple of 4
+services/rental_service.py:124:121: E501 line too long (173 > 120 characters)
+services/reporting_service.py:11:1: E302 expected 2 blank lines, found 1
+services/reporting_service.py:118:121: E501 line too long (151 > 120 characters)
+services/reporting_service.py:127:121: E501 line too long (128 > 120 characters)
+services/reporting_service.py:153:39: E261 at least two spaces before inline comment
+services/reporting_service.py:154:14: E111 indentation is not a multiple of 4
+services/reporting_service.py:154:14: E117 over-indented
+services/reporting_service.py:158:121: E501 line too long (129 > 120 characters)
+services/transaction_service.py:16:1: E302 expected 2 blank lines, found 1
+services/transaction_service.py:67:51: E261 at least two spaces before inline comment
+services/transaction_service.py:72:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:72:18: E117 over-indented
+services/transaction_service.py:72:26: E261 at least two spaces before inline comment
+services/transaction_service.py:109:42: E128 continuation line under-indented for visual indent
+services/transaction_service.py:110:42: E128 continuation line under-indented for visual indent
+services/transaction_service.py:111:42: E128 continuation line under-indented for visual indent
+services/transaction_service.py:124:121: E501 line too long (121 > 120 characters)
+services/transaction_service.py:140:17: E741 ambiguous variable name 'l'
+services/transaction_service.py:146:23: E261 at least two spaces before inline comment
+services/transaction_service.py:164:44: E701 multiple statements on one line (colon)
+services/transaction_service.py:181:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:181:18: E117 over-indented
+services/transaction_service.py:181:40: E741 ambiguous variable name 'l'
+services/transaction_service.py:182:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:182:32: E701 multiple statements on one line (colon)
+services/transaction_service.py:184:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:185:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:185:37: E701 multiple statements on one line (colon)
+services/transaction_service.py:187:18: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:188:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:190:18: F841 local variable 'mode' is assigned to but never used
+services/transaction_service.py:190:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:192:18: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:193:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:193:121: E501 line too long (141 > 120 characters)
+services/transaction_service.py:194:18: E111 indentation is not a multiple of 4
+services/transaction_service.py:229:22: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:229:22: E117 over-indented (comment)
+services/transaction_service.py:230:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:230:22: E117 over-indented
+services/transaction_service.py:230:121: E501 line too long (124 > 120 characters)
+services/transaction_service.py:232:22: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:233:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:234:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:236:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:236:121: E501 line too long (126 > 120 characters)
+services/transaction_service.py:238:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:239:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:240:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:251:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:251:121: E501 line too long (157 > 120 characters)
+services/transaction_service.py:253:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:254:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:255:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:255:121: E501 line too long (170 > 120 characters)
+services/transaction_service.py:256:39: E128 continuation line under-indented for visual indent
+services/transaction_service.py:258:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:259:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:260:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:261:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:261:121: E501 line too long (166 > 120 characters)
+services/transaction_service.py:262:39: E128 continuation line under-indented for visual indent
+services/transaction_service.py:262:121: E501 line too long (167 > 120 characters)
+services/transaction_service.py:264:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:265:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:266:26: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:267:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:270:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:270:22: E117 over-indented
+services/transaction_service.py:271:22: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:272:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:273:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:280:22: E114 indentation is not a multiple of 4 (comment)
+services/transaction_service.py:281:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:282:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:283:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:283:121: E501 line too long (137 > 120 characters)
+services/transaction_service.py:284:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:285:30: E111 indentation is not a multiple of 4
+services/transaction_service.py:285:121: E501 line too long (123 > 120 characters)
+services/transaction_service.py:286:44: E128 continuation line under-indented for visual indent
+services/transaction_service.py:287:22: E111 indentation is not a multiple of 4
+services/transaction_service.py:288:26: E111 indentation is not a multiple of 4
+services/transaction_service.py:293:121: E501 line too long (146 > 120 characters)
+services/transaction_service.py:299:121: E501 line too long (137 > 120 characters)
+services/transaction_service.py:300:121: E501 line too long (190 > 120 characters)
+simulation_runner.py:39:1: E302 expected 2 blank lines, found 1
+simulation_runner.py:50:14: E114 indentation is not a multiple of 4 (comment)
+simulation_runner.py:50:14: E117 over-indented (comment)
+simulation_runner.py:51:14: E111 indentation is not a multiple of 4
+simulation_runner.py:51:14: E117 over-indented
+simulation_runner.py:55:14: E111 indentation is not a multiple of 4
+simulation_runner.py:55:14: E117 over-indented
+simulation_runner.py:131:14: E111 indentation is not a multiple of 4
+simulation_runner.py:131:14: E117 over-indented
+simulation_runner.py:132:14: E111 indentation is not a multiple of 4
+simulation_runner.py:133:14: E111 indentation is not a multiple of 4
+simulation_runner.py:134:14: E111 indentation is not a multiple of 4
+simulation_runner.py:136:14: E111 indentation is not a multiple of 4
+simulation_runner.py:136:14: E117 over-indented
+simulation_runner.py:142:9: F841 local variable 'behavior_logger' is assigned to but never used
+simulation_runner.py:164:121: E501 line too long (126 > 120 characters)
+simulation_runner.py:178:121: E501 line too long (133 > 120 characters)
+simulation_runner.py:200:58: E261 at least two spaces before inline comment
+simulation_runner.py:212:121: E501 line too long (121 > 120 characters)
+simulation_runner.py:230:121: E501 line too long (126 > 120 characters)
+simulation_runner.py:263:17: E303 too many blank lines (2)
+simulation_runner.py:280:1: E305 expected 2 blank lines after class or function definition, found 1
+tests/test_load_reporting.py:19:55: E261 at least two spaces before inline comment
+tests/test_load_reporting.py:29:23: E261 at least two spaces before inline comment
+tests/test_load_reporting.py:47:14: E111 indentation is not a multiple of 4
+tests/test_load_reporting.py:47:14: E117 over-indented
+tests/test_load_reporting.py:54:54: E261 at least two spaces before inline comment
+tests/test_load_reporting.py:58:22: E261 at least two spaces before inline comment
+tests/test_load_reporting.py:88:1: E305 expected 2 blank lines after class or function definition, found 1
+tests/test_reporting_v2.py:59:121: E501 line too long (123 > 120 characters)
+tests/test_reporting_v2.py:63:1: E305 expected 2 blank lines after class or function definition, found 1
+tests/unit/test_mock_llm.py:10:1: E402 module level import not at top of file
+tests/unit/test_mock_llm.py:11:1: E402 module level import not at top of file
+tests/unit/test_mock_llm.py:70:42: E261 at least two spaces before inline comment
+tests/unit/test_mock_llm.py:80:1: E305 expected 2 blank lines after class or function definition, found 1
+tools/analyze_run_032614.py:8:1: E302 expected 2 blank lines, found 1
+tools/analyze_run_032614.py:79:121: E501 line too long (203 > 120 characters)
+tools/analyze_run_032614.py:88:121: E501 line too long (131 > 120 characters)
+tools/analyze_run_032614.py:98:21: E722 do not use bare 'except'
+tools/analyze_run_032614.py:103:121: E501 line too long (178 > 120 characters)
+tools/analyze_run_032614.py:111:121: E501 line too long (125 > 120 characters)
+tools/analyze_run_032614.py:114:49: E741 ambiguous variable name 'l'
+tools/analyze_run_032614.py:114:121: E501 line too long (136 > 120 characters)
+tools/analyze_run_032614.py:115:29: E741 ambiguous variable name 'l'
+tools/analyze_run_032614.py:121:121: E501 line too long (125 > 120 characters)
+tools/analyze_run_032614.py:136:121: E501 line too long (148 > 120 characters)
+tools/analyze_run_032614.py:143:1: E305 expected 2 blank lines after class or function definition, found 1
+transaction_engine.py:19:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:38:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:38:121: E501 line too long (148 > 120 characters)
+transaction_engine.py:40:5: F841 local variable 'history' is assigned to but never used
+transaction_engine.py:92:121: E501 line too long (133 > 120 characters)
+transaction_engine.py:143:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:145:5: F841 local variable 'history' is assigned to but never used
+transaction_engine.py:188:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:191:49: E261 at least two spaces before inline comment
+transaction_engine.py:216:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:219:49: E261 at least two spaces before inline comment
+transaction_engine.py:244:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:262:10: E261 at least two spaces before inline comment
+transaction_engine.py:273:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:273:121: E501 line too long (154 > 120 characters)
+transaction_engine.py:283:121: E501 line too long (139 > 120 characters)
+transaction_engine.py:286:5: E303 too many blank lines (2)
+transaction_engine.py:298:10: E111 indentation is not a multiple of 4
+transaction_engine.py:298:10: E117 over-indented
+transaction_engine.py:306:53: E261 at least two spaces before inline comment
+transaction_engine.py:327:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:327:121: E501 line too long (156 > 120 characters)
+transaction_engine.py:333:42: E261 at least two spaces before inline comment
+transaction_engine.py:407:5: E722 do not use bare 'except'
+transaction_engine.py:416:42: E261 at least two spaces before inline comment
+transaction_engine.py:424:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:424:121: E501 line too long (143 > 120 characters)
+transaction_engine.py:473:21: E741 ambiguous variable name 'l'
+transaction_engine.py:518:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:539:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:539:121: E501 line too long (129 > 120 characters)
+transaction_engine.py:560:10: E111 indentation is not a multiple of 4
+transaction_engine.py:560:10: E117 over-indented
+transaction_engine.py:560:121: E501 line too long (131 > 120 characters)
+transaction_engine.py:570:51: E261 at least two spaces before inline comment
+transaction_engine.py:570:121: E501 line too long (125 > 120 characters)
+transaction_engine.py:572:5: F841 local variable 'history' is assigned to but never used
+transaction_engine.py:615:121: E501 line too long (140 > 120 characters)
+transaction_engine.py:626:18: E111 indentation is not a multiple of 4
+transaction_engine.py:626:18: E117 over-indented
+transaction_engine.py:639:14: E111 indentation is not a multiple of 4
+transaction_engine.py:639:14: E117 over-indented
+transaction_engine.py:666:121: E501 line too long (143 > 120 characters)
+transaction_engine.py:670:14: E111 indentation is not a multiple of 4
+transaction_engine.py:670:14: E117 over-indented
+transaction_engine.py:671:14: E114 indentation is not a multiple of 4 (comment)
+transaction_engine.py:672:14: E111 indentation is not a multiple of 4
+transaction_engine.py:673:18: E111 indentation is not a multiple of 4
+transaction_engine.py:674:18: E111 indentation is not a multiple of 4
+transaction_engine.py:685:14: E111 indentation is not a multiple of 4
+transaction_engine.py:685:14: E117 over-indented
+transaction_engine.py:687:14: E111 indentation is not a multiple of 4
+transaction_engine.py:687:14: E117 over-indented
+transaction_engine.py:691:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:691:121: E501 line too long (141 > 120 characters)
+transaction_engine.py:709:10: E111 indentation is not a multiple of 4
+transaction_engine.py:709:10: E117 over-indented
+transaction_engine.py:709:121: E501 line too long (131 > 120 characters)
+transaction_engine.py:760:121: E501 line too long (152 > 120 characters)
+transaction_engine.py:769:18: E111 indentation is not a multiple of 4
+transaction_engine.py:769:18: E117 over-indented
+transaction_engine.py:772:121: E501 line too long (133 > 120 characters)
+transaction_engine.py:778:14: E111 indentation is not a multiple of 4
+transaction_engine.py:778:14: E117 over-indented
+transaction_engine.py:781:121: E501 line too long (127 > 120 characters)
+transaction_engine.py:807:121: E501 line too long (155 > 120 characters)
+transaction_engine.py:811:14: E111 indentation is not a multiple of 4
+transaction_engine.py:811:14: E117 over-indented
+transaction_engine.py:812:14: E111 indentation is not a multiple of 4
+transaction_engine.py:813:18: E111 indentation is not a multiple of 4
+transaction_engine.py:814:18: E111 indentation is not a multiple of 4
+transaction_engine.py:817:121: E501 line too long (132 > 120 characters)
+transaction_engine.py:821:14: E111 indentation is not a multiple of 4
+transaction_engine.py:821:14: E117 over-indented
+transaction_engine.py:823:14: E111 indentation is not a multiple of 4
+transaction_engine.py:823:14: E117 over-indented
+transaction_engine.py:829:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:829:121: E501 line too long (148 > 120 characters)
+transaction_engine.py:845:121: E501 line too long (146 > 120 characters)
+transaction_engine.py:861:26: E261 at least two spaces before inline comment
+transaction_engine.py:870:121: E501 line too long (130 > 120 characters)
+transaction_engine.py:899:121: E501 line too long (123 > 120 characters)
+transaction_engine.py:904:121: E501 line too long (138 > 120 characters)
+transaction_engine.py:915:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:936:25: E261 at least two spaces before inline comment
+transaction_engine.py:937:24: E701 multiple statements on one line (colon)
+transaction_engine.py:944:24: E701 multiple statements on one line (colon)
+transaction_engine.py:954:121: E501 line too long (149 > 120 characters)
+transaction_engine.py:959:1: F811 redefinition of unused 'decide_negotiation_format' from line 11
+transaction_engine.py:959:1: E302 expected 2 blank lines, found 1
+transaction_engine.py:970:26: E261 at least two spaces before inline comment
+utils/behavior_logger.py:172:121: E501 line too long (143 > 120 characters)
+utils/behavior_logger.py:192:41: E701 multiple statements on one line (colon)
+utils/exchange_display.py:12:5: F401 'rich.text.Text' imported but unused
+utils/exchange_display.py:72:17: E741 ambiguous variable name 'l'
+utils/exchange_display.py:96:17: E741 ambiguous variable name 'l'
+utils/exchange_display.py:146:31: E128 continuation line under-indented for visual indent
+utils/exchange_display.py:151:33: E127 continuation line over-indented for visual indent
+utils/exchange_display.py:171:31: E128 continuation line under-indented for visual indent
+utils/exchange_display.py:199:35: E128 continuation line under-indented for visual indent
+utils/exchange_display.py:204:31: E127 continuation line over-indented for visual indent
+utils/llm_client.py:45:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:51:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:57:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:57:121: E501 line too long (166 > 120 characters)
+utils/llm_client.py:83:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:98:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:98:14: E117 over-indented
+utils/llm_client.py:99:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:100:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:101:18: E111 indentation is not a multiple of 4
+utils/llm_client.py:102:9: E722 do not use bare 'except'
+utils/llm_client.py:106:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:106:121: E501 line too long (178 > 120 characters)
+utils/llm_client.py:131:1: E302 expected 2 blank lines, found 1
+utils/llm_client.py:131:121: E501 line too long (125 > 120 characters)
+utils/llm_client.py:146:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:146:14: E117 over-indented
+utils/llm_client.py:147:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:148:14: E111 indentation is not a multiple of 4
+utils/llm_client.py:149:18: E111 indentation is not a multiple of 4
+utils/llm_client.py:150:9: E722 do not use bare 'except'
+utils/name_generator.py:72:38: E261 at least two spaces before inline comment
+utils/workflow_logger.py:96:14: E111 indentation is not a multiple of 4
+utils/workflow_logger.py:96:14: E117 over-indented
+utils/workflow_logger.py:98:14: E111 indentation is not a multiple of 4
+utils/workflow_logger.py:98:14: E117 over-indented
+utils/workflow_logger.py:114:121: E501 line too long (123 > 120 characters)
+utils/workflow_logger.py:121:24: E128 continuation line under-indented for visual indent
+utils/workflow_logger.py:149:21: E722 do not use bare 'except'
+utils/workflow_logger.py:188:20: E128 continuation line under-indented for visual indent
+
+Ruff formatting..........................................................Failed
+- hook id: ruff
+- exit code: 1
+
+error: Failed to parse _archive_unused_scripts\auto_verify.py:75:19: unexpected character after line continuation character
+error: Failed to parse services\agent_service.py:429:85: EOL while scanning string literal
+_archive_unused_scripts\auto_verify.py:75:19: E999 SyntaxError: unexpected character after line continuation character
+_archive_unused_scripts\auto_verify_fix.py:10:1: E402 Module level import not at top of file
+_archive_unused_scripts\auto_verify_fix.py:12:1: E402 Module level import not at top of file
+_archive_unused_scripts\auto_verify_fix.py:13:1: E402 Module level import not at top of file
+_archive_unused_scripts\auto_verify_fix.py:14:1: E402 Module level import not at top of file
+_archive_unused_scripts\deep_analyze.py:140:5: E741 Ambiguous variable name: `l`
+_archive_unused_scripts\deep_analyze.py:148:12: E741 Ambiguous variable name: `l`
+_archive_unused_scripts\deep_analyze.py:169:5: E741 Ambiguous variable name: `l`
+_archive_unused_scripts\run_verify_sim.py:22:9: E722 Do not use bare `except`
+_archive_unused_scripts\test_initialization.py:5:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:6:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:7:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:9:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:10:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:11:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_initialization.py:33:9: F841 Local variable `self_user_config` is assigned to but never used
+_archive_unused_scripts\test_initialization.py:41:9: E722 Do not use bare `except`
+_archive_unused_scripts\test_negotiation_rounds.py:18:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_tier6_logic.py:9:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_tier6_logic.py:12:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_tier6_logic.py:13:1: E402 Module level import not at top of file
+_archive_unused_scripts\test_tier6_logic.py:20:23: E701 Multiple statements on one line (colon)
+_archive_unused_scripts\test_tier6_logic.py:21:23: E701 Multiple statements on one line (colon)
+_archive_unused_scripts\test_tier6_logic.py:79:21: F821 Undefined name `decide_price_adjustment`
+_archive_unused_scripts\test_tier6_logic.py:103:31: F821 Undefined name `decide_price_adjustment`
+agent_behavior.py:316:9: E722 Do not use bare `except`
+agent_behavior.py:338:5: E722 Do not use bare `except`
+agent_behavior.py:342:5: F841 Local variable `prompt` is assigned to but never used
+agent_behavior.py:603:1: E402 Module level import not at top of file
+agent_behavior.py:854:5: F841 Local variable `max_affordable` is assigned to but never used
+agent_behavior.py:867:9: F841 Local variable `supply_demand_desc` is assigned to but never used
+config\agent_tiers.py:36:38: E701 Multiple statements on one line (colon)
+config\agent_tiers.py:37:32: E701 Multiple statements on one line (colon)
+config\agent_tiers.py:38:34: E701 Multiple statements on one line (colon)
+config\agent_tiers.py:39:40: E701 Multiple statements on one line (colon)
+generate_simulation_report.py:54:17: E722 Do not use bare `except`
+generate_simulation_report.py:152:9: E722 Do not use bare `except`
+generate_simulation_report.py:212:5: E722 Do not use bare `except`
+property_initializer.py:12:21: E701 Multiple statements on one line (colon)
+property_initializer.py:13:24: E701 Multiple statements on one line (colon)
+property_initializer.py:14:24: E701 Multiple statements on one line (colon)
+property_initializer.py:15:13: E701 Multiple statements on one line (colon)
+property_initializer.py:17:21: E701 Multiple statements on one line (colon)
+property_initializer.py:18:24: E701 Multiple statements on one line (colon)
+property_initializer.py:19:24: E701 Multiple statements on one line (colon)
+property_initializer.py:20:13: E701 Multiple statements on one line (colon)
+property_initializer.py:54:9: F841 Local variable `bedrooms` is assigned to but never used
+property_initializer.py:129:9: F601 Dictionary key literal `"listed_price"` repeated
+real_estate_demo_v2_1.py:31:13: E722 Do not use bare `except`
+real_estate_demo_v2_1.py:39:13: E722 Do not use bare `except`
+real_estate_demo_v2_1.py:154:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:164:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:174:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:184:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:194:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:204:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:241:29: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:243:15: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:263:27: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:269:17: F821 Undefined name `subprocess`
+real_estate_demo_v2_1.py:276:21: F821 Undefined name `subprocess`
+real_estate_demo_v2_1.py:287:5: E722 Do not use bare `except`
+real_estate_demo_v2_1.py:344:23: E701 Multiple statements on one line (colon)
+real_estate_demo_v2_1.py:536:55: E701 Multiple statements on one line (colon)
+run_sim_auto.py:28:41: E701 Multiple statements on one line (colon)
+services\agent_service.py:67:24: E701 Multiple statements on one line (colon)
+services\agent_service.py:92:26: E701 Multiple statements on one line (colon)
+services\agent_service.py:110:35: E701 Multiple statements on one line (colon)
+services\agent_service.py:111:29: E701 Multiple statements on one line (colon)
+services\agent_service.py:223:38: E701 Multiple statements on one line (colon)
+services\agent_service.py:224:21: E701 Multiple statements on one line (colon)
+services\agent_service.py:416:29: E701 Multiple statements on one line (colon)
+services\agent_service.py:429:85: E999 SyntaxError: EOL while scanning string literal
+services\intervention_service.py:18:25: E701 Multiple statements on one line (colon)
+services\intervention_service.py:19:26: E701 Multiple statements on one line (colon)
+services\intervention_service.py:20:26: E701 Multiple statements on one line (colon)
+services\intervention_service.py:21:26: E701 Multiple statements on one line (colon)
+services\intervention_service.py:22:27: E701 Multiple statements on one line (colon)
+services\intervention_service.py:35:41: E701 Multiple statements on one line (colon)
+services\intervention_service.py:64:41: E701 Multiple statements on one line (colon)
+services\intervention_service.py:170:9: F841 Local variable `avg_area` is assigned to but never used
+services\intervention_service.py:172:9: F841 Local variable `new_props` is assigned to but never used
+services\intervention_service.py:207:9: F841 Local variable `removed_count` is assigned to but never used
+services\intervention_service.py:281:9: F841 Local variable `updates` is assigned to but never used
+services\market_service.py:190:30: E701 Multiple statements on one line (colon)
+services\rental_service.py:99:9: F841 Local variable `batch_status_update` is assigned to but never used
+services\rental_service.py:119:14: F841 Local variable `owner_ids` is assigned to but never used
+services\transaction_service.py:140:17: E741 Ambiguous variable name: `l`
+services\transaction_service.py:164:44: E701 Multiple statements on one line (colon)
+services\transaction_service.py:181:40: E741 Ambiguous variable name: `l`
+services\transaction_service.py:182:32: E701 Multiple statements on one line (colon)
+services\transaction_service.py:185:37: E701 Multiple statements on one line (colon)
+services\transaction_service.py:190:18: F841 Local variable `mode` is assigned to but never used
+simulation_runner.py:142:9: F841 Local variable `behavior_logger` is assigned to but never used
+tools\analyze_run_032614.py:98:21: E722 Do not use bare `except`
+tools\analyze_run_032614.py:114:49: E741 Ambiguous variable name: `l`
+tools\analyze_run_032614.py:115:29: E741 Ambiguous variable name: `l`
+transaction_engine.py:40:5: F841 Local variable `history` is assigned to but never used
+transaction_engine.py:145:5: F841 Local variable `history` is assigned to but never used
+transaction_engine.py:407:5: E722 Do not use bare `except`
+transaction_engine.py:473:21: E741 Ambiguous variable name: `l`
+transaction_engine.py:572:5: F841 Local variable `history` is assigned to but never used
+transaction_engine.py:937:24: E701 Multiple statements on one line (colon)
+transaction_engine.py:944:24: E701 Multiple statements on one line (colon)
+transaction_engine.py:959:5: F811 Redefinition of unused `decide_negotiation_format` from line 11
+utils\behavior_logger.py:192:41: E701 Multiple statements on one line (colon)
+utils\exchange_display.py:12:27: F401 `rich.text.Text` imported but unused; consider using `importlib.util.find_spec` to test for availability
+utils\exchange_display.py:72:17: E741 Ambiguous variable name: `l`
+utils\exchange_display.py:96:17: E741 Ambiguous variable name: `l`
+utils\llm_client.py:102:9: E722 Do not use bare `except`
+utils\llm_client.py:150:9: E722 Do not use bare `except`
+utils\workflow_logger.py:149:21: E722 Do not use bare `except`
+Found 112 errors.
+No fixes available (17 hidden fixes can be enabled with the `--unsafe-fixes` option).
+
+Format Markdown..........................................................Passed
+Check License............................................................Failed
+- hook id: check-license
+- exit code: 1
+
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
+Traceback (most recent call last):
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 121, in <module>
+    update_license_in_directory(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        directory_path,
+        ^^^^^^^^^^^^^^^
+    ...<2 lines>...
+        end_line_start_with,
+        ^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 96, in update_license_in_directory
+    if update_license_in_file(
+       ~~~~~~~~~~~~~~~~~~~~~~^
+            py_files,
+            ^^^^^^^^^
+    ...<2 lines>...
+            end_line_start_with,
+            ^^^^^^^^^^^^^^^^^^^^
+    ):
+    ^
+  File "D:\GitProj\oasis-main\licenses\update_license.py", line 44, in update_license_in_file
+    content = f.read()
+  File "<frozen codecs>", line 325, in decode
+UnicodeDecodeError: 'utf-8' codec can't decode byte 0xa1 in position 133: invalid start byte
